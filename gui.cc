@@ -199,25 +199,41 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   }
 
   wxMenu *fileMenu = new wxMenu;
+  // About is under guitest menu on mac
+  // exit is under guitest menu by default
   fileMenu->Append(wxID_ABOUT, "&About");
   fileMenu->Append(wxID_EXIT, "&Quit");
+
+  // The following behave normally
+  // refer to wxStandardID
+  fileMenu->Append(wxID_OPEN, "&Open");
+  fileMenu->Append(wxID_NEW, "&New");
+  fileMenu->Append(wxID_SAVE, "&Save");
+
+  wxMenu *editMenu = new wxMenu;
+  editMenu->Append(wxID_UNDO, "&Undo");
+  editMenu->Append(wxID_REDO, "&Redo");
+  
   wxMenuBar *menuBar = new wxMenuBar;
   menuBar->Append(fileMenu, "&File");
+  menuBar->Append(editMenu, "&Edit");
   SetMenuBar(menuBar);
+
 
   wxBoxSizer *topsizer = new wxBoxSizer(wxHORIZONTAL);
   canvas = new MyGLCanvas(this, wxID_ANY, monitor_mod, names_mod);
   topsizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
 
   wxBoxSizer *button_sizer = new wxBoxSizer(wxVERTICAL);
-  button_sizer->Add(new wxButton(this, MY_BUTTON_ID, "Run"), 0, wxALL, 10);
+  button_sizer->Add(new wxButton(this, MY_BUTTON_ID1, "Run"), 0, wxALL, 10);
   button_sizer->Add(new wxStaticText(this, wxID_ANY, "Cycles"), 0, wxTOP|wxLEFT|wxRIGHT, 10);
   spin = new wxSpinCtrl(this, MY_SPINCNTRL_ID, wxString("10"));
   button_sizer->Add(spin, 0 , wxALL, 10);
-
   button_sizer->Add(new wxTextCtrl(this, MY_TEXTCTRL_ID, "", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER), 0 , wxALL, 10);
-  topsizer->Add(button_sizer, 0, wxALIGN_CENTER);
+  // added reset button for testing
+  button_sizer->Add(new wxButton(this, MY_BUTTON_ID2, "Reset"), 0, wxALL, 10);
   
+  topsizer->Add(button_sizer, 0, wxALIGN_BOTTOM);
 
   SetSizeHints(400, 400);
   SetSizer(topsizer);

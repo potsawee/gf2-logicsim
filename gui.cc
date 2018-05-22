@@ -175,7 +175,8 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_EXIT, MyFrame::OnExit)
   EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
-  EVT_BUTTON(MY_BUTTON_ID, MyFrame::OnButton)
+  EVT_BUTTON(MY_BUTTON_ID1, MyFrame::OnButton1)
+  EVT_BUTTON(MY_BUTTON_ID2, MyFrame::OnButton2)
   EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
   EVT_TEXT_ENTER(MY_TEXTCTRL_ID, MyFrame::OnText)
 END_EVENT_TABLE()
@@ -234,7 +235,7 @@ void MyFrame::OnAbout(wxCommandEvent &event)
   about.ShowModal();
 }
 
-void MyFrame::OnButton(wxCommandEvent &event)
+void MyFrame::OnButton1(wxCommandEvent &event)
   // Event handler for the push button
 {
   int n, ncycles;
@@ -244,6 +245,12 @@ void MyFrame::OnButton(wxCommandEvent &event)
   mmz->resetmonitor ();
   runnetwork(spin->GetValue());
   canvas->Render("Run button pressed", cyclescompleted);
+}
+
+void MyFrame::OnButton2(wxCommandEvent &event)
+  // Event handler for the push button
+{
+  canvas->Render("Reset button pressed.", 0);
 }
 
 void MyFrame::OnSpin(wxSpinEvent &event)

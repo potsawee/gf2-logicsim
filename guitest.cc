@@ -1,6 +1,13 @@
 #include "guitest.h"
 #include "gui.h"
-#include <GL/glut.h>
+
+// added macintosh compatibility
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <GLUT/glut.h>
+#else
+#include <GL/gl.h>
+#endif
 
 IMPLEMENT_APP(MyApp)
   
@@ -15,7 +22,7 @@ bool MyApp::OnInit()
 
   // glutInit cannot cope with Unicode command line arguments, so we pass
   // it some fake ASCII ones instead
-  char **tmp1; int tmp2 = 0; glutInit(&tmp2, tmp1);
+    char **tmp1; int tmp2 = 0; glutInit(&tmp2, tmp1);
   // Construct the GUI
   MyFrame *frame = new MyFrame(NULL, "Logic simulator", wxDefaultPosition,  wxSize(800, 600), nmz, dmz, mmz);
   frame->Show(true);

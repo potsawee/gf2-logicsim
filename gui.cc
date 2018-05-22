@@ -1,5 +1,13 @@
 #include "gui.h"
-#include <GL/glut.h>
+
+// added macintosh compatibility
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <GLUT/glut.h>
+#else
+#include <GL/gl.h>
+#endif
+
 #include "wx_icon.xpm"
 #include <iostream>
 

@@ -59,14 +59,14 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 
   if ((cyclesdisplayed >= 0) && (mmz->moncount() > 0)) { // draw the first monitor signal, get trace from monitor class
 
-    glColor3f(1.0, 0.0, 0.0);
+    glColor3f(1., 0.0, 0.0);
     glBegin(GL_LINE_STRIP);
     for (i=0; i<cyclesdisplayed; i++) {
       if (mmz->getsignaltrace(0, i, s)) {
-	if (s==low) y = 10.0;
-	if (s==high) y = 30.0;
-	glVertex2f(20*i+10.0, y); 
-	glVertex2f(20*i+30.0, y);
+        if (s==low) y = 10.0;
+        if (s==high) y = 30.0;
+        glVertex2f(20*i+10.0, y); 
+        glVertex2f(20*i+30.0, y);
       }
     }
     glEnd();
@@ -75,8 +75,8 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 
     glColor3f(0.0, 1.0, 0.0);
     glBegin(GL_LINE_STRIP);
-    for (i=0; i<5; i++) {
-      if (i%2) y = 10.0;
+    for (i=0; i<15; i++) {
+      if (i%3) y = 10.0;
       else y = 30.0;
       glVertex2f(20*i+10.0, y); 
       glVertex2f(20*i+30.0, y);

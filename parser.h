@@ -24,11 +24,27 @@ private:
     /* also declare internal functions                     */
 
     /* Private routines */
-    void connections();
+    void devicelist();
+    void device();
+    void clockdev();
+    void switchdev();
+    void dtypedev();
+    void anddev();
+    void nanddev();
+    void ordev();
+    void nordev();
+    void xordev();
+
+    void connectionlist();
     void connection();
     void signame();
     void portname();
 
+    void monitorlist();
+    void monitor1();
+
+    void name();
+    void read_equal_name_num();
 
  public:
     bool readin ();

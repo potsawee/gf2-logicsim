@@ -31,11 +31,7 @@ MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, na
   context = new wxGLContext(this);
   mmz = monitor_mod;
   nmz = names_mod;
-  init = false;
-  pan_x = 0;
-  pan_y = 0;
-  zoom = 1.0;
-  cyclesdisplayed = -1;
+  SetDefault();
 }
 
 void MyGLCanvas::Render(wxString example_text, int cycles)
@@ -95,6 +91,8 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
   SwapBuffers();
 }
 
+
+
 void MyGLCanvas::InitGL()
   // Function to initialise the GL context
 {
@@ -112,6 +110,15 @@ void MyGLCanvas::InitGL()
   glLoadIdentity();
   glTranslated(pan_x, pan_y, 0.0);
   glScaled(zoom, zoom, zoom);
+}
+
+void MyGLCanvas::SetDefault()
+{
+  init = false;
+  pan_x = 0;
+  pan_y = 0;
+  zoom = 1.0;
+  cyclesdisplayed = -1;
 }
 
 void MyGLCanvas::OnPaint(wxPaintEvent& event)
@@ -267,6 +274,7 @@ void MyFrame::OnButton1(wxCommandEvent &event)
 void MyFrame::OnButton2(wxCommandEvent &event)
   // Event handler for the push button
 {
+  canvas->SetDefault();
   canvas->Render("Reset button pressed.", 0);
 }
 

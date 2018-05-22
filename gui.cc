@@ -10,7 +10,7 @@
 
 #include "wx_icon.xpm"
 #include <iostream>
-
+#include <time.h>
 using namespace std;
 
 // MyGLCanvas ////////////////////////////////////////////////////////////////////////////////////
@@ -319,6 +319,7 @@ void MyFrame::OnButton1(wxCommandEvent &event)
   mmz->resetmonitor ();
   runnetwork(spin->GetValue());
   canvas->Render("Run button pressed", cyclescompleted);
+  logMessagePanel->AppendText(getCurrentTime()+"Start running.\n");
 }
 
 void MyFrame::OnButton2(wxCommandEvent &event)
@@ -377,4 +378,18 @@ void MyFrame::runnetwork(int ncycles)
   }
   if (ok) cyclescompleted = cyclescompleted + ncycles;
   else cyclescompleted = 0;
+}
+
+std::string getCurrentTime()
+{
+  time_t rawtime;
+  struct tm * timeinfo;
+  char buffer [80];
+
+  time (&rawtime);
+  timeinfo = localtime (&rawtime);
+  strftime (buffer, 80, "%d-%m-%Y %I:%M:%S", timeinfo);
+  std::string str(buffer);
+  str += ": ";
+  return str;
 }

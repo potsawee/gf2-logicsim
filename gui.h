@@ -70,5 +70,7 @@ class MyGLCanvas: public wxGLCanvas
   void OnMouse(wxMouseEvent& event); // event handler for mouse events inside canvas
   DECLARE_EVENT_TABLE()
 };
+
+std::string getCurrentTime();
     
 #endif /* gui_h */

@@ -278,16 +278,46 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 
   bottomSizer->Add(displaySizer, 0, wxALIGN_LEFT);
 
-  wxBoxSizer *button_sizer = new wxBoxSizer(wxVERTICAL);
-  button_sizer->Add(new wxButton(this, MY_BUTTON_ID1, "Run"), 0, wxALL, 10);
-  button_sizer->Add(new wxStaticText(this, wxID_ANY, "Cycles"), 0, wxTOP|wxLEFT|wxRIGHT, 10);
-  spin = new wxSpinCtrl(this, MY_SPINCNTRL_ID, wxString("10"));
-  button_sizer->Add(spin, 0 , wxALL, 10);
-  button_sizer->Add(new wxTextCtrl(this, MY_TEXTCTRL_ID, "", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER), 0 , wxALL, 10);
-  // added reset button for testing
-  button_sizer->Add(new wxButton(this, MY_BUTTON_ID2, "Reset"), 0, wxALL, 10);
-  bottomSizer->Add(button_sizer, 0, wxALIGN_TOP);
+  // wxBoxSizer *button_sizer = new wxBoxSizer(wxVERTICAL);
+  // button_sizer->Add(new wxButton(this, MY_BUTTON_ID1, "Run"), 0, wxALL, 10);
+  // button_sizer->Add(new wxStaticText(this, wxID_ANY, "Cycles"), 0, wxTOP|wxLEFT|wxRIGHT, 10);
+  // spin = new wxSpinCtrl(this, MY_SPINCNTRL_ID, wxString("10"));
+  // button_sizer->Add(spin, 0 , wxALL, 10);
+  // button_sizer->Add(new wxTextCtrl(this, MY_TEXTCTRL_ID, "", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER), 0 , wxALL, 10);
+  // // added reset button for testing
+  // button_sizer->Add(new wxButton(this, MY_BUTTON_ID2, "Reset"), 0, wxALL, 10);
+  
+  // switch sizers
+  // todo: change this to property static box sizer
+  wxStaticBoxSizer *switchSizer = new wxStaticBoxSizer(wxHORIZONTAL, this, "Switches");
+  switchChoice = new wxChoice(switchSizer->GetStaticBox(), MY_CHOICE_LIST_SWITCHES);
+  switchSizer->Add(switchChoice, 0, wxALL, 5);
+  wxStaticBoxSizer *switchStateSizer = new wxStaticBoxSizer(wxHORIZONTAL, switchSizer->GetStaticBox(), "Switch State");
+  switchState0 = new wxCheckBox(switchStateSizer->GetStaticBox(), MY_CHECKBOX_0, "0");
+  switchState1 = new wxCheckBox(switchStateSizer->GetStaticBox(), MY_CHECKBOX_1, "1");
+  switchStateSizer->Add(switchState0, 0, wxALL, 5);
+  switchStateSizer->Add(switchState1, 0, wxALL, 5);
+  switchSizer->Add(switchStateSizer, 0, wxALIGN_TOP);
 
+  // monitor sizers
+  wxStaticBoxSizer *monitorSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Monitors");
+  wxBoxSizer *monitorSetSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer *monitorZapSizer = new wxBoxSizer(wxHORIZONTAL);
+
+  monitorSet = new wxChoice(monitorSizer->GetStaticBox(), MY_CHOICE_MONITOR_SET);
+  monitorSetSizer->Add(monitorSet, 0, wxALL, 5);
+  monitorSetSizer->Add(new wxButton(monitorSizer->GetStaticBox(), MY_BUTTON_SET, "Set"), 0, wxALL, 10);
+
+  monitorZap = new wxChoice(monitorSizer->GetStaticBox(), MY_CHOICE_MONITOR_ZAP);
+  monitorZapSizer->Add(monitorZap, 0, wxALL, 5);
+  monitorZapSizer->Add(new wxButton(monitorSizer->GetStaticBox(), MY_BUTTON_ZAP, "Set"), 0, wxALL, 10);
+
+  monitorSizer->Add(monitorSetSizer, 0, wxALIGN_LEFT);
+  monitorSizer->Add(monitorZapSizer, 0, wxALIGN_LEFT);
+
+  bottomSizer->Add(switchSizer, 0, wxALIGN_TOP);
+  bottomSizer->Add(monitorSizer, 0, wxALIGN_TOP);
+  // bottomSizer->Add(button_sizer, 0, wxALIGN_TOP);
   overallSizer->Add(filePathSizer, 0, wxALIGN_LEFT);
   overallSizer->Add(bottomSizer, 0, wxALIGN_LEFT);
 

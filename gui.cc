@@ -184,8 +184,10 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
   EVT_BUTTON(MY_BUTTON_ID1, MyFrame::OnButton1)
   EVT_BUTTON(MY_BUTTON_ID2, MyFrame::OnButton2)
+  EVT_BUTTON(MY_BUTTON_LOAD, MyFrame::OnButtonLoad)
   EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
   EVT_TEXT_ENTER(MY_TEXTCTRL_ID, MyFrame::OnText)
+  EVT_TEXT_ENTER(MY_TEXTCTRL_FILEPATH, MyFrame::OnTextPath)
 END_EVENT_TABLE()
   
 MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size,
@@ -204,7 +206,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
     cout << "Cannot operate GUI without names, devices and monitor classes" << endl;
     exit(1);
   }
-
+  // Menu bar
   wxMenu *fileMenu = new wxMenu;
   // About is under guitest menu on mac
   // exit is under guitest menu by default
@@ -226,10 +228,55 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   menuBar->Append(editMenu, "&Edit");
   SetMenuBar(menuBar);
 
+  // main window
+  wxBoxSizer *overallSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *filePathSizer = new wxBoxSizer(wxHORIZONTAL);
+  filePathSizer->Add(
+    new wxButton(this, MY_BUTTON_LOAD, "Load"), 
+    0, 
+    wxALL, 
+    10);
 
-  wxBoxSizer *topsizer = new wxBoxSizer(wxHORIZONTAL);
-  canvas = new MyGLCanvas(this, wxID_ANY, monitor_mod, names_mod);
-  topsizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
+  filePathSizer->Add(
+    new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(800, -1), wxTE_PROCESS_ENTER), 
+    0, 
+    wxEXPAND | wxALL, 
+    10);
+    
+  
+  wxBoxSizer *bottomSizer = new wxBoxSizer(wxHORIZONTAL);
+
+  wxBoxSizer *displaySizer = new wxBoxSizer(wxVERTICAL);
+
+  canvas = new MyGLCanvas(
+    this, 
+    wxID_ANY, 
+    monitor_mod, 
+    names_mod, 
+    wxPoint(-1, -1), 
+    wxSize(500, 400));
+
+  displaySizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
+  displaySizer->Add(
+    new wxStaticText(this, wxID_ANY, "Log Activity"), 
+    0, 
+    wxTOP|wxLEFT|wxRIGHT, 
+    10);
+
+  logMessagePanel = new wxTextCtrl(this, 
+      MY_TEXTCTRL_LOG, 
+      "", 
+      wxDefaultPosition, 
+      wxSize(500, 100), 
+      wxTE_MULTILINE|wxTE_READONLY);
+
+  displaySizer->Add(
+    logMessagePanel,
+    0,
+    wxALL,
+    10);
+
+  bottomSizer->Add(displaySizer, 0, wxALIGN_LEFT);
 
   wxBoxSizer *button_sizer = new wxBoxSizer(wxVERTICAL);
   button_sizer->Add(new wxButton(this, MY_BUTTON_ID1, "Run"), 0, wxALL, 10);
@@ -239,11 +286,14 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   button_sizer->Add(new wxTextCtrl(this, MY_TEXTCTRL_ID, "", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER), 0 , wxALL, 10);
   // added reset button for testing
   button_sizer->Add(new wxButton(this, MY_BUTTON_ID2, "Reset"), 0, wxALL, 10);
-  
-  topsizer->Add(button_sizer, 0, wxALIGN_BOTTOM);
+  bottomSizer->Add(button_sizer, 0, wxALIGN_TOP);
 
-  SetSizeHints(400, 400);
-  SetSizer(topsizer);
+  overallSizer->Add(filePathSizer, 0, wxALIGN_LEFT);
+  overallSizer->Add(bottomSizer, 0, wxALIGN_LEFT);
+
+  // the top level window should not shrink below this size
+  SetSizeHints(800, 600);
+  SetSizer(overallSizer);
 }
 
 void MyFrame::OnExit(wxCommandEvent &event)
@@ -278,6 +328,12 @@ void MyFrame::OnButton2(wxCommandEvent &event)
   canvas->Render("Reset button pressed.", 0);
 }
 
+void MyFrame::OnButtonLoad(wxCommandEvent &event)
+  // Event handler for the push button
+{
+
+}
+
 void MyFrame::OnSpin(wxSpinEvent &event)
   // Event handler for the spin control
 {
@@ -288,6 +344,15 @@ void MyFrame::OnSpin(wxSpinEvent &event)
 }
 
 void MyFrame::OnText(wxCommandEvent &event)
+  // Event handler for the text entry field
+{
+  wxString text;
+
+  text.Printf("New text entered %s", event.GetString().c_str());
+  canvas->Render(text);
+}
+
+void MyFrame::OnTextPath(wxCommandEvent &event)
   // Event handler for the text entry field
 {
   wxString text;

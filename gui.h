@@ -12,8 +12,11 @@
 enum { 
   MY_SPINCNTRL_ID = wxID_HIGHEST + 1,
   MY_TEXTCTRL_ID,
+  MY_TEXTCTRL_FILEPATH,
+  MY_TEXTCTRL_LOG,
   MY_BUTTON_ID1,
   MY_BUTTON_ID2,
+  MY_BUTTON_LOAD,
 }; // widget identifiers
 
 class MyGLCanvas;
@@ -30,14 +33,17 @@ class MyFrame: public wxFrame
   names *nmz;                             // pointer to names class
   devices *dmz;                           // pointer to devices class
   monitor *mmz;                           // pointer to monitor class
+  wxTextCtrl* logMessagePanel;
   int cyclescompleted;                    // how many simulation cycles have been completed
   void runnetwork(int ncycles);           // function to run the logic network
   void OnExit(wxCommandEvent& event);     // event handler for exit menu item
   void OnAbout(wxCommandEvent& event);    // event handler for about menu item
   void OnButton1(wxCommandEvent& event);   // event handler for push button
   void OnButton2(wxCommandEvent& event);
+  void OnButtonLoad(wxCommandEvent& event);
   void OnSpin(wxSpinEvent& event);        // event handler for spin control
   void OnText(wxCommandEvent& event);     // event handler for text entry field
+  void OnTextPath(wxCommandEvent& event);
   DECLARE_EVENT_TABLE()
 };
     

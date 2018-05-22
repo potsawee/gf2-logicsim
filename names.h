@@ -14,8 +14,11 @@ typedef string namestring;
 
 class names{
 
-  /* put stuff that the class uses internally here */
 
+private:
+    /* put stuff that the class uses internally here */
+    namestring name_table[maxnames];
+    int name_num; // tells how many names have been stored
 
 public:
   name lookup (namestring str);

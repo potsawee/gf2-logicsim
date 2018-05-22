@@ -11,8 +11,8 @@ into a sequence of 'symbols'
 #include "names.h"
 using namespace std;
 
-typedef enum {namesym, numsym, devsym, consym,
-    monsym, endsym, comma, semicol, equals, badsym, eofsym} symbol;
+typedef enum {namesym, numsym, devsym, consym, monsym, closym, swisym, dtysym,
+    andsym, comma, semicol, equals, badsym, eofsym} symbol;
 typedef int name;
 
 

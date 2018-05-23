@@ -28,6 +28,11 @@ enum {
   MY_CHOICE_MONITOR_ZAP,
   MY_BUTTON_SET,
   MY_BUTTON_ZAP,
+
+  MY_BUTTON_RUN,
+  MY_BUTTON_PAUSE,
+  MY_BUTTON_STOP,
+  MY_BUTTON_RESET,
 }; // widget identifiers
 
 class MyGLCanvas;

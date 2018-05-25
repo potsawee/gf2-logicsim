@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
+#include <vector>
 
 using namespace std;
 
@@ -10,7 +11,7 @@ using namespace std;
 
 names::names(void)  /* the constructor */
 {
-	keyword_table[] = {"DEVICES", "CONNECTIONS", "MONITORS", "CLOCK", "SWITCH", "DTYPE", "AND", "NAND", "OR", "NOR", "XOR", 
+	vector<namestring> keyword_table = {"DEVICES", "CONNECTIONS", "MONITORS", "CLOCK", "SWITCH", "DTYPE", "AND", "NAND", "OR", "NOR", "XOR", 
 	"I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9", "I10", "I11", "I12", "I13", "I14", "I15", "I16",
 	"DATA", "CLK", "SET", "CLEAR", "Q", "QBAR"};
     // initialisation

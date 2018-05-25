@@ -182,12 +182,13 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_EXIT, MyFrame::OnExit)
   EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
-  EVT_BUTTON(MY_BUTTON_ID1, MyFrame::OnButton1)
-  EVT_BUTTON(MY_BUTTON_ID2, MyFrame::OnButton2)
-  EVT_BUTTON(MY_BUTTON_LOAD, MyFrame::OnButtonLoad)
+  EVT_BUTTON(MY_BUTTON_RUN, MyFrame::OnButtonRUN)
+  EVT_BUTTON(MY_BUTTON_RESET, MyFrame::OnButtonRESET)
+  EVT_BUTTON(MY_BUTTON_LOAD, MyFrame::OnButtonLOAD)
   EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
-  EVT_TEXT_ENTER(MY_TEXTCTRL_ID, MyFrame::OnText)
-  EVT_TEXT_ENTER(MY_TEXTCTRL_FILEPATH, MyFrame::OnTextPath)
+  EVT_TEXT_ENTER(MY_TEXTCTRL_ID, MyFrame::OnText)  // todo: delete
+  EVT_TEXT(MY_TEXTCTRL_FILEPATH, MyFrame::OnPathChange)
+  EVT_TEXT_ENTER(MY_TEXTCTRL_FILEPATH, MyFrame::OnPathEnter)
 END_EVENT_TABLE()
   
 MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size,
@@ -303,21 +304,25 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   switchStateSizer->Add(switchState1, 0, wxALL, 5);
   switchSizer->Add(switchStateSizer, 0, wxALIGN_TOP);
 
+  switchChoice->Append("sw1");
+  switchChoice->Append("sw2");
+  switchChoice->Append("sw3");
+
   // monitor sizers
-  wxStaticBoxSizer *monitorSizer = new wxStaticBoxSizer(wxVERTICAL, configSizer->GetStaticBox(), "Monitors");
+  wxStaticBoxSizer *monitorCtrlSizer = new wxStaticBoxSizer(wxVERTICAL, configSizer->GetStaticBox(), "Monitors");
   wxBoxSizer *monitorSetSizer = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer *monitorZapSizer = new wxBoxSizer(wxHORIZONTAL);
-  monitorSet = new wxChoice(monitorSizer->GetStaticBox(), MY_CHOICE_MONITOR_SET);
+  monitorSet = new wxChoice(monitorCtrlSizer->GetStaticBox(), MY_CHOICE_MONITOR_SET);
   monitorSetSizer->Add(monitorSet, 0, wxALL, 5);
-  monitorSetSizer->Add(new wxButton(monitorSizer->GetStaticBox(), MY_BUTTON_SET, "Set"), 0, wxALL, 10);
-  monitorZap = new wxChoice(monitorSizer->GetStaticBox(), MY_CHOICE_MONITOR_ZAP);
+  monitorSetSizer->Add(new wxButton(monitorCtrlSizer->GetStaticBox(), MY_BUTTON_SET, "Set"), 0, wxALL, 10);
+  monitorZap = new wxChoice(monitorCtrlSizer->GetStaticBox(), MY_CHOICE_MONITOR_ZAP);
   monitorZapSizer->Add(monitorZap, 0, wxALL, 5);
-  monitorZapSizer->Add(new wxButton(monitorSizer->GetStaticBox(), MY_BUTTON_ZAP, "Zap"), 0, wxALL, 10);
-  monitorSizer->Add(monitorSetSizer, 0, wxALIGN_LEFT);
-  monitorSizer->Add(monitorZapSizer, 0, wxALIGN_LEFT);
+  monitorZapSizer->Add(new wxButton(monitorCtrlSizer->GetStaticBox(), MY_BUTTON_ZAP, "Zap"), 0, wxALL, 10);
+  monitorCtrlSizer->Add(monitorSetSizer, 0, wxALIGN_LEFT);
+  monitorCtrlSizer->Add(monitorZapSizer, 0, wxALIGN_LEFT);
 
   configSizer->Add(switchSizer, 0, wxALIGN_TOP|wxALIGN_LEFT);
-  configSizer->Add(monitorSizer, 0, wxALIGN_TOP|wxALIGN_LEFT);
+  configSizer->Add(monitorCtrlSizer, 0, wxALIGN_TOP|wxALIGN_LEFT);
   // end of configuration sizer
 
   // opration sizer
@@ -341,7 +346,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   bottomRightSizer->Add(opSizer, 0, wxALIGN_LEFT);
   bottomSizer->Add(bottomRightSizer, 0, wxALIGN_TOP);
   // bottomSizer->Add(switchSizer, 0, wxALIGN_TOP);
-  // bottomSizer->Add(monitorSizer, 0, wxALIGN_TOP);
+  // bottomSizer->Add(monitorCtrlSizer, 0, wxALIGN_TOP);
   // bottomSizer->Add(button_sizer, 0, wxALIGN_TOP);
   overallSizer->Add(filePathSizer, 0, wxALIGN_LEFT);
   overallSizer->Add(bottomSizer, 0, wxALIGN_LEFT);
@@ -364,7 +369,7 @@ void MyFrame::OnAbout(wxCommandEvent &event)
   about.ShowModal();
 }
 
-void MyFrame::OnButton1(wxCommandEvent &event)
+void MyFrame::OnButtonRUN(wxCommandEvent &event)
   // Event handler for the push button
 {
   int n, ncycles;
@@ -377,17 +382,11 @@ void MyFrame::OnButton1(wxCommandEvent &event)
   logMessagePanel->AppendText(getCurrentTime()+"Start running.\n");
 }
 
-void MyFrame::OnButton2(wxCommandEvent &event)
+void MyFrame::OnButtonRESET(wxCommandEvent &event)
   // Event handler for the push button
 {
   canvas->SetDefault();
   canvas->Render("Reset button pressed.", 0);
-}
-
-void MyFrame::OnButtonLoad(wxCommandEvent &event)
-  // Event handler for the push button
-{
-
 }
 
 void MyFrame::OnSpin(wxSpinEvent &event)
@@ -408,13 +407,29 @@ void MyFrame::OnText(wxCommandEvent &event)
   canvas->Render(text);
 }
 
-void MyFrame::OnTextPath(wxCommandEvent &event)
+void MyFrame::OnButtonLOAD(wxCommandEvent &event)
+{
+  loadFile(filePath);
+}
+
+void MyFrame::OnPathEnter(wxCommandEvent &event)
   // Event handler for the text entry field
 {
-  wxString text;
+  loadFile(filePath);
+}
 
-  text.Printf("New text entered %s", event.GetString().c_str());
-  canvas->Render(text);
+void MyFrame::OnPathChange(wxCommandEvent &event)
+  // Event handler for the text entry field
+{
+  filePath = event.GetString();
+}
+
+void MyFrame::loadFile(wxString s)
+{
+  logMessagePanel->AppendText(
+    getCurrentTime()+
+    "File loaded from  "+
+    s);
 }
 
 void MyFrame::runnetwork(int ncycles)

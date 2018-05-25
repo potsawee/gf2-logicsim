@@ -10,29 +10,30 @@
 #include "monitor.h"
 
 enum { 
+  // todo: delete unnecessary ones. add event handlers
   MY_SPINCNTRL_ID = wxID_HIGHEST + 1,
-  MY_TEXTCTRL_ID,
+  MY_TEXTCTRL_ID,         // todo: delete
   MY_TEXTCTRL_LOG,        // for logging text box
   
-  MY_BUTTON_ID1,
-  MY_BUTTON_ID2,  
+  MY_BUTTON_ID1,          // todo: delete
+  MY_BUTTON_ID2,          // todo: delete
   
-  MY_BUTTON_LOAD,           // for loading connection definitation file
+  MY_BUTTON_LOAD,         // for loading connection definitation file
   MY_TEXTCTRL_FILEPATH,   // storing filepath to def file
 
-  MY_CHECKBOX_0,            // switch state 0
-  MY_CHECKBOX_1,            // switch state 1
-  MY_CHOICE_LIST_SWITCHES,  // switch choice
+  MY_CHECKBOX_0,            // todo: switch state 0
+  MY_CHECKBOX_1,            // todo: switch state 1
+  MY_CHOICE_LIST_SWITCHES,  // todo: switch choice
 
-  MY_CHOICE_MONITOR_SET,
-  MY_CHOICE_MONITOR_ZAP,
-  MY_BUTTON_SET,
-  MY_BUTTON_ZAP,
+  MY_CHOICE_MONITOR_SET,    // todo: 
+  MY_CHOICE_MONITOR_ZAP,    // todo: 
+  MY_BUTTON_SET,            // todo: 
+  MY_BUTTON_ZAP,            // todo: 
 
-  MY_BUTTON_RUN,
-  MY_BUTTON_PAUSE,
-  MY_BUTTON_STOP,
-  MY_BUTTON_RESET,
+  MY_BUTTON_RUN,            // todo: implement actual running
+  MY_BUTTON_PAUSE,          // todo: 
+  MY_BUTTON_STOP,           // todo: 
+  MY_BUTTON_RESET,          // todo: implement actual reset
 }; // widget identifiers
 
 class MyGLCanvas;
@@ -58,16 +59,25 @@ class MyFrame: public wxFrame
   wxChoice *monitorSet;
   wxChoice *monitorZap;
 
+  wxString filePath;
+
   int cyclescompleted;                    // how many simulation cycles have been completed
   void runnetwork(int ncycles);           // function to run the logic network
   void OnExit(wxCommandEvent& event);     // event handler for exit menu item
   void OnAbout(wxCommandEvent& event);    // event handler for about menu item
-  void OnButton1(wxCommandEvent& event);   // event handler for push button
-  void OnButton2(wxCommandEvent& event);
-  void OnButtonLoad(wxCommandEvent& event);
+  void OnButtonRUN(wxCommandEvent& event);    // event handler for push button
+  void OnButtonRESET(wxCommandEvent& event);  // event handler for reset button
+
+  // functions related to loading description file
+  void OnButtonLOAD(wxCommandEvent& event);
+  void OnPathEnter(wxCommandEvent& event);
+  void OnPathChange(wxCommandEvent& event);
+  void loadFile(wxString s);
+
+  
   void OnSpin(wxSpinEvent& event);        // event handler for spin control
   void OnText(wxCommandEvent& event);     // event handler for text entry field
-  void OnTextPath(wxCommandEvent& event);
+  
   DECLARE_EVENT_TABLE()
 };
     

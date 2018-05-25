@@ -6,21 +6,18 @@
 
 using namespace std;
 
-const int maxnames  = 200;  /* max number of distinct names */
-const int maxlength = 8;    /* max chars in a name string   */
-const int blankname = -1;   /* special name                 */
-
 typedef int name;
 typedef string namestring;
+
+// const int maxlength = 8;     /* max chars in a name string   */
+const name blankname = -1;   /* special name                 */
 
 class names{
 
 
 private:
-    /* put stuff that the class uses internally here */
     vector<namestring> name_table;
     vector<namestring> keyword_table;
-    // int name_num; //keep track of the number of names stored in the nametable
 
 public:
   name lookup (namestring str);

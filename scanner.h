@@ -12,14 +12,18 @@ into a sequence of 'symbols'
 #include <fstream>
 #include <cstdlib>
 #include <string>
+
 #include "names.h"
+#include "network.h" // to make use of devicekind
 
 using namespace std;
 
+// For symbols describing devices
+// Use the definition provided in network.h instead!
 typedef enum {namesym, numsym, devsym, consym, monsym,
-	closym, swisym, dtysym, andsym, nandsym, orsym, norsym, xorsym,
 	comma, semicol, colon, equals, leftbrksym, rightbrksym, badsym, eofsym
 	} symbol;
+
 typedef int name;
 
 
@@ -40,9 +44,11 @@ private:
     void skipspaces(ifstream *infp, char& curch, bool& eofile); //skips spaces
     void skipcomments(); //skips comments
     string getline(); //gets current line
-    void getnumber(int& num); //reads number 
-    void getname(name& id); //reads name
+    void getnumber(ifstream *infp, char &curch, bool &eofile, int &num); //reads number
+    void getname(ifstream *infp, char &curch, bool &eofile, name &id); 	//reads name
     void displayerror(string errormessage); //displays error messages
+
+	names* _names_mod; // pointer to names class
 
 public:
     scanner(names* names_mod, // pointer to names class

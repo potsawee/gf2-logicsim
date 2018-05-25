@@ -18,7 +18,7 @@ using namespace std;
 
 typedef enum {namesym, numsym, devsym, consym, monsym,
 	closym, swisym, dtysym, andsym, nandsym, orsym, norsym, xorsym,
-	comma, semicol, equals, leftbrksym, rightbrksym, badsym, eofsym
+	comma, semicol, colon, equals, leftbrksym, rightbrksym, badsym, eofsym
 	} symbol;
 typedef int name;
 
@@ -27,11 +27,19 @@ class scanner {
 private:
     ifstream inf; //input definition file
     char curch; //current input character
+    string currentline;	//current line
+	char prevch; //previous input character
     bool eofile; //true when end of file is reached
+    bool eoline; //true when end of line is reached
+    symbol cursym; //current symbol
+    int symlength; //current symbol length
+    int linenum; //line number
 
     void getch(char& curch); //reads next character, updates curch
+    void incrChar(); //gets next character
     void skipspaces(ifstream *infp, char& curch, bool& eofile); //skips spaces
     void skipcomments(); //skips comments
+    string getline(); //gets current line
     void getnumber(int& num); //reads number 
     void getname(name& id); //reads name
     void displayerror(string errormessage); //displays error messages

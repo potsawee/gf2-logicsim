@@ -1,5 +1,9 @@
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
+#include <cctype>
+#include <vector>
+#include <string>
 #include "scanner.h"
 
 using namespace std;
@@ -8,13 +12,16 @@ scanner::scanner(names* names_mod, const char* defname)
 {
 	inf.open(defname); //open defname
 	if(!inf){
-		displayerror("Error: Failed to open file");
+		cout<< "Error: Failed to open file" << endl;
 		exit;
 	}
 	inf(clear); //clear fail bits
-	inf.seekg(0, ios::beg); //
+	inf.seekg(0, ios::beg);//find the beginning of the file
+	currentline.clear();
+	linenum = 1;
+	cout << "File opened successfully"<< endl;
+	s = badsym;
 	
-
 }
 scanner::~scanner()
 {
@@ -22,6 +29,10 @@ scanner::~scanner()
 }
 static void scanner::getsymbol(symbol& s, name& id, int& num)
 {
+	s = badsym;//initialisation
+	id = blankname;
+	num = 0;
+	
     skipspaces(&inf, curch, eofile);
     if(eofile)
         s = eofsym;
@@ -57,10 +68,23 @@ static void scanner::getsymbol(symbol& s, name& id, int& num)
         }
     }
 }
-void scanner::getch(char& curch)
-{
 
+
+void scanner::getch()
+{
+	prevch = curch;
+	eofile = (inf.get(curch) == 0);
+	if (curch == '\n') linenum ++;
+	if (eoline) {
+		currentline.clear(); //clear the current line
+		skipspaces();
+		eoline = false;//reset eoline
+	}	
+	if(prevch != '\n'){
+		currentline.push_back(prevch);
+	}
 }
+
 void scanner::skipspaces(ifstream *infp, char& curch, bool& eofile)
 {
     eofile = !((*infp).get(curch));
@@ -71,3 +95,33 @@ void scanner::skipspaces(ifstream *infp, char& curch, bool& eofile)
             return;
     }
 }
+
+void scanner::skipcomments(ifstream *infp, char& curch, bool& eofile)
+{
+	if (curch =='/') {
+		eofile = (inf.get(curch) == 0);
+		if (curch == '\n') linenum ++; 
+		while (!eofile && prevch != '/') { 
+			prevch = curch;
+			eofile = (inf.get(curch) == 0);
+			if (curch == '\n') linenum ++; 
+		}
+		if (eofile) {
+			cout<<("Error: Comment not closed")<<endl;
+		}
+		skipspaces();
+	}
+}
+
+string scanner::getline()
+{	
+	if(cursym != semicol && cursym != colon && cursym != comma){
+		while (curch !=':' && curch !=';' && curch !=',' && !eofile) {
+			getch(); 
+		}
+		currentline.push_back(curch);
+	}
+	return currentline;
+}
+
+

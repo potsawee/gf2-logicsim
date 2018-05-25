@@ -2,6 +2,7 @@
 #define names_h
 
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -17,8 +18,9 @@ class names{
 
 private:
     /* put stuff that the class uses internally here */
-    namestring name_table[maxnames];
-    int name_num; // tells how many names have been stored
+    vector<namestring> name_table;
+    vector<namestring> keyword_table;
+    int name_num; //keep track of the number of names stored in the nametable
 
 public:
   name lookup (namestring str);

@@ -186,9 +186,15 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_BUTTON(MY_BUTTON_RESET, MyFrame::OnButtonRESET)
   EVT_BUTTON(MY_BUTTON_LOAD, MyFrame::OnButtonLOAD)
   EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
+  
+  // load files
   EVT_TEXT_ENTER(MY_TEXTCTRL_ID, MyFrame::OnText)  // todo: delete
   EVT_TEXT(MY_TEXTCTRL_FILEPATH, MyFrame::OnPathChange)
   EVT_TEXT_ENTER(MY_TEXTCTRL_FILEPATH, MyFrame::OnPathEnter)
+
+  EVT_CHECKBOX(MY_CHECKBOX_0, MyFrame::OnCheck0)
+  EVT_CHECKBOX(MY_CHECKBOX_1, MyFrame::OnCheck1)
+
 END_EVENT_TABLE()
   
 MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size,
@@ -304,6 +310,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   switchStateSizer->Add(switchState1, 0, wxALL, 5);
   switchSizer->Add(switchStateSizer, 0, wxALIGN_TOP);
 
+  //todo: delete dummy switch options
   switchChoice->Append("sw1");
   switchChoice->Append("sw2");
   switchChoice->Append("sw3");
@@ -386,7 +393,7 @@ void MyFrame::OnButtonRESET(wxCommandEvent &event)
   // Event handler for the push button
 {
   canvas->SetDefault();
-  canvas->Render("Reset button pressed.", 0);
+  canvas->Render("Reset button pressed.\n", 0);
 }
 
 void MyFrame::OnSpin(wxSpinEvent &event)
@@ -426,10 +433,29 @@ void MyFrame::OnPathChange(wxCommandEvent &event)
 
 void MyFrame::loadFile(wxString s)
 {
+  // todo: check file path validity
+  // either be done by the parser or here
   logMessagePanel->AppendText(
     getCurrentTime()+
     "File loaded from  "+
-    s);
+    s + "\n");
+}
+
+void MyFrame::OnCheck0(wxCommandEvent &event)
+{
+  if((switchState1->GetValue()==switchState0->GetValue())&&(switchState0->GetValue()))
+  {
+    switchState1->SetValue(!(switchState1->GetValue()));
+  }
+}
+
+void MyFrame::OnCheck1(wxCommandEvent &event)
+  // Event handler for the text entry field
+{
+ if((switchState1->GetValue()==switchState0->GetValue())&&(switchState0->GetValue()))
+  {
+    switchState0->SetValue(!(switchState0->GetValue()));
+  }  
 }
 
 void MyFrame::runnetwork(int ncycles)

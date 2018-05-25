@@ -74,7 +74,10 @@ class MyFrame: public wxFrame
   void OnPathChange(wxCommandEvent& event);
   void loadFile(wxString s);
 
-  
+  // functions related to checkboxes
+  void OnCheck0(wxCommandEvent& event);
+  void OnCheck1(wxCommandEvent& event); 
+
   void OnSpin(wxSpinEvent& event);        // event handler for spin control
   void OnText(wxCommandEvent& event);     // event handler for text entry field
   

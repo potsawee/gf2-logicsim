@@ -46,6 +46,8 @@ private:
     void name();
     void read_equal_name_num();
 
+    void error(int errn); // a function to throw error
+
  public:
     bool readin ();
     /* Reads the definition of the logic system and builds the             */

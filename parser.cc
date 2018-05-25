@@ -60,7 +60,7 @@ void parser::devicelist()
 	if (cursym == semicol)
 		scanner::getsymbol(cursym, curid, curnum);
 	else
-		throw "error: devices";
+		error(1);
 
 }
 void parser::device()
@@ -75,7 +75,7 @@ void parser::device()
 		case orsym: 	ordev(); 		break;
 		case norsym: 	nordev(); 		break;
 		case xorsym: 	xordev(); 		break;
-		default: throw "error device";	break;
+		default: error(2);	break;
 	}
 }
 void parser::clockdev()
@@ -95,7 +95,7 @@ void parser::switchdev()
 					// int state0 = curnum;
 				}
 				else
-					throw "initial state 0 or 1";
+					error(3);
 				scanner::getsymbol(cursym, curid, curnum);
 				if(cursym != rightbracketsym)
 					throw "error expect a ) symbol ";
@@ -253,3 +253,22 @@ void parser::monitor1()
 	}
 }
 //
+void parser::error(int errn)
+{
+	switch(errn)
+	{
+		case 1: cout << "a semicolon is expected" << endl; break;
+		case 2: cout << "a device definition is expected" << endl; break;
+		case 3: cout << "Initial state is either 0 or 1" << endl; break;
+
+
+
+
+
+	}
+
+
+
+
+
+}

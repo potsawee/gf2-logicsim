@@ -18,7 +18,8 @@ class names{
 private:
     /* put stuff that the class uses internally here */
     namestring name_table[maxnames];
-    int name_num; // tells how many names have been stored
+    namestring keyword_table[32];
+    int name_num; //keep track of the number of names stored in the nametable
 
 public:
   name lookup (namestring str);

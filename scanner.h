@@ -18,7 +18,7 @@ using namespace std;
 
 typedef enum {namesym, numsym, devsym, consym, monsym,
 	closym, swisym, dtysym, andsym, nandsym, orsym, norsym, xorsym,
-	comma, semicol, equals, badsym, eofsym
+	comma, semicol, equals, leftbrksym, rightbrksym, badsym, eofsym
 	} symbol;
 typedef int name;
 

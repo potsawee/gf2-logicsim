@@ -34,16 +34,6 @@ name names::lookup (namestring str)
 		}
 	}
 	return id;
-//    /* over to you */
-//    // check if the name already exists
-//    for(int i=0; i<name_num; i++){
-//        if(name_table[i] == str)
-//            return i;
-//    }
-//    // the name does not exist yet
-//    name_table[name_num] = str;
-//    name_num += 1;
-//    return name_num-1;
 }
 
 name names::cvtname (namestring str)

@@ -6,29 +6,44 @@ using namespace std;
 
 scanner::scanner(names* names_mod, const char* defname)
 {
+	inf.open(defname); //open defname
+	if(!inf){
+		displayerror("Error: Failed to open file");
+		exit;
+	}
+	inf(clear); //clear fail bits
+	inf.seekg(0, ios::beg); //
+	
 
 }
 scanner::~scanner()
 {
-
+	inf.close(); //close defname
 }
-void scanner::getsymbol(symbol& s, name& id, int& num)
+static void scanner::getsymbol(symbol& s, name& id, int& num)
 {
     skipspaces(&inf, curch, eofile);
     if(eofile)
         s = eofsym;
     else {
-        if(isdigit(curch)) {
+        if(isdigit(curch)) { //current symbol is a number 
             s = numsym;
             getnumber(num);
         }
         else {
-            if (isalpha(curch)) { // name
-                // getname(id);
-                // if (id == devicename)
-                //     s = devsym;
-                // else
-                //     (id == connectionname)
+            if (isalpha(curch) || (curch == '_')) { //current symbol is a name
+                getname(id);
+                if (id == devicename)
+                    s = devsym;
+                else {
+                	if (id == connectionname){
+                		s = consym;
+                		else
+                		s = namesym;
+					}
+                	
+				}
+                    
             }
             else { // neither number nor name
                 switch (curch) {

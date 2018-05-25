@@ -8,24 +8,33 @@ into a sequence of 'symbols'
 #ifndef scanner_h
 #define scanner_h
 
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <string>
 #include "names.h"
+
 using namespace std;
 
-typedef enum {namesym, numsym, devsym, consym, monsym, closym, swisym, dtysym,
-    andsym, comma, semicol, equals, badsym, eofsym} symbol;
+typedef enum {namesym, numsym, devsym, consym, monsym,
+	closym, swisym, dtysym, andsym, nandsym, orsym, norsym, xorsym,
+	comma, semicol, equals, leftbrksym, rightbrksym, badsym, eofsym
+	} symbol;
 typedef int name;
 
 
 class scanner {
 private:
-    ifstream inf;
+    ifstream inf; //input definition file
     char curch; //current input character
-    bool eofile;
+    bool eofile; //true when end of file is reached
 
-    void getch(char& curch);
-    void skipspaces(ifstream *infp, char& curch, bool& eofile);
-    void getnumber(int& num);
-    void getname(name& id);
+    void getch(char& curch); //reads next character, updates curch
+    void skipspaces(ifstream *infp, char& curch, bool& eofile); //skips spaces
+    void skipcomments(); //skips comments
+    void getnumber(int& num); //reads number 
+    void getname(name& id); //reads name
+    void displayerror(string errormessage); //displays error messages
 
 public:
     scanner(names* names_mod, // pointer to names class
@@ -35,7 +44,7 @@ public:
 
     ~scanner(); // destructor to close file
 
-    void getsymbol(symbol& s,   // symbol read from the file
+    static void getsymbol(symbol& s,   // symbol read from the file
                    name& id,    // name id if it is a name
                    int& num);   // value if it is a number
     // return successive symbols in the definition file

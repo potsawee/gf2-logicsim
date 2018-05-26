@@ -79,6 +79,8 @@ public:
                    int& num);   // value if it is a number
     // return successive symbols in the definition file
 
+	void skipcolon();
+
 	// Functions for unit testing
 	void print_curch();
 	bool is_eofile();

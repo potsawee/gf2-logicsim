@@ -17,11 +17,13 @@ bool parser::readin (void)
 	try{
 		while(cursym != eofsym){
 			if(cursym == devsym){ // "DEVICES:"
+				smz->skipcolon();
 				devicelist();
 			} else if(cursym == consym){ // "CONNECTIONS:"
-				// CONNECTION = signame , "=" , signame;
+				smz->skipcolon();
 				connectionlist();
 			} else if(cursym == monsym){ // "MONITORS:"
+				smz->skipcolon();
 				monitorlist();
 			}
 			smz->getsymbol(cursym, curid, curnum);

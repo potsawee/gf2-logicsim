@@ -16,10 +16,10 @@ scanner::scanner(names* nmz, const char* defname) // nmz is a pointer to names c
 		cout<< "Error: Failed to open file" << endl;
 		exit(1);
 	}
-	inf(clear); //clear fail bits
-	inf.seekg(0, ios::beg);//find the beginning of the file
-	currentline.clear();
-	linenum = 1;
+	// inf(clear); //clear fail bits
+	// inf.seekg(0, ios::beg);//find the beginning of the file
+	// currentline.clear();
+	// linenum = 1;
 	cout << "File opened successfully" << endl;
 	// cursym = badsym;
 
@@ -37,7 +37,7 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 	id = blankname;
 	num = -1;
 
-    skipspaces(&inf, curch, eofile); // curch is not a white-space
+    skipspaces(); // curch is not a white-space
 
     if(eofile){
         s = eofsym;
@@ -46,13 +46,13 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 
     if(isdigit(curch)) { //current symbol is a number
         s = numsym;
-        getnumber(&inf, curch, eofile, num); 	// after this function is called,
+        getnumber(num); 	// after this function is called,
 												//curch becomes the character after the last digit
     }
     else if(isalpha(curch) || (curch == '_')) { //current symbol is a name
 		bool is_keyword;
 
-		getname(&inf, curch, eofile, id, is_keyword);
+		getname(id, is_keyword);
 
 		if (is_keyword){ // DEVICES, CONNECTIONS, MONITORS
 			switch (id) {
@@ -78,13 +78,14 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
     }
 }
 
-void scanner::getnumber(ifstream *infp, char& curch, bool& eofile, int& num)
+void scanner::getnumber(int& number)
+// This function also updates inf, curch, eofile.
 {
 	string s = "";
 	while(!eofile){
 		if(isdigit(curch)){
 			s += curch;
-			eofile = !((*infp).get(curch));
+			eofile = !(inf.get(curch));
 		}
 		else {
 			number = stoi(s);
@@ -95,7 +96,8 @@ void scanner::getnumber(ifstream *infp, char& curch, bool& eofile, int& num)
 	return;
 }
 
-void scanner::getname(ifstream *infp, char& curch, bool& eofile, name& id, bool& is_keyword)
+void scanner::getname(name& id, bool& is_keyword)
+// This function also updates inf, curch, eofile.
 {
 	/*
 	a string of letters could be
@@ -106,26 +108,27 @@ void scanner::getname(ifstream *infp, char& curch, bool& eofile, name& id, bool&
 	str += curch;
 
     while(!eofile){
-		eofile = !((*infp).get(curch));
-        if(isdigit(curch) || isalpha(curch) || curch == "_"){
+		eofile = !(inf.get(curch));
+        if(isdigit(curch) || isalpha(curch) || curch == '_'){
             str += curch;
         }
         else {
             break;
         }
-
     }
 
 	// check if the string is a keyword or not
 	is_keyword = _nmz->is_keyword(str);
 
 	if(is_keyword){ // if it is a keyword, id will be an id from keyword_table
-		switch (str) {
-			case "DEVICES": 		id = dev_id; break;
-			case "CONNECTTIONS": 	id = con_id; break;
-			case "MONITORS": 		id = mon_id; break;
-			default:				id = -1; break; // ERROR!!
-		}
+		if(str == "DEVICES")
+			id = dev_id;
+		else if(str == "CONNECTIONS")
+			id = con_id;
+		else if(str == "MONITORS")
+			id = mon_id;
+		else
+			id = -1; //ERROR!!
 	}
 	else{
 		id = _nmz->lookup(str);
@@ -135,58 +138,58 @@ void scanner::getname(ifstream *infp, char& curch, bool& eofile, name& id, bool&
     return;
 }
 
+// void scanner::getch()
+// {
+// 	prevch = curch;
+// 	eofile = (inf.get(curch) == 0);
+// 	if (curch == '\n') linenum ++;
+// 	if (eoline) {
+// 		currentline.clear(); //clear the current line
+// 		skipspaces();
+// 		eoline = false;//reset eoline
+// 	}
+// 	if(prevch != '\n'){
+// 		currentline.push_back(prevch);
+// 	}
+// }
 
-void scanner::getch()
-{
-	prevch = curch;
-	eofile = (inf.get(curch) == 0);
-	if (curch == '\n') linenum ++;
-	if (eoline) {
-		currentline.clear(); //clear the current line
-		skipspaces();
-		eoline = false;//reset eoline
-	}
-	if(prevch != '\n'){
-		currentline.push_back(prevch);
-	}
-}
-
-void scanner::skipspaces(ifstream *infp, char& curch, bool& eofile)
+void scanner::skipspaces()
 // return a non white-space character in curch
+// This function updates inf, curch, eofile
 {
-    eofile = !((*infp).get(curch));
+    eofile = !(inf.get(curch));
     while(!eofile){
         if(isspace(curch))
-            eofile = !((*infp).get(curch));
+            eofile = !(inf.get(curch));
         else
             return;
     }
 }
 
-void scanner::skipcomments(ifstream *infp, char& curch, bool& eofile)
-{
-	if (curch =='/') {
-		eofile = (inf.get(curch) == 0);
-		if (curch == '\n') linenum ++;
-		while (!eofile && prevch != '/') {
-			prevch = curch;
-			eofile = (inf.get(curch) == 0);
-			if (curch == '\n') linenum ++;
-		}
-		if (eofile) {
-			cout<<("Error: Comment not closed")<<endl;
-		}
-		skipspaces();
-	}
-}
+// void scanner::skipcomments(ifstream *infp, char& curch, bool& eofile)
+// {
+// 	if (curch =='/') {
+// 		eofile = (inf.get(curch) == 0);
+// 		if (curch == '\n') linenum ++;
+// 		while (!eofile && prevch != '/') {
+// 			prevch = curch;
+// 			eofile = (inf.get(curch) == 0);
+// 			if (curch == '\n') linenum ++;
+// 		}
+// 		if (eofile) {
+// 			cout<<("Error: Comment not closed")<<endl;
+// 		}
+// 		skipspaces();
+// 	}
+// }
 
-string scanner::getline()
-{
-	if(cursym != semicol && cursym != colon && cursym != comma){
-		while (curch !=':' && curch !=';' && curch !=',' && !eofile) {
-			getch();
-		}
-		currentline.push_back(curch);
-	}
-	return currentline;
-}
+// string scanner::getline()
+// {
+// 	if(cursym != semicol && cursym != colon && cursym != comma){
+// 		while (curch !=':' && curch !=';' && curch !=',' && !eofile) {
+// 			getch();
+// 		}
+// 		currentline.push_back(curch);
+// 	}
+// 	return currentline;
+// }

@@ -39,14 +39,14 @@ private:
     int symlength; //current symbol length
     int linenum; //line number
 
-    void getch(char& curch); //reads next character, updates curch
-    void incrChar(); //gets next character
-    void skipspaces(ifstream *infp, char& curch, bool& eofile); //skips spaces
-    void skipcomments(); //skips comments
-    string getline(); //gets current line
-    void getnumber(ifstream *infp, char& curch, bool& eofile, int& num); //reads number
-    void getname(ifstream *infp, char& curch, bool& eofile, name& id, bool& is_keyword); 	//reads name
-    void displayerror(string errormessage); //displays error messages
+    // void getch(char& curch); //reads next character, updates curch
+    // void incrChar(); //gets next character
+    void skipspaces(); //skips spaces
+    // void skipcomments(ifstream *infp, char& curch, bool& eofile); //skips comments
+    // string getline(); //gets current line
+    void getnumber(int& num); //reads number
+    void getname(name& id, bool& is_keyword); 	//reads name
+    // void displayerror(string errormessage); //displays error messages
 
 	names* _nmz; // pointer to names class
 
@@ -58,12 +58,11 @@ public:
 
     ~scanner(); // destructor to close file
 
-    static void getsymbol(symbol& s,   // symbol read from the file
+    void getsymbol(symbol& s,   // symbol read from the file
                    name& id,    // name id if it is a name
                    int& num);   // value if it is a number
     // return successive symbols in the definition file
 };
-
 
 
 #endif /* scanner_h */

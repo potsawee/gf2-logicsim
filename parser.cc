@@ -11,20 +11,20 @@ bool parser::readin (void)
 	/* over to you */
 	// return true if definition file parsed OK
 
-	scanner::getsymbol(cursym, curid, curnum);
+	smz->getsymbol(cursym, curid, curnum);
 
 	/* Syntax error detection */
 	try{
 		while(cursym != eofsym){
-			if(cursym == devsym){ // device
+			if(cursym == devsym){ // "DEVICES:"
 				devicelist();
 			} else if(cursym == consym){ // "CONNECTIONS:"
 				// CONNECTION = signame , "=" , signame;
 				connectionlist();
-			} else if(cursym == monsym){ // monitor
+			} else if(cursym == monsym){ // "MONITORS:"
 				monitorlist();
 			}
-			scanner::getsymbol(cursym, curid, curnum);
+			smz->getsymbol(cursym, curid, curnum);
 		}
 	} catch (const char* msg) {
 		cerr << msg << endl;
@@ -40,42 +40,48 @@ parser::parser (network* network_mod, devices* devices_mod,
 	dmz = devices_mod;   /* so we can call functions from these classes  */
 	mmz = monitor_mod;   /* eg. to call makeconnection from the network  */
 	smz = scanner_mod;   /* class you say:                               */
-	                   /* netz->makeconnection (i1, i2, o1, o2, ok);   */
+	                   	 /* netz->makeconnection (i1, i2, o1, o2, ok);   */
 
   	/* any other initialisation you want to do? */
 
 }
-
 
 /* Private routines */
 /* 1. Devices */
 void parser::devicelist()
 {
 	device();
-	scanner::getsymbol(cursym, curid, curnum);
+	smz->getsymbol(cursym, curid, curnum);
 	while(cursym == comma){
 		device();
-		scanner::getsymbol(cursym, curid, curnum);
+		smz->getsymbol(cursym, curid, curnum);
 	}
 	if (cursym == semicol)
-		scanner::getsymbol(cursym, curid, curnum);
+		smz->getsymbol(cursym, curid, curnum);
 	else
 		error(1);
 
 }
 void parser::device()
 {
-	scanner::getsymbol(cursym, curid, curnum);
-	switch (cursym) {
-		case closym: 	clockdev(); 	break;
-		case swisym: switchdev(); 	break;
-		case dtysym: 	dtypedev(); 	break;
-		case andsym: 	anddev(); 		break;
-		case nandsym: 	nanddev(); 		break;
-		case orsym: 	ordev(); 		break;
-		case norsym: 	nordev(); 		break;
-		case xorsym: 	xordev(); 		break;
-		default: error(2);	break;
+	smz->getsymbol(cursym, curid, curnum);
+	if(cursym != namesym){
+		error(0);
+		return;
+	}
+	// here cursym == namesym, so curid tells the NAME
+	devicekind _devkind = dmz->devkind(curid);
+
+	switch (_devkind) {
+		case aclock: 	clockdev(); 	break;
+		case aswitch: 	switchdev(); 	break;
+		case dtype: 	dtypedev(); 	break;
+		case andgate: 	anddev(); 		break;
+		case nandgate: 	nanddev(); 		break;
+		case orgate: 	ordev(); 		break;
+		case norgate: 	nordev(); 		break;
+		case xorgate: 	xordev(); 		break;
+		default: error(2);	break; //a device definition is expected
 	}
 }
 void parser::clockdev()
@@ -84,42 +90,42 @@ void parser::clockdev()
 }
 void parser::switchdev()
 {
-	scanner::getsymbol(cursym, curid, curnum);
+	smz->getsymbol(cursym, curid, curnum);
 	if (cursym == equals){
 		name();
-		scanner::getsymbol(cursym, curid, curnum);
-		if(cursym == leftbracketsym){
-			scanner::getsymbol(cursym, curid, curnum);
+		smz->getsymbol(cursym, curid, curnum);
+		if(cursym == leftbrk){
+			smz->getsymbol(cursym, curid, curnum);
 			if(cursym == numsym){
 				if(curnum == 0 || curnum == 1){
 					// int state0 = curnum;
 				}
 				else
 					error(3);
-				scanner::getsymbol(cursym, curid, curnum);
-				if(cursym != rightbracketsym)
-					throw "error expect a ) symbol ";
+				smz->getsymbol(cursym, curid, curnum);
+				if(cursym != rightbrk)
+					error(4);
 			}
 			else {
-				throw "error expect a number symbol";
+				error(5);
 			}
 		}
 		else{
-			throw "error expect a ( symbol";
+			error(6);
 		}
 	}
 	else{
-		throw "error expect an equal symbol";
+		error(7);
 	}
 }
 void parser::dtypedev()
 {
-	scanner::getsymbol(cursym, curid, curnum);
+	smz->getsymbol(cursym, curid, curnum);
 	if (cursym == equals){
 		name();
 	}
 	else{
-		throw "error expect an equal symbol";
+		error(7);
 	}
 }
 void parser::anddev()
@@ -140,45 +146,50 @@ void parser::nordev()
 }
 void parser::xordev()
 {
-	scanner::getsymbol(cursym, curid, curnum);
+	smz->getsymbol(cursym, curid, curnum);
 	if (cursym == equals){
 		name();
 	}
 	else{
-		throw "error expect an equal symbol";
+		error(7);
 	}
 }
 void parser::read_equal_name_num()
 {
-	scanner::getsymbol(cursym, curid, curnum);
+	smz->getsymbol(cursym, curid, curnum);
 	if (cursym == equals){
 		name();
-		scanner::getsymbol(cursym, curid, curnum);
-		if(cursym == leftbracketsym){
-			scanner::getsymbol(cursym, curid, curnum);
+		smz->getsymbol(cursym, curid, curnum);
+		if(cursym == leftbrk){
+			smz->getsymbol(cursym, curid, curnum);
 			if(cursym == numsym){
 				// int freq = curnum;
-				scanner::getsymbol(cursym, curid, curnum);
-				if(cursym != rightbracketsym)
-					throw "error expect a ) symbol ";
+				smz->getsymbol(cursym, curid, curnum);
+				if(cursym != rightbrk)
+					error(4);
 			}
 			else {
-				throw "error expect a number symbol";
+				error(5);
 			}
 		}
 		else{
-			throw "error expect a ( symbol";
+			error(6);
 		}
 	}
 	else{
-		throw "error expect an equal symbol";
+		error(7);
 	}
 }
 void parser::name()
 {
-	scanner::getsymbol(cursym, curid, curnum);
+	smz->getsymbol(cursym, curid, curnum);
 	if (cursym == namesym){
 		// name id & names::writename(id)
+		// TODO: Comple this
+		// For testing
+
+		cout << "parser::name() => " << curid << endl;
+		/////////////
 	}
 	else {
 		throw "name error";
@@ -192,7 +203,7 @@ void parser::connectionlist()
 		connection();
 	}
 	if (cursym == semicol)
-		scanner::getsymbol(cursym, curid, curnum);
+		smz->getsymbol(cursym, curid, curnum);
 	else
 		throw "error: connections";
 }
@@ -200,7 +211,7 @@ void parser::connection()
 {
 	signame();
 	if (cursym == equals){
-		scanner::getsymbol(cursym, curid, curnum);
+		smz->getsymbol(cursym, curid, curnum);
 		signame();
 	} else {
 		throw "error: connection";
@@ -208,15 +219,25 @@ void parser::connection()
 }
 void parser::signame()
 {
-	scanner::getsymbol(cursym, curid, curnum);
+	smz->getsymbol(cursym, curid, curnum);
 	if(cursym == namesym){ // expect name to come first
 
-		/* read the actual name from the name_table */
-		// name id = curid
-		// to print out the name names::writename(id)
+		devicekind _devkind = dmz->devkind(curid);
+		//TODO: finish this up!!
+		if(_devkind == dtype){
+			smz->getsymbol(cursym, curid, curnum); //expect '.'
+			if(cursym == fullstop){
+				smz->getsymbol(cursym, curid, curnum); //expect "DATA" etc..
+				portname();
+			}
+			else{
 
-		scanner::getsymbol(cursym, curid, curnum);
-		if(cursym == dotsym){
+			}
+
+		}
+
+		smz->getsymbol(cursym, curid, curnum);
+		if(cursym == fullstop){
 			portname();
 		} else {
 			// this is OK. some devices do not have any port
@@ -228,7 +249,18 @@ void parser::signame()
 }
 void parser::portname()
 {
-	// Complete this!!
+	// TODO: Complete this!!
+	// datapin = nmz->cvtname("DATA");
+	// clkpin  = nmz->cvtname("CLK");
+	// setpin  = nmz->cvtname("SET");
+	// clrpin  = nmz->cvtname("CLEAR");
+	// qpin    = nmz->cvtname("Q");
+	// qbarpin = nmz->cvtname("QBAR");
+
+
+
+
+
 }
 /* 3. Monitors */
 void parser::monitorlist()
@@ -238,14 +270,14 @@ void parser::monitorlist()
 		monitor1();
 	}
 	if (cursym == semicol)
-		scanner::getsymbol(cursym, curid, curnum);
+		smz->getsymbol(cursym, curid, curnum);
 	else
 		throw "error: monitors";
 }
 void parser::monitor1()
 {
 	name();
-	scanner::getsymbol(cursym, curid, curnum);
+	smz->getsymbol(cursym, curid, curnum);
 	if (cursym == equals){
 		signame();
 	} else {
@@ -253,22 +285,19 @@ void parser::monitor1()
 	}
 }
 //
-void parser::error(int errn)
+void parser::error(int errn=0)
 {
 	switch(errn)
 	{
+		case 0: cout << "undefined error" << endl; break;
 		case 1: cout << "a semicolon is expected" << endl; break;
 		case 2: cout << "a device definition is expected" << endl; break;
 		case 3: cout << "Initial state is either 0 or 1" << endl; break;
-
-
-
-
+		case 4: cout << "error expect a ) symbol " << endl; break;
+		case 5: cout << "expect a number symbol" << endl; break;
+		case 6: cout << "error expect a ( symbol " << endl; break;
+		case 7: cout << "error expect an equal symbol" << endl; break;
 
 	}
-
-
-
-
 
 }

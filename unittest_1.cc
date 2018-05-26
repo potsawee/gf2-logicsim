@@ -42,16 +42,19 @@ int main(int argc, char **argv)
         }
 
         cout << "cursym: " << cursym << endl;
-        cout << "curid: " << curid << endl;
-        cout << "curnum: " << curnum << endl;
 
         if(cursym == namesym)
         {
             cout << "Namesym received: ";
+            cout << "curid: " << curid << endl;
             my_names.writename(curid);
         }
+        else if(cursym == numsym)
+        {
+            cout << "curnum: " << curnum << endl;
+        }
 
-        my_scanner.print_curch();
+        // my_scanner.print_curch();
 
         cout << "continue?? (y/n): ";
         cin >> cont;

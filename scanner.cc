@@ -78,6 +78,7 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 			case ':': s = colon; break;
 			case '(': s = leftbrk; break;
 			case ')': s = rightbrk; break;
+			case '.': s = fullstop; break;
             default:  s = badsym; cout << "BADSYM" << endl; break;
         }
 		eofile = !(inf.get(curch));
@@ -171,6 +172,7 @@ void scanner::skipspaces()
     }
 }
 
+// TODO: Skip comments!!
 // void scanner::skipcomments(ifstream *infp, char& curch, bool& eofile)
 // {
 // 	if (curch =='/') {
@@ -200,6 +202,7 @@ void scanner::skipspaces()
 // }
 
 // Functions for unit testing
+
 void scanner::print_curch()
 {
 	cout << "curch: '" << curch << "'" << endl;

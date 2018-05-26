@@ -1,2 +1,15 @@
 DEVICES:
-    SWITCH = SW1 (0);
+    SWITCH = SW1 (0),
+    SWITCH = SW2 (0),
+    NAND = G1 (16),
+    NAND = G2 (10);
+
+CONNECTIONS:
+    G1.I1 = SW1,
+    G2.I2 = SW2,
+    G1.I2 = G2,
+    G2.I1 = G1;
+
+MONITORS:
+    monitor1 = G1,
+    monitor2 = G2;

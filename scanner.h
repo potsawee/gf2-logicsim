@@ -21,8 +21,24 @@ using namespace std;
 // For symbols describing devices
 // Use the definition provided in network.h instead!
 typedef enum {namesym, numsym, devsym, consym, monsym,
-	comma, semicol, colon, equals, leftbrk, rightbrk, badsym, eofsym
+	comma, semicol, colon, equals, leftbrk, rightbrk, fullstop, badsym, eofsym
 	} symbol;
+
+	/*
+	for unit testing comparison
+	0 		= namesym
+	1 		= numsym
+	2,3,4	= dev, con, mon
+	5		= ,
+	6		= ;
+	7		= :
+	8		= =
+	9		= (
+	10		= )
+	11		= .
+	12		= badsym
+	13		= eofsym
+	*/
 
 typedef int name;
 

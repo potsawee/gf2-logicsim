@@ -20,6 +20,7 @@ scanner::scanner(names* nmz, const char* defname) // nmz is a pointer to names c
 	// inf.seekg(0, ios::beg);//find the beginning of the file
 	// currentline.clear();
 	// linenum = 1;
+	eofile = !(inf.get(curch));
 	cout << "File opened successfully" << endl;
 	// cursym = badsym;
 
@@ -33,11 +34,11 @@ scanner::~scanner()
 }
 void scanner::getsymbol(symbol& s, name& id, int& num)
 {
-	s = badsym;	//initialisation
-	id = blankname;
-	num = -1;
+	// s = badsym;	//initialisation
+	// id = blankname;
+	// num = -1;
 
-    skipspaces(); // curch is not a white-space
+	skipspaces(); // curch is not a white-space
 
     if(eofile){
         s = eofsym;
@@ -47,9 +48,10 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
     if(isdigit(curch)) { //current symbol is a number
         s = numsym;
         getnumber(num); 	// after this function is called,
-												//curch becomes the character after the last digit
+							//curch becomes the character after the last digit
     }
     else if(isalpha(curch) || (curch == '_')) { //current symbol is a name
+
 		bool is_keyword;
 
 		getname(id, is_keyword);
@@ -68,13 +70,17 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 		}
 
     }
-    else { // neither number nor name
+    else { // neither alphabetic nor '_' nor digit
         switch (curch) {
             case '=': s = equals; break;
             case ';': s = semicol; break;
             case ',': s = comma; break;
-            default:  s = badsym; break;
+			case ':': s = colon; break;
+			case '(': s = leftbrk; break;
+			case ')': s = rightbrk; break;
+            default:  s = badsym; cout << "BADSYM" << endl; break;
         }
+		eofile = !(inf.get(curch));
     }
 }
 
@@ -157,7 +163,6 @@ void scanner::skipspaces()
 // return a non white-space character in curch
 // This function updates inf, curch, eofile
 {
-    eofile = !(inf.get(curch));
     while(!eofile){
         if(isspace(curch))
             eofile = !(inf.get(curch));
@@ -193,3 +198,13 @@ void scanner::skipspaces()
 // 	}
 // 	return currentline;
 // }
+
+// Functions for unit testing
+void scanner::print_curch()
+{
+	cout << "curch: '" << curch << "'" << endl;
+}
+bool scanner::is_eofile()
+{
+	return eofile;
+}

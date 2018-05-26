@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include "scanner.h"
+#include "names.h"
 
 using namespace std;
 
@@ -15,7 +16,7 @@ scanner::scanner(names* names_mod, const char* defname)
 		cout<< "Error: Failed to open file" << endl;
 		exit;
 	}
-	inf(clear); //clear fail bits
+	inf.clear(); //clear fail bits
 	inf.seekg(0, ios::beg);//find the beginning of the file
 	currentline.clear();
 	linenum = 1;
@@ -27,13 +28,13 @@ scanner::~scanner()
 {
 	inf.close(); //close defname
 }
-static void scanner::getsymbol(symbol& s, name& id, int& num)
+void scanner::getsymbol(symbol& s, name& id, int& num)
 {
 	s = badsym;//initialisation
 	id = blankname;
 	num = 0;
 	
-    skipspaces(&inf, curch, eofile);
+    skipspaces();
     if(eofile)
         s = eofsym;
     else {
@@ -44,17 +45,12 @@ static void scanner::getsymbol(symbol& s, name& id, int& num)
         else {
             if (isalpha(curch) || (curch == '_')) { //current symbol is a name
                 getname(id);
-                if (id == devicename)
-                    s = devsym;
-                else {
-                	if (id == connectionname){
-                		s = consym;
-                		else
-                		s = namesym;
-					}
-                	
-				}
-                    
+                if (id == 0) s = devsym; else
+				if (id == 1) s = consym; else
+				if (id == 2) s = monsym; else
+				if (id >= 3 && id <= 10) s = typesym; else
+				if(id >=11 && id <= 32) s = sigsym; else
+				s = namesym;   
             }
             else { // neither number nor name
                 switch (curch) {
@@ -63,12 +59,16 @@ static void scanner::getsymbol(symbol& s, name& id, int& num)
                     case ',': s = comma; break;
                     default:  s = badsym; break;
                 }
-                getch(curch);
+                symlength = 1;
+                getch();
+                if (prevch==':' || prevch==';' || prevch==','){
+					eoline = true;
+				}
             }
         }
     }
+    cursym = s;
 }
-
 
 void scanner::getch()
 {
@@ -79,24 +79,58 @@ void scanner::getch()
 		currentline.clear(); //clear the current line
 		skipspaces();
 		eoline = false;//reset eoline
-	}	
+	}
 	if(prevch != '\n'){
 		currentline.push_back(prevch);
 	}
 }
 
-void scanner::skipspaces(ifstream *infp, char& curch, bool& eofile)
+void scanner::getnumber(int &number)
 {
-    eofile = !((*infp).get(curch));
+	symlength = 0;
+	number = 0; 
+	string num = "";
+	while (isdigit(curch)) { 
+	  num+=curch;
+          getch();
+	  symlength++;
+	}
+	number = atoi(num.c_str());
+}
+
+void scanner::getname(name &id)
+{
+	symlength = 0;
+	int i = 1;
+	namestring str;
+	while (isalnum(curch)) { 
+		str.push_back(curch) ;
+		symlength++;
+		if (i == maxlength) { 			// Continue reading string
+			id = names_mod->lookup(str);
+		}
+		i++;
+		getch();	
+	}
+	if (i < maxlength) { 		// If str < maxlength, put/find in table
+		id = names_mod->lookup(str);
+	} else { 					//if str > maxlength, inform the user
+	 //error message here
+	}
+}
+
+void scanner::skipspaces()
+{
+    eofile = (inf.get(curch) == 0);
     while(!eofile){
         if(isspace(curch))
-            eofile = !((*infp).get(curch));
+            eofile = (inf.get(curch) == 0);
         else
             return;
     }
 }
 
-void scanner::skipcomments(ifstream *infp, char& curch, bool& eofile)
+void scanner::skipcomments()
 {
 	if (curch =='/') {
 		eofile = (inf.get(curch) == 0);

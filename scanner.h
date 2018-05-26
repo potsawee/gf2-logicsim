@@ -16,7 +16,7 @@ into a sequence of 'symbols'
 
 using namespace std;
 
-typedef enum {namesym, numsym, devsym, consym, monsym,
+typedef enum {namesym, numsym, devsym, consym, monsym, typesym, sigsym,
 	closym, swisym, dtysym, andsym, nandsym, orsym, norsym, xorsym,
 	comma, semicol, colon, equals, leftbrksym, rightbrksym, badsym, eofsym
 	} symbol;
@@ -35,24 +35,26 @@ private:
     int symlength; //current symbol length
     int linenum; //line number
 
-    void getch(char& curch); //reads next character, updates curch
-    void incrChar(); //gets next character
-    void skipspaces(ifstream *infp, char& curch, bool& eofile); //skips spaces
+    void getch(); //reads next character, updates curch
+    void skipspaces(); //skips spaces
     void skipcomments(); //skips comments
     string getline(); //gets current line
     void getnumber(int& num); //reads number 
     void getname(name& id); //reads name
-    void displayerror(string errormessage); //displays error messages
 
 public:
-    scanner(names* names_mod, // pointer to names class
+	symbol s;
+	name id;
+	int num;
+    
+	scanner(names* names_mod, // pointer to names class
             const char* defname); // name of the def file
             /*the constructor takes care of openning the definition file
             as well as initialisation any global scanner variables */
 
     ~scanner(); // destructor to close file
 
-    static void getsymbol(symbol& s,   // symbol read from the file
+    void getsymbol(symbol& s,   // symbol read from the file
                    name& id,    // name id if it is a name
                    int& num);   // value if it is a number
     // return successive symbols in the definition file

@@ -9,8 +9,10 @@ using namespace std;
 typedef int name;
 typedef string namestring;
 
-// const int maxlength = 8;     /* max chars in a name string   */
 const name blankname = -1;   /* special name                 */
+const name dev_id = -50;
+const name con_id = -51;
+const name mon_id = -52;
 
 class names{
 
@@ -35,6 +37,8 @@ public:
 
   int namelength (name id);
     /* Returns length ie number of characters in given name                */
+
+  bool is_keyword (namestring str);
 
   names (void);
     /* names initialises the name table.  This procedure is called at      */

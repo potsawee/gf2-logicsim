@@ -11,13 +11,11 @@ using namespace std;
 
 names::names(void)  /* the constructor */
 {
-	// there are 33 keywords!!
-	string keywords[] = {"DEVICES", "CONNECTIONS", "MONITORS", "CLOCK", "SWITCH", "DTYPE", "AND", "NAND", "OR", "NOR", "XOR",
-	"I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9", "I10", "I11", "I12", "I13", "I14", "I15", "I16",
-	"DATA", "CLK", "SET", "CLEAR", "Q", "QBAR"};
-
-	keyword_table.assign(&keywords[0], &keywords[32]);
-    // initialisation
+	// there are 3 keywords!!
+	// other special names are added to name_table in devices.cc
+	keyword_table.push_back("DEVICES");
+	keyword_table.push_back("CONNECTIONS");
+	keyword_table.push_back("MONITORS");
 }
 
 name names::lookup (namestring str)
@@ -26,11 +24,13 @@ name names::lookup (namestring str)
 	if (str == "") return blankname;
 
 	name id = cvtname(str); // id = blankname unless it already exists
+
 	if (id == blankname){ 	//if the name does not exist yet, create it
 		name_table.push_back(str); //store the name in the nametable
 		return name_table.size() - 1;
+	} else {				// the name already exists
+		return id;
 	}
-	return id;
 }
 
 name names::cvtname (namestring str)
@@ -61,5 +61,15 @@ int names::namelength (name id)
     else
         cout << "(names::namelength) the id is out of range." << endl;
         return -1;
+
+}
+
+bool names::is_keyword (namestring str)
+{
+	for(int i=0; i<keyword_table.size(); i++){
+		if(str == keyword_table[i])
+			return true;
+	}
+	return false;
 
 }

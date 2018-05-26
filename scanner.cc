@@ -9,12 +9,12 @@
 
 using namespace std;
 
-scanner::scanner(names* names_mod, const char* defname) // names_mod is a pointer to names class, so scanner can use it
+scanner::scanner(names* nmz, const char* defname) // nmz is a pointer to names class, so scanner can use it
 {
 	inf.open(defname); //open defname
 	if(!inf){
 		cout<< "Error: Failed to open file" << endl;
-		exit;
+		exit(1);
 	}
 	inf(clear); //clear fail bits
 	inf.seekg(0, ios::beg);//find the beginning of the file
@@ -24,7 +24,7 @@ scanner::scanner(names* names_mod, const char* defname) // names_mod is a pointe
 	// cursym = badsym;
 
 	// pointer to names class
-	_names_mod = names_mod;
+	_nmz = nmz;
 
 }
 scanner::~scanner()
@@ -39,38 +39,46 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 
     skipspaces(&inf, curch, eofile); // curch is not a white-space
 
-    if(eofile)
+    if(eofile){
         s = eofsym;
-    else {
-        if(isdigit(curch)) { //current symbol is a number
-            s = numsym;
-            getnumber(&inf, curch, eofile, num); 	// after this function is called,
-													//curch becomes the character after the last digit
-        }
-        else if(isalpha(curch) || (curch == '_')) { //current symbol is a name
+		return;
+	}
 
-			getname(&inf, curch, eofile, id);
+    if(isdigit(curch)) { //current symbol is a number
+        s = numsym;
+        getnumber(&inf, curch, eofile, num); 	// after this function is called,
+												//curch becomes the character after the last digit
+    }
+    else if(isalpha(curch) || (curch == '_')) { //current symbol is a name
+		bool is_keyword;
 
+		getname(&inf, curch, eofile, id, is_keyword);
+
+		if (is_keyword){ // DEVICES, CONNECTIONS, MONITORS
 			switch (id) {
-				case devicename: 		s = devsym; break;
-				case connectionname:	s = consym; break;
-				default:				s = namesym; break;
+				case dev_id: s = devsym; break;
+				case con_id: s = consym; break;
+				case mon_id: s = monsym; break;
+				default: break; //ERROR!!
 			}
+		}
+		else { // not a keyword i.e. it is a user-defined name
+			s = namesym;
+			// id already set
+		}
 
-        }
-        else { // neither number nor name
-            switch (curch) {
-                case '=': s = equals; break;
-                case ';': s = semicol; break;
-                case ',': s = comma; break;
-                default:  s = badsym; break;
-            }
-            getch(curch);
+    }
+    else { // neither number nor name
+        switch (curch) {
+            case '=': s = equals; break;
+            case ';': s = semicol; break;
+            case ',': s = comma; break;
+            default:  s = badsym; break;
         }
     }
 }
 
-void scanner::getnumber(ifstream *infp, char &curch, bool &eofile, int &num)
+void scanner::getnumber(ifstream *infp, char& curch, bool& eofile, int& num)
 {
 	string s = "";
 	while(!eofile){
@@ -87,8 +95,13 @@ void scanner::getnumber(ifstream *infp, char &curch, bool &eofile, int &num)
 	return;
 }
 
-void scanner::getname(ifstream *infp, char &curch, bool &eofile, name &id)
+void scanner::getname(ifstream *infp, char& curch, bool& eofile, name& id, bool& is_keyword)
 {
+	/*
+	a string of letters could be
+	1. name of devices, monitors (e.g. sw1, monitor3 etc) => is_keyword = false
+	2. keyword (e.g. DEVICES, XOR, QBAR)				  => is_keyword = true
+	*/
 	namestring str = "";
 	str += curch;
 
@@ -102,7 +115,22 @@ void scanner::getname(ifstream *infp, char &curch, bool &eofile, name &id)
         }
 
     }
-    id = lookup(str);
+
+	// check if the string is a keyword or not
+	is_keyword = _nmz->is_keyword(str);
+
+	if(is_keyword){ // if it is a keyword, id will be an id from keyword_table
+		switch (str) {
+			case "DEVICES": 		id = dev_id; break;
+			case "CONNECTTIONS": 	id = con_id; break;
+			case "MONITORS": 		id = mon_id; break;
+			default:				id = -1; break; // ERROR!!
+		}
+	}
+	else{
+		id = _nmz->lookup(str);
+	}
+
 	// at this point curch is not alphabetic nor digit nor '_'
     return;
 }

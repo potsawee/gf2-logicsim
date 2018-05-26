@@ -44,14 +44,14 @@ private:
     void skipspaces(ifstream *infp, char& curch, bool& eofile); //skips spaces
     void skipcomments(); //skips comments
     string getline(); //gets current line
-    void getnumber(ifstream *infp, char &curch, bool &eofile, int &num); //reads number
-    void getname(ifstream *infp, char &curch, bool &eofile, name &id); 	//reads name
+    void getnumber(ifstream *infp, char& curch, bool& eofile, int& num); //reads number
+    void getname(ifstream *infp, char& curch, bool& eofile, name& id, bool& is_keyword); 	//reads name
     void displayerror(string errormessage); //displays error messages
 
-	names* _names_mod; // pointer to names class
+	names* _nmz; // pointer to names class
 
 public:
-    scanner(names* names_mod, // pointer to names class
+    scanner(names* nmz, // pointer to names class
             const char* defname); // name of the def file
             /*the constructor takes care of openning the definition file
             as well as initialisation any global scanner variables */

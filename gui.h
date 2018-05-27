@@ -42,8 +42,8 @@ class MyChoiceObj
  public:
   MyChoiceObj(std::string name, bool val);
   MyChoiceObj();
-  bool switchVal;
-  std::string switchName;
+  bool objVal;
+  std::string objName;
 };
 
 class MyGLCanvas;
@@ -71,8 +71,10 @@ class MyFrame: public wxFrame
 
   wxChoice *monitorSet;
   wxChoice *monitorZap;
-  MyChoiceObj* currentSetSelection;
-  MyChoiceObj* currentZapSelection;
+  int currentSetIndex;
+  int currentZapIndex;
+  std::vector<MyChoiceObj> setVec;  
+  std::vector<MyChoiceObj> zapVec;
 
   wxString filePath;
 
@@ -89,15 +91,19 @@ class MyFrame: public wxFrame
   void OnPathChange(wxCommandEvent& event);
   void loadFile(wxString s);
 
-  // functions related to checkboxes
+  // functions related to switch checkboxes
   void OnCheck0(wxCommandEvent& event);
   void OnCheck1(wxCommandEvent& event); 
   void OnChoiceSwitch(wxCommandEvent& event);
 
+  // functions related to monitor set/zap
+  void OnButtonSET(wxCommandEvent& event);
+  void OnButtonZAP(wxCommandEvent& event);
+
   void OnSpin(wxSpinEvent& event);        // event handler for spin control
   void OnText(wxCommandEvent& event);     // event handler for text entry field
   
-  void updateCurrentChoice(std::string choiceName, std::vector<MyChoiceObj>* vec);
+  int updateCurrentChoice(std::string choiceName, std::vector<MyChoiceObj>* vec);
   DECLARE_EVENT_TABLE()
 };
     

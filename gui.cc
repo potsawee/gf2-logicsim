@@ -196,6 +196,9 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_CHECKBOX(MY_CHECKBOX_0, MyFrame::OnCheck0)
   EVT_CHECKBOX(MY_CHECKBOX_1, MyFrame::OnCheck1)
 
+  EVT_BUTTON(MY_BUTTON_SET, MyFrame::OnButtonSET)
+  EVT_BUTTON(MY_BUTTON_ZAP, MyFrame::OnButtonZAP)
+
 END_EVENT_TABLE()
   
 MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size,
@@ -440,9 +443,9 @@ void MyFrame::OnPathChange(wxCommandEvent &event)
 void MyFrame::OnChoiceSwitch(wxCommandEvent &event)
 {
   // todo: find a better way of doing so
-  updateCurrentChoice((event.GetString()).ToStdString(), &switchVec);
+  currentSwitchIndex = updateCurrentChoice((event.GetString()).ToStdString(), &switchVec);
 
-  if(switchVec[currentSwitchIndex].switchVal)
+  if(switchVec[currentSwitchIndex].objVal)
   {
     switchState1->SetValue(1);
     switchState0->SetValue(0);
@@ -460,10 +463,10 @@ void MyFrame::OnCheck0(wxCommandEvent &event)
   // todo: two unchecked boxes should not be allowed
   {
     switchState1->SetValue(!(switchState1->GetValue()));
-    switchVec[currentSwitchIndex].switchVal = 0;
+    switchVec[currentSwitchIndex].objVal = 0;
     logMessagePanel->AppendText(
     getCurrentTime()+
-    switchVec[currentSwitchIndex].switchName +
+    switchVec[currentSwitchIndex].objName +
     " is set to 0.\n");
   }
 }
@@ -474,12 +477,60 @@ void MyFrame::OnCheck1(wxCommandEvent &event)
   // todo: two unchecked boxes should not be allowed
   {
     switchState0->SetValue(!(switchState0->GetValue()));
-    switchVec[currentSwitchIndex].switchVal = 1;
+    switchVec[currentSwitchIndex].objVal = 1;
     logMessagePanel->AppendText(
     getCurrentTime()+
-    switchVec[currentSwitchIndex].switchName +
+    switchVec[currentSwitchIndex].objName +
     " is set to 1.\n");
   }  
+}
+
+void MyFrame::OnButtonSET(wxCommandEvent& event)
+{
+  if(monitorSet->IsEmpty())
+  {
+    logMessagePanel->AppendText(
+    getCurrentTime()+
+    "No monitor is available to be set.\n");
+  }
+  else
+  {
+  currentSetIndex = updateCurrentChoice((monitorSet->GetStringSelection()).ToStdString(), &setVec);
+  logMessagePanel->AppendText(
+    getCurrentTime()+
+    "Monitor "+
+    monitorSet->GetStringSelection() + 
+    " is set.\n");
+    monitorSet->Delete(currentSetIndex);
+    monitorZap->Append(setVec[currentSetIndex].objName);
+    setVec[currentSetIndex].objVal = !setVec[currentSetIndex].objVal;
+    zapVec.push_back(setVec[currentSetIndex]);
+    setVec.erase(setVec.begin()+currentSetIndex);
+  }
+}
+
+void MyFrame::OnButtonZAP(wxCommandEvent& event)
+{
+  if(monitorZap->IsEmpty())
+  {
+    logMessagePanel->AppendText(
+    getCurrentTime()+
+    "No monitor is available to be zapped.\n");
+  }
+  else
+  {
+  currentZapIndex = updateCurrentChoice((monitorZap->GetStringSelection()).ToStdString(), &zapVec);
+  logMessagePanel->AppendText(
+    getCurrentTime()+
+    "Monitor "+
+    monitorZap->GetStringSelection() + 
+    " is zapped.\n");
+    monitorZap->Delete(currentZapIndex);
+    monitorSet->Append(setVec[currentZapIndex].objName);
+    zapVec[currentZapIndex].objVal = !setVec[currentZapIndex].objVal;
+    setVec.push_back(zapVec[currentSetIndex]);
+    zapVec.erase(zapVec.begin()+currentZapIndex);
+  }
 }
 
 
@@ -493,19 +544,22 @@ void MyFrame::loadFile(wxString s)
     "File loaded from  "+
     s + "\n");
 
-  switchVec.push_back(MyChoiceObj("s1",1));
-  switchVec.push_back(MyChoiceObj("2333",0));
-  switchVec.push_back(MyChoiceObj("hello",1));
+  switchVec.push_back(MyChoiceObj("sw0",1));
+  switchVec.push_back(MyChoiceObj("sw1",0));
+  switchVec.push_back(MyChoiceObj("sw2",1));
+  switchVec.push_back(MyChoiceObj("sw3",1));
+  switchVec.push_back(MyChoiceObj("sw4",0));
+  switchVec.push_back(MyChoiceObj("sw5",1));
 
   for(std::vector<MyChoiceObj>::iterator it = switchVec.begin() ; it != switchVec.end(); ++it)
   {
-    switchChoice->Append(it->switchName);
+    switchChoice->Append(it->objName);
   }
   // current switch choice by default is 
   currentSwitchIndex = 0;
   // set the value for the first switch
   // todo: find a better way to initialise
-  if(switchVec.begin()->switchVal)
+  if(switchVec.begin()->objVal)
   {
     switchState1->SetValue(1);
     switchState0->SetValue(0);
@@ -515,22 +569,33 @@ void MyFrame::loadFile(wxString s)
     switchState1->SetValue(0);
     switchState0->SetValue(1);
   }
-  
 
-
+  currentSetIndex = 0; 
+  setVec.push_back(MyChoiceObj("m0",1));
+  setVec.push_back(MyChoiceObj("m1",1));
+  setVec.push_back(MyChoiceObj("m2",1));
+  setVec.push_back(MyChoiceObj("m3",1));
+  setVec.push_back(MyChoiceObj("m4",1));
+  setVec.push_back(MyChoiceObj("m5",1));
+  for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
+  {
+    monitorSet->Append(it->objName);
+  }
+  currentZapIndex = 0;
 }
 
-void MyFrame::updateCurrentChoice(std::string choiceName, std::vector<MyChoiceObj>* vec)
+int MyFrame::updateCurrentChoice(std::string choiceName, std::vector<MyChoiceObj>* vec)
 {
   int i = 0;
   for(std::vector<MyChoiceObj>::iterator it = vec->begin() ; it != vec->end(); ++it)
   {
-    if(choiceName == it->switchName)
+    if(choiceName == it->objName)
     {
-      currentSwitchIndex = i;
+      return i;
     }
     i++;
   }
+  return 0;
 }
 
 void MyFrame::runnetwork(int ncycles)
@@ -569,12 +634,12 @@ std::string getCurrentTime()
 
 MyChoiceObj::MyChoiceObj(std::string name, bool val)
 {
-  switchName = name;
-  switchVal = val;
+  objName = name;
+  objVal = val;
 }
 
 MyChoiceObj::MyChoiceObj()
 {
-  switchName = "";
-  switchVal = 0;
+  objName = "";
+  objVal = 0;
 }

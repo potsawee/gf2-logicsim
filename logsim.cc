@@ -1,7 +1,12 @@
 #include "logsim.h"
 #include "userint.h"
 #include "gui.h"
-#include <GL/glut.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <GLUT/glut.h>
+#else
+#include <GL/gl.h>
+#endif
 
 // #define USE_GUI
 

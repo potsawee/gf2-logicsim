@@ -574,13 +574,13 @@ void MyFrame::loadFile(wxString s)
     "File loaded from  "+
     s + "\n");
 
-  switchVec.push_back(MyChoiceObj("sw0",1));
-  switchVec.push_back(MyChoiceObj("sw1",0));
-  switchVec.push_back(MyChoiceObj("sw2",1));
-  switchVec.push_back(MyChoiceObj("sw3",1));
-  switchVec.push_back(MyChoiceObj("sw4",0));
   switchVec.push_back(MyChoiceObj("sw5",1));
-
+  switchVec.push_back(MyChoiceObj("sw3",0));
+  switchVec.push_back(MyChoiceObj("sw2",1));
+  switchVec.push_back(MyChoiceObj("sw1",1));
+  switchVec.push_back(MyChoiceObj("sw4",0));
+  switchVec.push_back(MyChoiceObj("sw0",1));
+  std::sort(switchVec.begin(), switchVec.end());
   for(std::vector<MyChoiceObj>::iterator it = switchVec.begin() ; it != switchVec.end(); ++it)
   {
     switchChoice->Append(it->objName);

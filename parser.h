@@ -43,14 +43,14 @@ private:
 
     void connectionlist();
     void connection();
-    void signame();
-    void portname();
+    void signame(int& dev, int& port);
+    name portname();
 
     void monitorlist();
     void monitor1();
 
-    void name();
-    void read_equal_name_num();
+    name name();
+    void dev_name_num(devicekind dkind);
 
     void error(int errn); // a function to throw error
 

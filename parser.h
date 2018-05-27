@@ -49,7 +49,7 @@ private:
     void monitorlist();
     void monitor1();
 
-    name name();
+    name name1();
     void dev_name_num(devicekind dkind);
 
     void error(int errn); // a function to throw error

@@ -120,7 +120,7 @@ void parser::switchdev()
 	bool ok;
 	smz->getsymbol(cursym, curid, curnum);
 	if (cursym == equals){
-		did = name();
+		did = name1();
 		smz->getsymbol(cursym, curid, curnum);
 		if(cursym == leftbrk){
 			smz->getsymbol(cursym, curid, curnum);
@@ -162,7 +162,7 @@ void parser::dtypedev()
 	bool ok;
 	smz->getsymbol(cursym, curid, curnum);
 	if (cursym == equals){
-		did = name();
+		did = name1();
 	}
 	else{
 		error(7);
@@ -197,7 +197,7 @@ void parser::xordev()
 	bool ok;
 	smz->getsymbol(cursym, curid, curnum);
 	if (cursym == equals){
-		did = name();
+		did = name1();
 	}
 	else{
 		error(7);
@@ -211,7 +211,7 @@ void parser::dev_name_num(devicekind dkind)
 	bool ok;
 	smz->getsymbol(cursym, curid, curnum);
 	if (cursym == equals){
-		did = name();
+		did = name1();
 		smz->getsymbol(cursym, curid, curnum);
 		if(cursym == leftbrk){
 			smz->getsymbol(cursym, curid, curnum);
@@ -246,7 +246,7 @@ void parser::dev_name_num(devicekind dkind)
 	}
 	dmz->makedevice(dkind, did, variant, ok);
 }
-name parser::name()
+name parser::name1()
 {
 	smz->getsymbol(cursym, curid, curnum);
 	if (cursym == namesym){
@@ -338,7 +338,7 @@ void parser::monitor1()
 	int outputport; // output port of the deivce
 	bool ok;
 	try{
-		monid = name();
+		monid = name1();
 	}
 	catch(errortype err){
 		if(err == nameerror)

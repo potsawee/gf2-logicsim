@@ -192,6 +192,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_TEXT(MY_TEXTCTRL_FILEPATH, MyFrame::OnPathChange)
   EVT_TEXT_ENTER(MY_TEXTCTRL_FILEPATH, MyFrame::OnPathEnter)
 
+  EVT_CHOICE(MY_CHOICE_LIST_SWITCHES, MyFrame::OnChoiceSwitch)
   EVT_CHECKBOX(MY_CHECKBOX_0, MyFrame::OnCheck0)
   EVT_CHECKBOX(MY_CHECKBOX_1, MyFrame::OnCheck1)
 
@@ -301,7 +302,16 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   wxStaticBoxSizer *configSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Configuration");
   // switch sizers
   wxStaticBoxSizer *switchSizer = new wxStaticBoxSizer(wxHORIZONTAL, configSizer->GetStaticBox(), "Switches");
-  switchChoice = new wxChoice(switchSizer->GetStaticBox(), MY_CHOICE_LIST_SWITCHES);
+  switchChoice = new wxChoice(
+    switchSizer->GetStaticBox(), 
+    MY_CHOICE_LIST_SWITCHES, 
+    wxDefaultPosition,
+    wxDefaultSize,
+    0,
+    NULL,
+    0,
+    wxDefaultValidator,
+    "Switches");
   switchSizer->Add(switchChoice, 0, wxALL, 5);
   wxStaticBoxSizer *switchStateSizer = new wxStaticBoxSizer(wxHORIZONTAL, switchSizer->GetStaticBox(), "Switch State");
   switchState0 = new wxCheckBox(switchStateSizer->GetStaticBox(), MY_CHECKBOX_0, "0");
@@ -309,11 +319,6 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   switchStateSizer->Add(switchState0, 0, wxALL, 5);
   switchStateSizer->Add(switchState1, 0, wxALL, 5);
   switchSizer->Add(switchStateSizer, 0, wxALIGN_TOP);
-
-  //todo: delete dummy switch options
-  switchChoice->Append("sw1");
-  switchChoice->Append("sw2");
-  switchChoice->Append("sw3");
 
   // monitor sizers
   wxStaticBoxSizer *monitorCtrlSizer = new wxStaticBoxSizer(wxVERTICAL, configSizer->GetStaticBox(), "Monitors");
@@ -431,31 +436,101 @@ void MyFrame::OnPathChange(wxCommandEvent &event)
   filePath = event.GetString();
 }
 
-void MyFrame::loadFile(wxString s)
+// display switch state accordingly
+void MyFrame::OnChoiceSwitch(wxCommandEvent &event)
 {
-  // todo: check file path validity
-  // either be done by the parser or here
-  logMessagePanel->AppendText(
-    getCurrentTime()+
-    "File loaded from  "+
-    s + "\n");
+  // todo: find a better way of doing so
+  updateCurrentChoice((event.GetString()).ToStdString(), &switchVec);
+
+  if(switchVec[currentSwitchIndex].switchVal)
+  {
+    switchState1->SetValue(1);
+    switchState0->SetValue(0);
+  }
+  else
+  {
+    switchState1->SetValue(0);
+    switchState0->SetValue(1);
+  }
 }
 
 void MyFrame::OnCheck0(wxCommandEvent &event)
 {
-  if((switchState1->GetValue()==switchState0->GetValue())&&(switchState0->GetValue()))
+  if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
+  // todo: two unchecked boxes should not be allowed
   {
     switchState1->SetValue(!(switchState1->GetValue()));
+    switchVec[currentSwitchIndex].switchVal = 0;
+    logMessagePanel->AppendText(
+    getCurrentTime()+
+    switchVec[currentSwitchIndex].switchName +
+    " is set to 0.\n");
   }
 }
 
 void MyFrame::OnCheck1(wxCommandEvent &event)
-  // Event handler for the text entry field
 {
- if((switchState1->GetValue()==switchState0->GetValue())&&(switchState0->GetValue()))
+  if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
+  // todo: two unchecked boxes should not be allowed
   {
     switchState0->SetValue(!(switchState0->GetValue()));
+    switchVec[currentSwitchIndex].switchVal = 1;
+    logMessagePanel->AppendText(
+    getCurrentTime()+
+    switchVec[currentSwitchIndex].switchName +
+    " is set to 1.\n");
   }  
+}
+
+
+void MyFrame::loadFile(wxString s)
+{
+  // todo: check file path validity
+  // either be done by the parser or here
+  // load switches to wxChoice
+  logMessagePanel->AppendText(
+    getCurrentTime()+
+    "File loaded from  "+
+    s + "\n");
+
+  switchVec.push_back(MyChoiceObj("s1",1));
+  switchVec.push_back(MyChoiceObj("2333",0));
+  switchVec.push_back(MyChoiceObj("hello",1));
+
+  for(std::vector<MyChoiceObj>::iterator it = switchVec.begin() ; it != switchVec.end(); ++it)
+  {
+    switchChoice->Append(it->switchName);
+  }
+  // current switch choice by default is 
+  currentSwitchIndex = 0;
+  // set the value for the first switch
+  // todo: find a better way to initialise
+  if(switchVec.begin()->switchVal)
+  {
+    switchState1->SetValue(1);
+    switchState0->SetValue(0);
+  }
+  else
+  {
+    switchState1->SetValue(0);
+    switchState0->SetValue(1);
+  }
+  
+
+
+}
+
+void MyFrame::updateCurrentChoice(std::string choiceName, std::vector<MyChoiceObj>* vec)
+{
+  int i = 0;
+  for(std::vector<MyChoiceObj>::iterator it = vec->begin() ; it != vec->end(); ++it)
+  {
+    if(choiceName == it->switchName)
+    {
+      currentSwitchIndex = i;
+    }
+    i++;
+  }
 }
 
 void MyFrame::runnetwork(int ncycles)
@@ -476,6 +551,8 @@ void MyFrame::runnetwork(int ncycles)
   else cyclescompleted = 0;
 }
 
+
+
 std::string getCurrentTime()
 {
   time_t rawtime;
@@ -488,4 +565,16 @@ std::string getCurrentTime()
   std::string str(buffer);
   str += ": ";
   return str;
+}
+
+MyChoiceObj::MyChoiceObj(std::string name, bool val)
+{
+  switchName = name;
+  switchVal = val;
+}
+
+MyChoiceObj::MyChoiceObj()
+{
+  switchName = "";
+  switchVal = 0;
 }

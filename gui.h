@@ -5,6 +5,7 @@
 #include <wx/glcanvas.h>
 #include <wx/spinctrl.h>
 #include <wx/textctrl.h>
+#include <vector>
 #include "names.h"
 #include "devices.h"
 #include "monitor.h"
@@ -36,6 +37,15 @@ enum {
   MY_BUTTON_RESET,          // todo: implement actual reset
 }; // widget identifiers
 
+class MyChoiceObj
+{
+ public:
+  MyChoiceObj(std::string name, bool val);
+  MyChoiceObj();
+  bool switchVal;
+  std::string switchName;
+};
+
 class MyGLCanvas;
 
 class MyFrame: public wxFrame
@@ -52,12 +62,17 @@ class MyFrame: public wxFrame
   monitor *mmz;                           // pointer to monitor class
   
   wxTextCtrl *logMessagePanel;
+
+  std::vector<MyChoiceObj> switchVec;
+  int currentSwitchIndex;
   wxChoice *switchChoice;
   wxCheckBox *switchState0;
   wxCheckBox *switchState1;
 
   wxChoice *monitorSet;
   wxChoice *monitorZap;
+  MyChoiceObj* currentSetSelection;
+  MyChoiceObj* currentZapSelection;
 
   wxString filePath;
 
@@ -77,10 +92,12 @@ class MyFrame: public wxFrame
   // functions related to checkboxes
   void OnCheck0(wxCommandEvent& event);
   void OnCheck1(wxCommandEvent& event); 
+  void OnChoiceSwitch(wxCommandEvent& event);
 
   void OnSpin(wxSpinEvent& event);        // event handler for spin control
   void OnText(wxCommandEvent& event);     // event handler for text entry field
   
+  void updateCurrentChoice(std::string choiceName, std::vector<MyChoiceObj>* vec);
   DECLARE_EVENT_TABLE()
 };
     

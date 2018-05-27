@@ -16,17 +16,22 @@ scanner::scanner(names* nmz, const char* defname) // nmz is a pointer to names c
 		cout<< "Error: Failed to open file" << endl;
 		exit(1);
 	}
-	// inf(clear); //clear fail bits
-	// inf.seekg(0, ios::beg);//find the beginning of the file
-	// currentline.clear();
-	// linenum = 1;
-	eofile = !(inf.get(curch));
 	cout << "File opened successfully" << endl;
-	// cursym = badsym;
+
+	/* append lines for report lines containing errors */
+	string str;
+	while(getline(inf, str)){
+		lines.push_back(str);
+	}
+	inf.clear(); 					// clear eof state
+	inf.seekg(0, inf.ios::beg);		// go to the beginning of the file
+	/* -------------------------------------------------*/
+
+	linenum = 0;
+	eofile = !(inf.get(curch));
 
 	// pointer to names class
 	_nmz = nmz;
-
 }
 scanner::~scanner()
 {
@@ -166,8 +171,11 @@ void scanner::skipspaces()
 // This function updates inf, curch, eofile
 {
     while(!eofile){
-        if(isspace(curch))
+        if(isspace(curch)){
+			if(curch == '\n')
+				linenum++;
             eofile = !(inf.get(curch));
+		}
         else
             return;
     }
@@ -212,11 +220,20 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num)
 	// while(!(curch == ',' || curch == ';')){
 	// 	eofile = !(inf.get(curch));
 	// }
+
+	print_line_error();
+
 	while(!(s == comma || s == semicol)){
 		getsymbol(s, id, num);
 	}
 }
+void scanner::print_line_error()
+{
+	cout << lines[linenum] << endl;
+	// TODO: Need to find where to put '^'
+	cout << "\t\t^" << endl;
 
+}
 // Functions for unit testing
 
 void scanner::print_curch()

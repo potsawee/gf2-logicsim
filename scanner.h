@@ -53,7 +53,7 @@ private:
     // bool eoline; //true when end of line is reached
     // symbol cursym; //current symbol
     // int symlength; //current symbol length
-    // int linenum; //line number
+    int linenum; //line number
 
     // void getch(char& curch); //reads next character, updates curch
     // void incrChar(); //gets next character
@@ -65,6 +65,7 @@ private:
     // void displayerror(string errormessage); //displays error messages
 
 	names* _nmz; // pointer to names class
+	vector<string>	lines;
 
 public:
     scanner(names* nmz, // pointer to names class
@@ -81,6 +82,7 @@ public:
 
 	void skipcolon();			//skip if curch is a ':'
 	void skip_dueto_error(symbol& s, name& id, int& num);
+	void print_line_error();
 
 	// Functions for unit testing
 	void print_curch();

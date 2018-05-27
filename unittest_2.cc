@@ -31,8 +31,6 @@ int main(int argc, char **argv)
 
     if(my_parser.readin())
         cout << "the definition file is defined corectly!" << endl;
-    else
-        cout << "syntax or/and semantic error(s)" << endl;
 
     cout << "end of testing" << endl;
 

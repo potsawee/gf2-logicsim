@@ -65,7 +65,7 @@ parser::parser (network* network_mod, devices* devices_mod,
 /* 1. Devices */
 void parser::devicelist()
 {
-	cout << "DEVICELIST" << endl;
+	// cout << "DEVICELIST" << endl;
 	device();
 	while(cursym == comma){
 		device();
@@ -219,8 +219,8 @@ void parser::name()
 {
 	smz->getsymbol(cursym, curid, curnum);
 	if (cursym == namesym){
-		cout << "parser::name() => ";
-		nmz->writename(curid);
+		// cout << "parser::name() => ";
+		// nmz->writename(curid);
 	}
 	else {
 		error(8);
@@ -232,7 +232,7 @@ void parser::name()
 /* 2. Connections */
 void parser::connectionlist()
 {
-	cout << "CONNECTIONLIST" << endl;
+	// cout << "CONNECTIONLIST" << endl;
 	connection();
 	while(cursym == comma){ // while loop breaks when cursym == semicol
 		connection();
@@ -268,8 +268,8 @@ void parser::portname()
 {
 	smz->getsymbol(cursym, curid, curnum); // expect I+number OR DATA CLK etc..
 	if (cursym == namesym){
-		cout << "portname = ";
-		nmz->writename(curid);
+		// cout << "portname = ";
+		// nmz->writename(curid);
 	}
 	else {
 		error(11);
@@ -279,7 +279,7 @@ void parser::portname()
 /* 3. Monitors */
 void parser::monitorlist()
 {
-	cout << "MONITORLIST" << endl;
+	// cout << "MONITORLIST" << endl;
 	monitor1();
 	while(cursym == comma){ // while loop breaks when cursym == semicol
 		monitor1();
@@ -309,6 +309,7 @@ void parser::error(int errn)
 {
 	errorcount++;
 	smz->skip_dueto_error(cursym, curid, curnum);
+	cout << "***ERROR: ";
 	switch(errn)
 	{
 		case 0: cout << "undefined error" << endl; break;

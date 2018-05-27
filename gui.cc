@@ -188,7 +188,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
   
   // load files
-  EVT_TEXT_ENTER(MY_TEXTCTRL_ID, MyFrame::OnText)  // todo: delete
   EVT_TEXT(MY_TEXTCTRL_FILEPATH, MyFrame::OnPathChange)
   EVT_TEXT_ENTER(MY_TEXTCTRL_FILEPATH, MyFrame::OnPathEnter)
 
@@ -288,15 +287,6 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
     10);
 
   bottomSizer->Add(displaySizer, 0, wxALIGN_LEFT);
-
-  // wxBoxSizer *button_sizer = new wxBoxSizer(wxVERTICAL);
-  // button_sizer->Add(new wxButton(this, MY_BUTTON_ID1, "Run"), 0, wxALL, 10);
-  // button_sizer->Add(new wxStaticText(this, wxID_ANY, "Cycles"), 0, wxTOP|wxLEFT|wxRIGHT, 10);
-  // spin = new wxSpinCtrl(this, MY_SPINCNTRL_ID, wxString("10"));
-  // button_sizer->Add(spin, 0 , wxALL, 10);
-  // button_sizer->Add(new wxTextCtrl(this, MY_TEXTCTRL_ID, "", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER), 0 , wxALL, 10);
-  // // added reset button for testing
-  // button_sizer->Add(new wxButton(this, MY_BUTTON_ID2, "Reset"), 0, wxALL, 10);
   
   //bottom-right config-op panel
   wxBoxSizer *bottomRightSizer = new wxBoxSizer(wxVERTICAL);
@@ -428,15 +418,6 @@ void MyFrame::OnSpin(wxSpinEvent &event)
   wxString text;
 
   text.Printf("New spinctrl value %d", event.GetPosition());
-  canvas->Render(text);
-}
-
-void MyFrame::OnText(wxCommandEvent &event)
-  // Event handler for the text entry field
-{
-  wxString text;
-
-  text.Printf("New text entered %s", event.GetString().c_str());
   canvas->Render(text);
 }
 

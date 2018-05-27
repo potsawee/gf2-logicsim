@@ -16,9 +16,6 @@ enum {
   MY_TEXTCTRL_ID,         // todo: delete
   MY_TEXTCTRL_LOG,        // for logging text box
   
-  MY_BUTTON_ID1,          // todo: delete
-  MY_BUTTON_ID2,          // todo: delete
-  
   MY_BUTTON_LOAD,         // for loading connection definitation file
   MY_TEXTCTRL_FILEPATH,   // storing filepath to def file
 

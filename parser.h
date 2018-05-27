@@ -10,6 +10,10 @@
 
 using namespace std;
 
+typedef enum {nameerror, devicedeferror
+} errortype;
+
+
 class parser {
 private:
     network* netz; // instantiations of various classes for parser to use.

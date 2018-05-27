@@ -51,7 +51,7 @@ private:
 	// char prevch; //previous input character
     bool eofile; //true when end of file is reached
     // bool eoline; //true when end of line is reached
-    symbol cursym; //current symbol
+    // symbol cursym; //current symbol
     // int symlength; //current symbol length
     // int linenum; //line number
 
@@ -79,7 +79,8 @@ public:
                    int& num);   // value if it is a number
     // return successive symbols in the definition file
 
-	void skipcolon();
+	void skipcolon();			//skip if curch is a ':'
+	void skip_dueto_error(symbol& s, name& id, int& num);
 
 	// Functions for unit testing
 	void print_curch();

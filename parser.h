@@ -15,12 +15,14 @@ private:
     network* netz; // instantiations of various classes for parser to use.
     devices* dmz;
     monitor* mmz;
-    scanner* smz;
+    scanner* smz; // internal pointer to the scanner
+    names*   nmz;
 
     /* put other stuff that the class uses internally here */
     symbol cursym;
     name curid;
     int curnum;
+    int errorcount;
     /* also declare internal functions                     */
 
     /* Private routines */
@@ -55,8 +57,9 @@ private:
     /* module and the 'Devices' module.                                    */
 
     parser (network* network_mod, devices* devices_mod,
-      monitor* monitor_mod, scanner* scanner_mod);
+      monitor* monitor_mod, scanner* scanner_mod, names* names_mod);
     /* the constructor takes pointers to various other classes as parameters */
+
 };
 
 #endif /* parser_h */

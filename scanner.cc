@@ -207,6 +207,15 @@ void scanner::skipcolon()
 	if(curch == ':')
 		eofile = !(inf.get(curch));
 }
+void scanner::skip_dueto_error(symbol& s, name& id, int& num)
+{
+	// while(!(curch == ',' || curch == ';')){
+	// 	eofile = !(inf.get(curch));
+	// }
+	while(!(s == comma || s == semicol)){
+		getsymbol(s, id, num);
+	}
+}
 
 // Functions for unit testing
 

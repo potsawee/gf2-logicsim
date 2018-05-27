@@ -2,23 +2,24 @@
 #define names_h
 
 #include <string>
+#include <vector>
 
 using namespace std;
 
-const int maxnames  = 200;  /* max number of distinct names */
-const int maxlength = 8;    /* max chars in a name string   */
-const int blankname = -1;   /* special name                 */
-
 typedef int name;
 typedef string namestring;
+
+const name blankname = -1;   /* special name                 */
+const name dev_id = -50;
+const name con_id = -51;
+const name mon_id = -52;
 
 class names{
 
 
 private:
-    /* put stuff that the class uses internally here */
-    namestring name_table[maxnames];
-    int name_num; // tells how many names have been stored
+    vector<namestring> name_table;
+    vector<namestring> keyword_table;
 
 public:
   name lookup (namestring str);
@@ -36,6 +37,8 @@ public:
 
   int namelength (name id);
     /* Returns length ie number of characters in given name                */
+
+  bool is_keyword (namestring str);
 
   names (void);
     /* names initialises the name table.  This procedure is called at      */

@@ -327,10 +327,28 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   wxStaticBoxSizer *monitorCtrlSizer = new wxStaticBoxSizer(wxVERTICAL, configSizer->GetStaticBox(), "Monitors");
   wxBoxSizer *monitorSetSizer = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer *monitorZapSizer = new wxBoxSizer(wxHORIZONTAL);
-  monitorSet = new wxChoice(monitorCtrlSizer->GetStaticBox(), MY_CHOICE_MONITOR_SET);
+  monitorSet = new wxChoice(
+    monitorCtrlSizer->GetStaticBox(), 
+    MY_CHOICE_MONITOR_SET,
+    wxDefaultPosition,
+    wxDefaultSize,
+    0,
+    NULL,
+    wxCB_SORT,
+    wxDefaultValidator,
+    "Set Monitors");
   monitorSetSizer->Add(monitorSet, 0, wxALL, 5);
   monitorSetSizer->Add(new wxButton(monitorCtrlSizer->GetStaticBox(), MY_BUTTON_SET, "Set"), 0, wxALL, 10);
-  monitorZap = new wxChoice(monitorCtrlSizer->GetStaticBox(), MY_CHOICE_MONITOR_ZAP);
+  monitorZap = new wxChoice(
+    monitorCtrlSizer->GetStaticBox(), 
+    MY_CHOICE_MONITOR_ZAP,
+    wxDefaultPosition,
+    wxDefaultSize,
+    0,
+    NULL,
+    wxCB_SORT,
+    wxDefaultValidator,
+    "Zap Monitors");
   monitorZapSizer->Add(monitorZap, 0, wxALL, 5);
   monitorZapSizer->Add(new wxButton(monitorCtrlSizer->GetStaticBox(), MY_BUTTON_ZAP, "Zap"), 0, wxALL, 10);
   monitorCtrlSizer->Add(monitorSetSizer, 0, wxALIGN_LEFT);
@@ -501,11 +519,17 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
     "Monitor "+
     monitorSet->GetStringSelection() + 
     " is set.\n");
-    monitorSet->Delete(currentSetIndex);
-    monitorZap->Append(setVec[currentSetIndex].objName);
-    setVec[currentSetIndex].objVal = !setVec[currentSetIndex].objVal;
-    zapVec.push_back(setVec[currentSetIndex]);
-    setVec.erase(setVec.begin()+currentSetIndex);
+  monitorSet->Delete(currentSetIndex);
+  setVec[currentSetIndex].objVal = !setVec[currentSetIndex].objVal;
+  zapVec.push_back(setVec[currentSetIndex]);
+  std::sort(zapVec.begin(), zapVec.end());
+  setVec.erase(setVec.begin()+currentSetIndex);
+  monitorZap->Clear();
+  for(std::vector<MyChoiceObj>::iterator it = zapVec.begin() ; it != zapVec.end(); ++it)
+  {
+    monitorZap->Append(it->objName);
+  }
+  currentSetIndex = 0;
   }
 }
 
@@ -525,11 +549,17 @@ void MyFrame::OnButtonZAP(wxCommandEvent& event)
     "Monitor "+
     monitorZap->GetStringSelection() + 
     " is zapped.\n");
-    monitorZap->Delete(currentZapIndex);
-    monitorSet->Append(setVec[currentZapIndex].objName);
-    zapVec[currentZapIndex].objVal = !setVec[currentZapIndex].objVal;
-    setVec.push_back(zapVec[currentSetIndex]);
-    zapVec.erase(zapVec.begin()+currentZapIndex);
+  monitorZap->Delete(currentZapIndex);
+  zapVec[currentZapIndex].objVal = !zapVec[currentZapIndex].objVal;
+  setVec.push_back(zapVec[currentZapIndex]);
+  std::sort(setVec.begin(), setVec.end());
+  zapVec.erase(zapVec.begin()+currentZapIndex);
+  monitorSet->Clear();
+  for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
+  {
+    monitorSet->Append(it->objName);
+  }
+  currentZapIndex = 0;
   }
 }
 
@@ -571,12 +601,13 @@ void MyFrame::loadFile(wxString s)
   }
 
   currentSetIndex = 0; 
-  setVec.push_back(MyChoiceObj("m0",1));
+  setVec.push_back(MyChoiceObj("m60",1));
   setVec.push_back(MyChoiceObj("m1",1));
   setVec.push_back(MyChoiceObj("m2",1));
   setVec.push_back(MyChoiceObj("m3",1));
   setVec.push_back(MyChoiceObj("m4",1));
   setVec.push_back(MyChoiceObj("m5",1));
+  std::sort(setVec.begin(), setVec.end());
   for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
   {
     monitorSet->Append(it->objName);

@@ -42,6 +42,10 @@ class MyChoiceObj
  public:
   MyChoiceObj(std::string name, bool val);
   MyChoiceObj();
+  bool operator < (const MyChoiceObj& obj) const
+  {
+      return (objName < obj.objName);
+  }
   bool objVal;
   std::string objName;
 };
@@ -132,5 +136,5 @@ class MyGLCanvas: public wxGLCanvas
 };
 
 std::string getCurrentTime();
-    
+// void sortObjVec();
 #endif /* gui_h */

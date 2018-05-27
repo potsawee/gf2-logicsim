@@ -18,10 +18,12 @@ bool parser::readin (void)
 		if(cursym == devsym){ // "DEVICES:"
 			smz->skipcolon();
 			devicelist();
-		} else if(cursym == consym){ // "CONNECTIONS:"
+		}
+		else if(cursym == consym){ // "CONNECTIONS:"
 			smz->skipcolon();
 			connectionlist();
-		} else if(cursym == monsym){ // "MONITORS:"
+		}
+		else if(cursym == monsym){ // "MONITORS:"
 			smz->skipcolon();
 			monitorlist();
 		}
@@ -58,12 +60,12 @@ parser::parser (network* network_mod, devices* devices_mod,
 /* 1. Devices */
 void parser::devicelist()
 {
+	cout << "DEVICELIST" << endl;
 	device();
 	while(cursym == comma){
 		device();
 	}
-	if (cursym == semicol){}
-	else
+	if (cursym != semicol)
 		error(1);
 }
 void parser::device() // scan up to ',' or ';'
@@ -208,52 +210,38 @@ void parser::name()
 		error(0);
 	}
 }
+
+
+
 /* 2. Connections */
 void parser::connectionlist()
 {
+	cout << "CONNECTIONLIST" << endl;
 	connection();
 	while(cursym == comma){ // while loop breaks when cursym == semicol
 		connection();
 	}
-	if (cursym == semicol)
-		smz->getsymbol(cursym, curid, curnum);
-	else
-		error(0);
+	if (cursym != semicol)
+		error(1);
 }
 void parser::connection()
 {
 	signame();
 	if (cursym == equals){
-		smz->getsymbol(cursym, curid, curnum);
 		signame();
-	} else {
-		error(0);
+	}
+	else {
+		error(99);
 	}
 }
 void parser::signame()
 {
 	smz->getsymbol(cursym, curid, curnum);
-	if(cursym == namesym){ // expect name to come first
-
-		devicekind _devkind = dmz->devkind(curid);
-		//TODO: finish this up!!
-		if(_devkind == dtype){
-			smz->getsymbol(cursym, curid, curnum); //expect '.'
-			if(cursym == fullstop){
-				smz->getsymbol(cursym, curid, curnum); //expect "DATA" etc..
-				portname();
-			}
-			else{
-
-			}
-
-		}
-
-		smz->getsymbol(cursym, curid, curnum);
+	if(cursym == namesym){ // expect name to come first e.g. 'G1'
+		smz->getsymbol(cursym, curid, curnum); // either '.' or no port
 		if(cursym == fullstop){
 			portname();
-		} else {
-			// this is OK. some devices do not have any port
+			smz->getsymbol(cursym, curid, curnum);
 		}
 	}
 	else { // if the first symbol when signame() is called is NOT name => error
@@ -262,25 +250,26 @@ void parser::signame()
 }
 void parser::portname()
 {
-	// TODO: Complete this!!
-	// datapin = nmz->cvtname("DATA");
-	// clkpin  = nmz->cvtname("CLK");
-	// setpin  = nmz->cvtname("SET");
-	// clrpin  = nmz->cvtname("CLEAR");
-	// qpin    = nmz->cvtname("Q");
-	// qbarpin = nmz->cvtname("QBAR");
+	smz->getsymbol(cursym, curid, curnum); // expect I+number OR DATA CLK etc..
+	if (cursym == namesym){
+		cout << "portname = ";
+		nmz->writename(curid);
+	}
+	else {
+		error(0);
+	}
 }
+
 /* 3. Monitors */
 void parser::monitorlist()
 {
+	cout << "MONITORLIST" << endl;
 	monitor1();
 	while(cursym == comma){ // while loop breaks when cursym == semicol
 		monitor1();
 	}
-	if (cursym == semicol)
-		smz->getsymbol(cursym, curid, curnum);
-	else
-		error(0);
+	if (cursym != semicol)
+		error(1);
 }
 void parser::monitor1()
 {
@@ -288,8 +277,9 @@ void parser::monitor1()
 	smz->getsymbol(cursym, curid, curnum);
 	if (cursym == equals){
 		signame();
-	} else {
-		error(0);
+	}
+	else {
+		error(7);
 	}
 }
 //
@@ -303,9 +293,10 @@ void parser::error(int errn=0)
 		case 1: cout << "a semicolon is expected" << endl; break;
 		case 2: cout << "a device definition is expected" << endl; break;
 		case 3: cout << "Initial state is either 0 or 1" << endl; break;
-		case 4: cout << "error expect a ) symbol " << endl; break;
+		case 4: cout << "expect a ) symbol " << endl; break;
 		case 5: cout << "expect a number symbol" << endl; break;
-		case 6: cout << "error expect a ( symbol " << endl; break;
-		case 7: cout << "error expect an equal symbol" << endl; break;
+		case 6: cout << "expect a ( symbol " << endl; break;
+		case 7: cout << "expect an '=' symbol" << endl; break;
+		case 99: cout << "special error" << endl; break;
 	}
 }

@@ -567,8 +567,20 @@ void MyFrame::OnButtonZAP(wxCommandEvent& event)
 void MyFrame::loadFile(wxString s)
 {
   // todo: check file path validity
-  // either be done by the parser or here
-  // load switches to wxChoice
+  // todo: seems duplicated with reset button, delete one maybe
+  // (reset button only sets the canvas
+  canvas->SetDefault();
+  switchChoice->Clear();
+  switchState0->SetValue(0);
+  switchState1->SetValue(0);
+  monitorSet->Clear();
+  monitorZap->Clear();
+  switchVec.clear();
+  setVec.clear();
+  zapVec.clear();
+  // todo: more to be added upon 'reset'
+
+
   logMessagePanel->AppendText(
     getCurrentTime()+
     "File loaded from  "+

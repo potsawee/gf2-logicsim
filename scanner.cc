@@ -4,25 +4,29 @@
 #include <cctype>
 #include <vector>
 #include <string>
+
 #include "scanner.h"
-#include "names.h"
 
 using namespace std;
 
-scanner::scanner(names* names_mod, const char* defname)
+scanner::scanner(names* nmz, const char* defname) // nmz is a pointer to names class, so scanner can use it
 {
 	inf.open(defname); //open defname
 	if(!inf){
 		cout<< "Error: Failed to open file" << endl;
-		exit;
+		exit(1);
 	}
-	inf.clear(); //clear fail bits
-	inf.seekg(0, ios::beg);//find the beginning of the file
-	currentline.clear();
-	linenum = 1;
-	cout << "File opened successfully"<< endl;
-	s = badsym;
-	
+	// inf(clear); //clear fail bits
+	// inf.seekg(0, ios::beg);//find the beginning of the file
+	// currentline.clear();
+	// linenum = 1;
+	eofile = !(inf.get(curch));
+	cout << "File opened successfully" << endl;
+	// cursym = badsym;
+
+	// pointer to names class
+	_nmz = nmz;
+
 }
 scanner::~scanner()
 {
@@ -30,132 +34,180 @@ scanner::~scanner()
 }
 void scanner::getsymbol(symbol& s, name& id, int& num)
 {
-	s = badsym;//initialisation
-	id = blankname;
-	num = 0;
-	
-    skipspaces();
-    if(eofile)
+	// s = badsym;	//initialisation
+	// id = blankname;
+	// num = -1;
+
+	skipspaces(); // curch is not a white-space
+
+    if(eofile){
         s = eofsym;
-    else {
-        if(isdigit(curch)) { //current symbol is a number 
-            s = numsym;
-            getnumber(num);
+		return;
+	}
+
+    if(isdigit(curch)) { //current symbol is a number
+        s = numsym;
+        getnumber(num); 	// after this function is called,
+							//curch becomes the character after the last digit
+    }
+    else if(isalpha(curch) || (curch == '_')) { //current symbol is a name
+
+		bool is_keyword;
+
+		getname(id, is_keyword);
+
+		if (is_keyword){ // DEVICES, CONNECTIONS, MONITORS
+			switch (id) {
+				case dev_id: s = devsym; break;
+				case con_id: s = consym; break;
+				case mon_id: s = monsym; break;
+				default: break; //ERROR!!
+			}
+		}
+		else { // not a keyword i.e. it is a user-defined name
+			s = namesym;
+			// id already set
+		}
+
+    }
+    else { // neither alphabetic nor '_' nor digit
+        switch (curch) {
+            case '=': s = equals; break;
+            case ';': s = semicol; break;
+            case ',': s = comma; break;
+			case ':': s = colon; break;
+			case '(': s = leftbrk; break;
+			case ')': s = rightbrk; break;
+			case '.': s = fullstop; break;
+            default:  s = badsym; cout << "BADSYM" << endl; break;
+        }
+		eofile = !(inf.get(curch));
+    }
+}
+
+void scanner::getnumber(int& number)
+// This function also updates inf, curch, eofile.
+{
+	string s = "";
+	while(!eofile){
+		if(isdigit(curch)){
+			s += curch;
+			eofile = !(inf.get(curch));
+		}
+		else {
+			number = stoi(s);
+			return;
+		}
+	}
+	number = stoi(s);
+	return;
+}
+
+void scanner::getname(name& id, bool& is_keyword)
+// This function also updates inf, curch, eofile.
+{
+	/*
+	a string of letters could be
+	1. name of devices, monitors (e.g. sw1, monitor3 etc) => is_keyword = false
+	2. keyword (e.g. DEVICES, XOR, QBAR)				  => is_keyword = true
+	*/
+	namestring str = "";
+	str += curch;
+
+    while(!eofile){
+		eofile = !(inf.get(curch));
+        if(isdigit(curch) || isalpha(curch) || curch == '_'){
+            str += curch;
         }
         else {
-            if (isalpha(curch) || (curch == '_')) { //current symbol is a name
-                getname(id);
-                if (id == 0) s = devsym; else
-				if (id == 1) s = consym; else
-				if (id == 2) s = monsym; else
-				if (id >= 3 && id <= 10) s = typesym; else
-				if(id >=11 && id <= 32) s = sigsym; else
-				s = namesym;   
-            }
-            else { // neither number nor name
-                switch (curch) {
-                    case '=': s = equals; break;
-                    case ';': s = semicol; break;
-                    case ',': s = comma; break;
-                    default:  s = badsym; break;
-                }
-                symlength = 1;
-                getch();
-                if (prevch==':' || prevch==';' || prevch==','){
-					eoline = true;
-				}
-            }
+            break;
         }
     }
-    cursym = s;
+
+	// check if the string is a keyword or not
+	is_keyword = _nmz->is_keyword(str);
+
+	if(is_keyword){ // if it is a keyword, id will be an id from keyword_table
+		if(str == "DEVICES")
+			id = dev_id;
+		else if(str == "CONNECTIONS")
+			id = con_id;
+		else if(str == "MONITORS")
+			id = mon_id;
+		else
+			id = -1; //ERROR!!
+	}
+	else{
+		id = _nmz->lookup(str);
+	}
+
+	// at this point curch is not alphabetic nor digit nor '_'
+    return;
 }
 
-void scanner::getch()
-{
-	prevch = curch;
-	eofile = (inf.get(curch) == 0);
-	if (curch == '\n') linenum ++;
-	if (eoline) {
-		currentline.clear(); //clear the current line
-		skipspaces();
-		eoline = false;//reset eoline
-	}
-	if(prevch != '\n'){
-		currentline.push_back(prevch);
-	}
-}
-
-void scanner::getnumber(int &number)
-{
-	symlength = 0;
-	number = 0; 
-	string num = "";
-	while (isdigit(curch)) { 
-	  num+=curch;
-          getch();
-	  symlength++;
-	}
-	number = atoi(num.c_str());
-}
-
-void scanner::getname(name &id)
-{
-	symlength = 0;
-	int i = 1;
-	namestring str;
-	while (isalnum(curch)) { 
-		str.push_back(curch) ;
-		symlength++;
-		if (i == maxlength) { 			// Continue reading string
-			id = names_mod->lookup(str);
-		}
-		i++;
-		getch();	
-	}
-	if (i < maxlength) { 		// If str < maxlength, put/find in table
-		id = names_mod->lookup(str);
-	} else { 					//if str > maxlength, inform the user
-	 //error message here
-	}
-}
+// void scanner::getch()
+// {
+// 	prevch = curch;
+// 	eofile = (inf.get(curch) == 0);
+// 	if (curch == '\n') linenum ++;
+// 	if (eoline) {
+// 		currentline.clear(); //clear the current line
+// 		skipspaces();
+// 		eoline = false;//reset eoline
+// 	}
+// 	if(prevch != '\n'){
+// 		currentline.push_back(prevch);
+// 	}
+// }
 
 void scanner::skipspaces()
+// return a non white-space character in curch
+// This function updates inf, curch, eofile
 {
-    eofile = (inf.get(curch) == 0);
     while(!eofile){
         if(isspace(curch))
-            eofile = (inf.get(curch) == 0);
+            eofile = !(inf.get(curch));
         else
             return;
     }
 }
 
-void scanner::skipcomments()
+// TODO: Skip comments!!
+// void scanner::skipcomments(ifstream *infp, char& curch, bool& eofile)
+// {
+// 	if (curch =='/') {
+// 		eofile = (inf.get(curch) == 0);
+// 		if (curch == '\n') linenum ++;
+// 		while (!eofile && prevch != '/') {
+// 			prevch = curch;
+// 			eofile = (inf.get(curch) == 0);
+// 			if (curch == '\n') linenum ++;
+// 		}
+// 		if (eofile) {
+// 			cout<<("Error: Comment not closed")<<endl;
+// 		}
+// 		skipspaces();
+// 	}
+// }
+
+// string scanner::getline()
+// {
+// 	if(cursym != semicol && cursym != colon && cursym != comma){
+// 		while (curch !=':' && curch !=';' && curch !=',' && !eofile) {
+// 			getch();
+// 		}
+// 		currentline.push_back(curch);
+// 	}
+// 	return currentline;
+// }
+
+// Functions for unit testing
+
+void scanner::print_curch()
 {
-	if (curch =='/') {
-		eofile = (inf.get(curch) == 0);
-		if (curch == '\n') linenum ++; 
-		while (!eofile && prevch != '/') { 
-			prevch = curch;
-			eofile = (inf.get(curch) == 0);
-			if (curch == '\n') linenum ++; 
-		}
-		if (eofile) {
-			cout<<("Error: Comment not closed")<<endl;
-		}
-		skipspaces();
-	}
+	cout << "curch: '" << curch << "'" << endl;
 }
-
-string scanner::getline()
-{	
-	if(cursym != semicol && cursym != colon && cursym != comma){
-		while (curch !=':' && curch !=';' && curch !=',' && !eofile) {
-			getch(); 
-		}
-		currentline.push_back(curch);
-	}
-	return currentline;
+bool scanner::is_eofile()
+{
+	return eofile;
 }
-
-

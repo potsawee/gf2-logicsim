@@ -12,14 +12,34 @@ into a sequence of 'symbols'
 #include <fstream>
 #include <cstdlib>
 #include <string>
+
 #include "names.h"
+#include "network.h" // to make use of devicekind
 
 using namespace std;
 
-typedef enum {namesym, numsym, devsym, consym, monsym, typesym, sigsym,
-	closym, swisym, dtysym, andsym, nandsym, orsym, norsym, xorsym,
-	comma, semicol, colon, equals, leftbrksym, rightbrksym, badsym, eofsym
+// For symbols describing devices
+// Use the definition provided in network.h instead!
+typedef enum {namesym, numsym, devsym, consym, monsym,
+	comma, semicol, colon, equals, leftbrk, rightbrk, fullstop, badsym, eofsym
 	} symbol;
+
+	/*
+	for unit testing comparison
+	0 		= namesym
+	1 		= numsym
+	2,3,4	= dev, con, mon
+	5		= ,
+	6		= ;
+	7		= :
+	8		= =
+	9		= (
+	10		= )
+	11		= .
+	12		= badsym
+	13		= eofsym
+	*/
+
 typedef int name;
 
 
@@ -35,19 +55,19 @@ private:
     int symlength; //current symbol length
     int linenum; //line number
 
-    void getch(); //reads next character, updates curch
+    // void getch(char& curch); //reads next character, updates curch
+    // void incrChar(); //gets next character
     void skipspaces(); //skips spaces
-    void skipcomments(); //skips comments
-    string getline(); //gets current line
-    void getnumber(int& num); //reads number 
-    void getname(name& id); //reads name
+    // void skipcomments(ifstream *infp, char& curch, bool& eofile); //skips comments
+    // string getline(); //gets current line
+    void getnumber(int& num); //reads number
+    void getname(name& id, bool& is_keyword); 	//reads name
+    // void displayerror(string errormessage); //displays error messages
+
+	names* _nmz; // pointer to names class
 
 public:
-	symbol s;
-	name id;
-	int num;
-    
-	scanner(names* names_mod, // pointer to names class
+    scanner(names* nmz, // pointer to names class
             const char* defname); // name of the def file
             /*the constructor takes care of openning the definition file
             as well as initialisation any global scanner variables */
@@ -58,8 +78,11 @@ public:
                    name& id,    // name id if it is a name
                    int& num);   // value if it is a number
     // return successive symbols in the definition file
-};
 
+	// Functions for unit testing
+	void print_curch();
+	bool is_eofile();
+};
 
 
 #endif /* scanner_h */

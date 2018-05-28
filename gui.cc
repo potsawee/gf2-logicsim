@@ -570,55 +570,93 @@ void MyFrame::loadFile(wxString s)
   zapVec.clear();
   // todo: more to be added upon 'reset'
 
-  smz = new scanner(nmz, filePath);
-  pmz = new parser(netz, dmz, mmz, smz, nmz);
 
-
-
-  logMessagePanel->AppendText(
-    getCurrentTime()+
-    "File loaded from  "+
-    s + "\n");
-
-  switchVec.push_back(MyChoiceObj("sw5",1));
-  switchVec.push_back(MyChoiceObj("sw3",0));
-  switchVec.push_back(MyChoiceObj("sw2",1));
-  switchVec.push_back(MyChoiceObj("sw1",1));
-  switchVec.push_back(MyChoiceObj("sw4",0));
-  switchVec.push_back(MyChoiceObj("sw0",1));
-  std::sort(switchVec.begin(), switchVec.end());
-  for(std::vector<MyChoiceObj>::iterator it = switchVec.begin() ; it != switchVec.end(); ++it)
+  ifstream f((filePath.ToStdString()).c_str());
+  if(f.good())
   {
-    switchChoice->Append(it->objName);
-  }
-  // current switch choice by default is 
-  currentSwitchIndex = 0;
-  // set the value for the first switch
-  // todo: find a better way to initialise
-  if(switchVec.begin()->objVal)
-  {
-    switchState1->SetValue(1);
-    switchState0->SetValue(0);
+    smz = new scanner(nmz, filePath);
+    pmz = new parser(netz, dmz, mmz, smz, nmz);
+    if(!(pmz->readin()))
+    {// check if the definition file is valid
+      logMessagePanel->AppendText(
+        getCurrentTime()+
+        "Logic Definition File Error.\n");
+    }  
+    else
+    {
+      logMessagePanel->AppendText(
+        getCurrentTime()+
+        "File loaded from  "+
+        s + "\n");
+
+      devlink dlink = netz->devicelist();
+      while(dlink!=NULL)
+      {
+        std::cout << dlink->kind << " " << "\n";
+        name currentID = dlink->id;
+        nmz->writename(currentID);
+
+        outplink olink = netz->findoutput(dlink, currentID);
+        while(olink != NULL)
+        {
+          std::cout << "Start looking for output\n";
+          nmz->writename(olink->id);
+          std::cout << "\n";
+          olink = olink->next;
+        }
+
+        dlink = dlink->next;
+      }
+      
+
+      switchVec.push_back(MyChoiceObj("sw5",1));
+      switchVec.push_back(MyChoiceObj("sw3",0));
+      switchVec.push_back(MyChoiceObj("sw2",1));
+      switchVec.push_back(MyChoiceObj("sw1",1));
+      switchVec.push_back(MyChoiceObj("sw4",0));
+      switchVec.push_back(MyChoiceObj("sw0",1));
+      std::sort(switchVec.begin(), switchVec.end());
+      for(std::vector<MyChoiceObj>::iterator it = switchVec.begin() ; it != switchVec.end(); ++it)
+      {
+        switchChoice->Append(it->objName);
+      }
+      // current switch choice by default is 
+      currentSwitchIndex = 0;
+      // set the value for the first switch
+      // todo: find a better way to initialise
+      if(switchVec.begin()->objVal)
+      {
+        switchState1->SetValue(1);
+        switchState0->SetValue(0);
+      }
+      else
+      {
+        switchState1->SetValue(0);
+        switchState0->SetValue(1);
+      }
+
+      currentSetIndex = 0; 
+      setVec.push_back(MyChoiceObj("m60",1));
+      setVec.push_back(MyChoiceObj("m1",1));
+      setVec.push_back(MyChoiceObj("m2",1));
+      setVec.push_back(MyChoiceObj("m3",1));
+      setVec.push_back(MyChoiceObj("m4",1));
+      setVec.push_back(MyChoiceObj("m5",1));
+      std::sort(setVec.begin(), setVec.end());
+      for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
+      {
+        monitorSet->Append(it->objName);
+      }
+      currentZapIndex = 0;
+    }
   }
   else
   {
-    switchState1->SetValue(0);
-    switchState0->SetValue(1);
+    logMessagePanel->AppendText(
+      getCurrentTime()+
+      "File does not exist.\n");
   }
-
-  currentSetIndex = 0; 
-  setVec.push_back(MyChoiceObj("m60",1));
-  setVec.push_back(MyChoiceObj("m1",1));
-  setVec.push_back(MyChoiceObj("m2",1));
-  setVec.push_back(MyChoiceObj("m3",1));
-  setVec.push_back(MyChoiceObj("m4",1));
-  setVec.push_back(MyChoiceObj("m5",1));
-  std::sort(setVec.begin(), setVec.end());
-  for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
-  {
-    monitorSet->Append(it->objName);
-  }
-  currentZapIndex = 0;
+  
 }
 
 int MyFrame::updateCurrentChoice(std::string choiceName, std::vector<MyChoiceObj>* vec)

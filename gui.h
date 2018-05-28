@@ -6,6 +6,7 @@
 #include <wx/spinctrl.h>
 #include <wx/textctrl.h>
 #include <vector>
+#include <sstream>
 #include "names.h"
 #include "devices.h"
 #include "monitor.h"

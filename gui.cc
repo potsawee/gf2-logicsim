@@ -31,7 +31,7 @@ MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, na
   context = new wxGLContext(this);
   mmz = monitor_mod;
   nmz = names_mod;
-  SetDefault();
+  SetDefault(mmz, nmz);
 }
 
 void MyGLCanvas::Render(wxString example_text, int cycles)
@@ -112,13 +112,15 @@ void MyGLCanvas::InitGL()
   glScaled(zoom, zoom, zoom);
 }
 
-void MyGLCanvas::SetDefault()
+void MyGLCanvas::SetDefault(monitor *monitor_mod, names *names_mod)
 {
   init = false;
   pan_x = 0;
   pan_y = 0;
   zoom = 1.0;
   cyclesdisplayed = -1;
+  mmz = monitor_mod;
+  nmz = names_mod;
 }
 
 void MyGLCanvas::OnPaint(wxPaintEvent& event)
@@ -270,8 +272,8 @@ MyFrame::MyFrame(wxWindow *parent,
   canvas = new MyGLCanvas(
     this, 
     wxID_ANY, 
-    monitor_mod, 
-    names_mod, 
+    mmz, 
+    nmz, 
     wxPoint(-1, -1), 
     wxSize(500, 400));
 
@@ -417,7 +419,7 @@ void MyFrame::OnButtonRUN(wxCommandEvent &event)
 void MyFrame::OnButtonRESET(wxCommandEvent &event)
   // Event handler for the push button
 {
-  canvas->SetDefault();
+  canvas->SetDefault(mmz, nmz);
   switchChoice->Clear();
   switchState0->SetValue(0);
   switchState1->SetValue(0);
@@ -567,7 +569,11 @@ void MyFrame::loadFile(wxString s)
   // todo: check file path validity
   // todo: seems duplicated with reset button, delete one maybe
   // (reset button only sets the canvas
-  canvas->SetDefault();
+  nmz = new names();
+  netz = new network(nmz);
+  dmz = new devices(nmz, netz);
+  mmz = new monitor(nmz, netz);
+  canvas->SetDefault(mmz, nmz);
   switchChoice->Clear();
   switchState0->SetValue(0);
   switchState1->SetValue(0);
@@ -576,6 +582,7 @@ void MyFrame::loadFile(wxString s)
   switchVec.clear();
   setVec.clear();
   zapVec.clear();
+  mmz->resetmonitor();
   // todo: more to be added upon 'reset'
 
   std::cout << "Reset/Reload\n";
@@ -585,10 +592,6 @@ void MyFrame::loadFile(wxString s)
   {
     // nmz, netz, dmz, mmz reinitialised here to allow load/reset
     // todo: maybe not necessary to pass them as arguments?
-    nmz = new names();
-    netz = new network(nmz);
-    dmz = new devices(nmz, netz);
-    mmz = new monitor(nmz, netz);
     smz = new scanner(nmz, filePath);
     pmz = new parser(netz, dmz, mmz, smz, nmz);
     if(!(pmz->readin()))
@@ -614,7 +617,7 @@ void MyFrame::loadFile(wxString s)
         {
           MyChoiceObj tempObj;
           tempObj.dev = currentID;
-          tempObj.objName = currentID;
+          tempObj.objName = devName;
           if(currentDevice->swstate==low)
           {
             tempObj.objVal = 0;
@@ -624,7 +627,6 @@ void MyFrame::loadFile(wxString s)
             tempObj.objVal = 1;
           }
           switchVec.push_back(tempObj);
-          std::cout << devName << "\n";
         }
         currentDevice = currentDevice->next;
       }
@@ -668,15 +670,15 @@ void MyFrame::loadFile(wxString s)
         }
         tempObj.objName = monitorName;
         tempObj.objVal = 1;
-        std::cout << monitorName << "\n";
-        setVec.push_back(tempObj);
+        zapVec.push_back(tempObj);
+      }
+      std::cout << mmz->moncount();
+      std::sort(zapVec.begin(), zapVec.end());
+      for(std::vector<MyChoiceObj>::iterator it = zapVec.begin() ; it != zapVec.end(); ++it)
+      {
+        monitorZap->Append(it->objName);
       }
       currentSetIndex = 0; 
-      std::sort(setVec.begin(), setVec.end());
-      for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
-      {
-        monitorSet->Append(it->objName);
-      }
       currentZapIndex = 0;
     }
   }

@@ -612,14 +612,18 @@ void MyFrame::loadFile(wxString s)
         namestring devName = nmz->getname(currentID);
         if(currentDevice->kind == aswitch)
         {
+          MyChoiceObj tempObj;
+          tempObj.dev = currentID;
+          tempObj.objName = currentID;
           if(currentDevice->swstate==low)
           {
-            switchVec.push_back(MyChoiceObj(devName, 0));
+            tempObj.objVal = 0;
           }
           else if(currentDevice->swstate==high)
           {
-            switchVec.push_back(MyChoiceObj(devName, 1));
+            tempObj.objVal = 1;
           }
+          switchVec.push_back(tempObj);
           std::cout << devName << "\n";
         }
         currentDevice = currentDevice->next;
@@ -651,6 +655,9 @@ void MyFrame::loadFile(wxString s)
       {
         std::string monitorName;
         mmz->getmonname(i, dev, output);
+        MyChoiceObj tempObj;
+        tempObj.dev = dev;
+        tempObj.output = output;
         if(output == -1)
         {
           monitorName = nmz->getname(dev);
@@ -659,16 +666,12 @@ void MyFrame::loadFile(wxString s)
         {
           monitorName = nmz->getname(dev) + "." + nmz->getname(output);
         }
+        tempObj.objName = monitorName;
+        tempObj.objVal = 1;
         std::cout << monitorName << "\n";
-        setVec.push_back(MyChoiceObj(monitorName, 1));
+        setVec.push_back(tempObj);
       }
       currentSetIndex = 0; 
-      // setVec.push_back(MyChoiceObj("m60",1));
-      // setVec.push_back(MyChoiceObj("m1",1));
-      // setVec.push_back(MyChoiceObj("m2",1));
-      // setVec.push_back(MyChoiceObj("m3",1));
-      // setVec.push_back(MyChoiceObj("m4",1));
-      // setVec.push_back(MyChoiceObj("m5",1));
       std::sort(setVec.begin(), setVec.end());
       for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
       {
@@ -744,4 +747,6 @@ MyChoiceObj::MyChoiceObj()
 {
   objName = "";
   objVal = 0;
+  dev = -1;
+  output = -1;
 }

@@ -47,6 +47,8 @@ class MyChoiceObj
   }
   bool objVal;
   std::string objName;
+  name dev;
+  name output;
 };
 
 class MyGLCanvas;

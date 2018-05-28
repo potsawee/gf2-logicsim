@@ -9,6 +9,8 @@
 #include "names.h"
 #include "devices.h"
 #include "monitor.h"
+#include "parser.h"
+#include "scanner.h"
 
 enum { 
   // todo: delete unnecessary ones. add event handlers
@@ -51,16 +53,25 @@ class MyGLCanvas;
 class MyFrame: public wxFrame
 {
  public:
-  MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size, 
-	  names *names_mod = NULL, devices *devices_mod = NULL, monitor *monitor_mod = NULL, 
-	  long style = wxDEFAULT_FRAME_STYLE); // constructor
+  MyFrame(wxWindow *parent, 
+  const wxString& title, 
+  const wxPoint& pos, 
+  const wxSize& size, 
+	names *names_mod = NULL, 
+  devices *devices_mod = NULL, 
+  monitor *monitor_mod = NULL, 
+  network *network_mod = NULL,
+	long style = wxDEFAULT_FRAME_STYLE); // constructor
  private:
   MyGLCanvas *canvas;                     // OpenGL drawing area widget to draw traces
   wxSpinCtrl *spin;                       // control widget to select the number of cycles
   names *nmz;                             // pointer to names class
   devices *dmz;                           // pointer to devices class
   monitor *mmz;                           // pointer to monitor class
-  
+  network *netz;
+  scanner *smz;
+  parser *pmz;
+
   wxTextCtrl *logMessagePanel;
 
   std::vector<MyChoiceObj> switchVec;

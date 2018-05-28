@@ -200,8 +200,15 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
 END_EVENT_TABLE()
   
-MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size,
-		 names *names_mod, devices *devices_mod, monitor *monitor_mod, long style):
+MyFrame::MyFrame(wxWindow *parent, 
+  const wxString& title, 
+  const wxPoint& pos, 
+  const wxSize& size,
+	names *names_mod, 
+  devices *devices_mod, 
+  monitor *monitor_mod, 
+  network *network_mod,
+  long style):
   wxFrame(parent, wxID_ANY, title, pos, size, style)
   // Constructor - initialises pointers to names, devices and monitor classes, lays out widgets
   // using sizers
@@ -212,8 +219,10 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   nmz = names_mod;
   dmz = devices_mod;
   mmz = monitor_mod;
-  if (nmz == NULL || dmz == NULL || mmz == NULL) {
-    cout << "Cannot operate GUI without names, devices and monitor classes" << endl;
+  netz = network_mod;
+
+  if (nmz == NULL || dmz == NULL || mmz == NULL|| netz == NULL) {
+    cout << "Cannot operate GUI without names, devices, monitor, or network classes" << endl;
     exit(1);
   }
   // Menu bar
@@ -560,6 +569,10 @@ void MyFrame::loadFile(wxString s)
   setVec.clear();
   zapVec.clear();
   // todo: more to be added upon 'reset'
+
+  smz = new scanner(nmz, filePath);
+  pmz = new parser(netz, dmz, mmz, smz, nmz);
+
 
 
   logMessagePanel->AppendText(

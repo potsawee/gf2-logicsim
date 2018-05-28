@@ -10,17 +10,23 @@
 
 using namespace std;
 
+typedef enum {nameerror, devicedeferror, signalerror, semanticerror
+} errortype;
+
+
 class parser {
 private:
     network* netz; // instantiations of various classes for parser to use.
     devices* dmz;
     monitor* mmz;
-    scanner* smz;
+    scanner* smz; // internal pointer to the scanner
+    names*   nmz;
 
     /* put other stuff that the class uses internally here */
     symbol cursym;
     name curid;
     int curnum;
+    int errorcount;
     /* also declare internal functions                     */
 
     /* Private routines */
@@ -37,16 +43,20 @@ private:
 
     void connectionlist();
     void connection();
-    void signame();
-    void portname();
+    void signalout(name& dev, name& port);
+    void signalin(name& dev, name& port);
+    void dtypeout(name& port);
+    void dtypein(name& port);
+    void gatein(name& port);
 
     void monitorlist();
-    void monitor1();
+    void monitor1();      // use monitor1 to avoid same name as monitor
 
-    void name();
-    void read_equal_name_num();
+    name name1();         // use name1 to avoid same name as name (int)
+    void dev_name_num(devicekind dkind);
 
     void error(int errn); // a function to throw error
+    void semantic(int errn); // for semantic error dectection
 
  public:
     bool readin ();
@@ -55,8 +65,9 @@ private:
     /* module and the 'Devices' module.                                    */
 
     parser (network* network_mod, devices* devices_mod,
-      monitor* monitor_mod, scanner* scanner_mod);
+      monitor* monitor_mod, scanner* scanner_mod, names* names_mod);
     /* the constructor takes pointers to various other classes as parameters */
+
 };
 
 #endif /* parser_h */

@@ -1,0 +1,23 @@
+DEVICES:
+    SWITCH = sw1 (0),
+    SWITCH = sw2 (0),
+    SWITCH = sw3 (1),
+    CLOCK = clock1 (5),
+    XOR = xor1,
+    XOR = xor2,
+    DTYPE = d1;
+
+CONNECTIONS:
+    xor1.I1 = sw1,
+    xor1.I2 = sw2,
+    xor2.I1 = d1.Q,
+    xor2.I2 = xor1,
+    d1.DATA = xor2,
+    d1.CLK = CLOCK,
+    d1.SET = sw3,
+    d1.CLEAR = sw3;
+
+MONITORS:
+    monitor1 = xor1,
+    monitor2 = xor2,
+    monitor3 = d1.Q;

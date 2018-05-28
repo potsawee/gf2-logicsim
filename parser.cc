@@ -153,6 +153,9 @@ void parser::switchdev()
 		throw devicedeferror;
 	}
 	dmz->makedevice(dkind, did, variant, ok);
+	if(!ok){
+		error(31);
+	}
 }
 void parser::dtypedev()
 {
@@ -168,6 +171,9 @@ void parser::dtypedev()
 		error(7);
 	}
 	dmz->makedevice(dkind, did, variant, ok);
+	if(!ok){
+		error(31);
+	}
 }
 void parser::anddev()
 {
@@ -203,6 +209,9 @@ void parser::xordev()
 		error(7);
 	}
 	dmz->makedevice(dkind, did, variant, ok);
+	if(!ok){
+		error(31);
+	}
 }
 void parser::dev_name_num(devicekind dkind)
 {
@@ -245,6 +254,9 @@ void parser::dev_name_num(devicekind dkind)
 		throw devicedeferror;
 	}
 	dmz->makedevice(dkind, did, variant, ok);
+	if(!ok){
+		error(31);
+	}
 }
 name parser::name1()
 {
@@ -286,6 +298,9 @@ void parser::connection()
 		error(99);
 	}
 	netz->makeconnection(inputdev, inputport, outputdev, outputport, ok);
+	if(!ok){
+		error(32);
+	}
 }
 void parser::signame(int& dev, int& port)
 {
@@ -352,6 +367,9 @@ void parser::monitor1()
 		error(7);
 	}
 	mmz->makemonitor(devid, outputport, ok);
+	if(!ok){
+		error(33);
+	}
 }
 //
 void parser::error(int errn)
@@ -375,6 +393,9 @@ void parser::error(int errn)
 		case 10: cout << "signalname definition error" << endl; break;
 		case 11: cout << "portname definition error" << endl; break;
 		case 12: cout << "the maximum number of inputs is 16" << endl; break;
+		case 31: cout << "Makedevice error" << endl; break;
+		case 32: cout << "makeconnection error" << endl; break;
+		case 33: cout << "Makemonitor error" << endl; break;
 		case 99: cout << "special error" << endl; break;
 	}
 }

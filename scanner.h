@@ -82,7 +82,7 @@ public:
     // return successive symbols in the definition file
 
 	void skipcolon();			//skip if curch is a ':'
-	void skip_dueto_error(symbol& s, name& id, int& num);
+	void skip_dueto_error(symbol& s, name& id, int& num, bool print = true);
 	void print_line_error();
 
 	// Functions for unit testing

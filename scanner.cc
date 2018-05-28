@@ -216,13 +216,13 @@ void scanner::skipcolon()
 	if(curch == ':')
 		eofile = !(inf.get(curch));
 }
-void scanner::skip_dueto_error(symbol& s, name& id, int& num)
+void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 {
 	// while(!(curch == ',' || curch == ';')){
 	// 	eofile = !(inf.get(curch));
 	// }
-
-	print_line_error();
+	if(print)
+		print_line_error();
 
 	while(!(s == comma || s == semicol)){
 		getsymbol(s, id, num);
@@ -230,7 +230,7 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num)
 }
 void scanner::print_line_error()
 {
-	cout << lines[linenum] << endl;
+	cout << "In line " << (linenum+1) << ": " << lines[linenum] << endl;
 	// TODO: Need to find where to put '^'
 	cout << "\t\t^" << endl;
 }

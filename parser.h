@@ -10,7 +10,7 @@
 
 using namespace std;
 
-typedef enum {nameerror, devicedeferror
+typedef enum {nameerror, devicedeferror, signalerror
 } errortype;
 
 
@@ -43,13 +43,16 @@ private:
 
     void connectionlist();
     void connection();
-    void signame(int& dev, int& port);
-    name portname();
+    void signalout(name& dev, name& port);
+    void signalin(name& dev, name& port);
+    void dtypeout(name& port);
+    void dtypein(name& port);
+    void gatein(name& port, devicekind dkind);
 
     void monitorlist();
-    void monitor1();
+    void monitor1();      // use monitor1 to avoid same name as monitor
 
-    name name1();
+    name name1();         // use name1 to avoid same name as name (int)
     void dev_name_num(devicekind dkind);
 
     void error(int errn); // a function to throw error

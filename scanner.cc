@@ -84,6 +84,7 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 			case '(': s = leftbrk; break;
 			case ')': s = rightbrk; break;
 			case '.': s = fullstop; break;
+			case '>': s = greaterthan; break;
             // default:  s = badsym; cout << "BADSYM" << endl; break;
 			default:  s = badsym; break;
         }
@@ -232,7 +233,6 @@ void scanner::print_line_error()
 	cout << lines[linenum] << endl;
 	// TODO: Need to find where to put '^'
 	cout << "\t\t^" << endl;
-
 }
 // Functions for unit testing
 

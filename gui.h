@@ -13,20 +13,19 @@
 enum { 
   // todo: delete unnecessary ones. add event handlers
   MY_SPINCNTRL_ID = wxID_HIGHEST + 1,
-  MY_TEXTCTRL_ID,         // todo: delete
   MY_TEXTCTRL_LOG,        // for logging text box
   
   MY_BUTTON_LOAD,         // for loading connection definitation file
   MY_TEXTCTRL_FILEPATH,   // storing filepath to def file
 
-  MY_CHECKBOX_0,            // todo: switch state 0
-  MY_CHECKBOX_1,            // todo: switch state 1
-  MY_CHOICE_LIST_SWITCHES,  // todo: switch choice
+  MY_CHECKBOX_0,            
+  MY_CHECKBOX_1,            
+  MY_CHOICE_LIST_SWITCHES,  
 
-  MY_CHOICE_MONITOR_SET,    // todo: 
-  MY_CHOICE_MONITOR_ZAP,    // todo: 
-  MY_BUTTON_SET,            // todo: 
-  MY_BUTTON_ZAP,            // todo: 
+  MY_CHOICE_MONITOR_SET,     
+  MY_CHOICE_MONITOR_ZAP,    
+  MY_BUTTON_SET,            
+  MY_BUTTON_ZAP,            
 
   MY_BUTTON_RUN,            // todo: implement actual running
   MY_BUTTON_PAUSE,          // todo: 

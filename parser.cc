@@ -341,6 +341,7 @@ void parser::signalout(name& dev, name& port)
 		/* find device kind */
 		devlink dlink = netz->finddevice(dev); // return NULL if not defined yet
 		/* --------- Semantic error #5 --------- */
+		// Invalid device (not defined)
 		if(!dlink)
 		{
 			semantic(5);
@@ -372,6 +373,13 @@ void parser::signalin(name& dev, name& port)
 		dev = curid;
 		/* find device kind */
 		devlink dlink = netz->finddevice(dev);
+		/* --------- Semantic error #5 --------- */
+		// Invalid device (not defined)
+		if(!dlink)
+		{
+			semantic(5);
+		}
+		/* ------------------------------------- */
 		devicekind dkind = dlink->kind;
 		/* ---------------- */
 		if(dkind == dtype){

@@ -357,7 +357,7 @@ void parser::signalin(name& dev, name& port)
 		else if(dkind == xorgate){
 			smz->getsymbol(cursym, curid, curnum);
 			if(cursym == fullstop){
-				gatein(port, dkind);
+				gatein(port);
 			}
 			else
 				error(16);
@@ -365,7 +365,7 @@ void parser::signalin(name& dev, name& port)
 		else if(dkind == andgate || dkind == nandgate || dkind == orgate || dkind == norgate){
 			smz->getsymbol(cursym, curid, curnum);
 			if(cursym == fullstop){
-				gatein(port, dkind);
+				gatein(port);
 			}
 			else
 				error(17);
@@ -404,16 +404,22 @@ void parser::dtypein(name& port)
 		error(15);
 	}
 }
-void parser::gatein(name& port, devicekind dkind)
+void parser::gatein(name& port)
 {
-	/* TODO: Improve->check is the port is valid */
+	/* Improve->check is the port is valid */
+	// gatein = ( "I" , number )
 	smz->getsymbol(cursym, curid, curnum);
-	if(dkind == xorgate){
-		port = curid;
+	for(int i=1; i<=16; i++){
+		string s = "I" + to_string(i);
+		name checkid = nmz->lookup(s);
+		if(checkid == curid){
+			port = curid;
+			return;
+		}
 	}
-	else{
-		port = curid;
-	}
+	// if it is not I1, ..., I16
+	// it either fails to follow gatein = ( "I" , number ) or number is too high
+	error(17);
 }
 
 
@@ -485,7 +491,7 @@ void parser::error(int errn)
 				throw signalerror; break;
 		case 17: cout << "gate input I1 to I16" << endl;
 				throw signalerror; break;
-		case 18: cout << "expect => after signalout" << endl;
+		case 18: cout << "expect => after signalout (or apart from dtype no port should be defined.)" << endl;
 				throw signalerror; break;
 		case 19: cout << "invalid input device" << endl;
 				throw signalerror; break;

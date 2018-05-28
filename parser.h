@@ -47,7 +47,7 @@ private:
     void signalin(name& dev, name& port);
     void dtypeout(name& port);
     void dtypein(name& port);
-    void gatein(name& port, devicekind dkind);
+    void gatein(name& port);
 
     void monitorlist();
     void monitor1();      // use monitor1 to avoid same name as monitor

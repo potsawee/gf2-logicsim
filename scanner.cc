@@ -230,7 +230,7 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 }
 void scanner::print_line_error()
 {
-	cout << lines[linenum] << endl;
+	cout << "In line " << (linenum+1) << ": " << lines[linenum] << endl;
 	// TODO: Need to find where to put '^'
 	cout << "\t\t^" << endl;
 }

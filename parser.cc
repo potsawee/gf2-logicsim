@@ -326,7 +326,10 @@ void parser::connection()
 
 	netz->makeconnection(inputdev, inputport, outputdev, outputport, ok);
 	if(!ok){
-		error(32);
+		/* --------- Semantic error #4 --------- */
+		// 4. Portnumber does not exist e.g. gate1.I20
+		semantic(4);
+		/* ------------------------------------- */
 	}
 }
 void parser::signalout(name& dev, name& port)
@@ -336,7 +339,13 @@ void parser::signalout(name& dev, name& port)
 	if(cursym == namesym){ // expect name to come first e.g. 'G1'
 		dev = curid;
 		/* find device kind */
-		devlink dlink = netz->finddevice(dev);
+		devlink dlink = netz->finddevice(dev); // return NULL if not defined yet
+		/* --------- Semantic error #5 --------- */
+		if(!dlink)
+		{
+			semantic(5);
+		}
+		/* ------------------------------------- */
 		devicekind dkind = dlink->kind;
 		/* ---------------- */
 		if(dkind == dtype){
@@ -481,7 +490,7 @@ void parser::error(int errn)
 {
 	errorcount++;
 	smz->skip_dueto_error(cursym, curid, curnum);
-	cout << "***ERROR: ";
+	cout << "***ERROR " << errn << ": " ;
 	switch(errn)
 	{
 		case 0: cout << "undefined error" << endl; break;
@@ -532,7 +541,7 @@ void parser::semantic(int errn)
 		smz->skip_dueto_error(cursym, curid, curnum, false);
 	else
 		smz->skip_dueto_error(cursym, curid, curnum);
-	cout << "***ERROR: ";
+	cout << "***ERROR 10" << errn << ": " ;
 	switch (errn)
 	{
 		case 1: cout << "device name invalid - two devices cannot have the same name" << endl;
@@ -541,5 +550,10 @@ void parser::semantic(int errn)
 				throw semanticerror; break;
 		case 3: cout << "CONNTECTIONS: every input should be connected to a (valid) output" << endl;
 				break;
+		case 4: cout << "Portnumber does not exist" << endl;
+				break;
+		case 5: cout << "Invalid device (not defined)" << endl;
+				throw semanticerror; break;
+
 	}
 }

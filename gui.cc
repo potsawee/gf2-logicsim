@@ -418,6 +418,14 @@ void MyFrame::OnButtonRESET(wxCommandEvent &event)
   // Event handler for the push button
 {
   canvas->SetDefault();
+  switchChoice->Clear();
+  switchState0->SetValue(0);
+  switchState1->SetValue(0);
+  monitorSet->Clear();
+  monitorZap->Clear();
+  switchVec.clear();
+  setVec.clear();
+  zapVec.clear();
   canvas->Render("Reset button pressed.\n", 0);
 }
 
@@ -570,10 +578,17 @@ void MyFrame::loadFile(wxString s)
   zapVec.clear();
   // todo: more to be added upon 'reset'
 
+  std::cout << "Reset/Reload\n";
 
   ifstream f((filePath.ToStdString()).c_str());
   if(f.good())
   {
+    // nmz, netz, dmz, mmz reinitialised here to allow load/reset
+    // todo: maybe not necessary to pass them as arguments?
+    nmz = new names();
+    netz = new network(nmz);
+    dmz = new devices(nmz, netz);
+    mmz = new monitor(nmz, netz);
     smz = new scanner(nmz, filePath);
     pmz = new parser(netz, dmz, mmz, smz, nmz);
     if(!(pmz->readin()))
@@ -589,32 +604,26 @@ void MyFrame::loadFile(wxString s)
         "File loaded from  "+
         s + "\n");
 
-      devlink dlink = netz->devicelist();
-      while(dlink!=NULL)
+      devlink currentDevice = netz->devicelist();
+	    name currentID;
+      while(currentDevice!=NULL)
       {
-        std::cout << dlink->kind << " " << "\n";
-        name currentID = dlink->id;
-        nmz->writename(currentID);
-
-        outplink olink = netz->findoutput(dlink, currentID);
-        while(olink != NULL)
+        currentID = currentDevice->id;
+        namestring devName = nmz->getname(currentID);
+        if(currentDevice->kind == aswitch)
         {
-          std::cout << "Start looking for output\n";
-          nmz->writename(olink->id);
-          std::cout << "\n";
-          olink = olink->next;
+          if(currentDevice->swstate==low)
+          {
+            switchVec.push_back(MyChoiceObj(devName, 0));
+          }
+          else if(currentDevice->swstate==high)
+          {
+            switchVec.push_back(MyChoiceObj(devName, 1));
+          }
+          std::cout << devName << "\n";
         }
-
-        dlink = dlink->next;
+        currentDevice = currentDevice->next;
       }
-      
-
-      switchVec.push_back(MyChoiceObj("sw5",1));
-      switchVec.push_back(MyChoiceObj("sw3",0));
-      switchVec.push_back(MyChoiceObj("sw2",1));
-      switchVec.push_back(MyChoiceObj("sw1",1));
-      switchVec.push_back(MyChoiceObj("sw4",0));
-      switchVec.push_back(MyChoiceObj("sw0",1));
       std::sort(switchVec.begin(), switchVec.end());
       for(std::vector<MyChoiceObj>::iterator it = switchVec.begin() ; it != switchVec.end(); ++it)
       {
@@ -635,13 +644,31 @@ void MyFrame::loadFile(wxString s)
         switchState0->SetValue(1);
       }
 
+
+      int monitorCount = mmz->moncount();
+      name dev, output;
+      for(int i = 0; i < monitorCount; ++i)
+      {
+        std::string monitorName;
+        mmz->getmonname(i, dev, output);
+        if(output == -1)
+        {
+          monitorName = nmz->getname(dev);
+        }
+        else
+        {
+          monitorName = nmz->getname(dev) + "." + nmz->getname(output);
+        }
+        std::cout << monitorName << "\n";
+        setVec.push_back(MyChoiceObj(monitorName, 1));
+      }
       currentSetIndex = 0; 
-      setVec.push_back(MyChoiceObj("m60",1));
-      setVec.push_back(MyChoiceObj("m1",1));
-      setVec.push_back(MyChoiceObj("m2",1));
-      setVec.push_back(MyChoiceObj("m3",1));
-      setVec.push_back(MyChoiceObj("m4",1));
-      setVec.push_back(MyChoiceObj("m5",1));
+      // setVec.push_back(MyChoiceObj("m60",1));
+      // setVec.push_back(MyChoiceObj("m1",1));
+      // setVec.push_back(MyChoiceObj("m2",1));
+      // setVec.push_back(MyChoiceObj("m3",1));
+      // setVec.push_back(MyChoiceObj("m4",1));
+      // setVec.push_back(MyChoiceObj("m5",1));
       std::sort(setVec.begin(), setVec.end());
       for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
       {

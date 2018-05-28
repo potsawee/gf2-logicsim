@@ -216,13 +216,13 @@ void scanner::skipcolon()
 	if(curch == ':')
 		eofile = !(inf.get(curch));
 }
-void scanner::skip_dueto_error(symbol& s, name& id, int& num)
+void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 {
 	// while(!(curch == ',' || curch == ';')){
 	// 	eofile = !(inf.get(curch));
 	// }
-
-	print_line_error();
+	if(print)
+		print_line_error();
 
 	while(!(s == comma || s == semicol)){
 		getsymbol(s, id, num);

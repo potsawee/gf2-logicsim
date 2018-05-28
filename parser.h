@@ -10,7 +10,7 @@
 
 using namespace std;
 
-typedef enum {nameerror, devicedeferror, signalerror
+typedef enum {nameerror, devicedeferror, signalerror, semanticerror
 } errortype;
 
 
@@ -56,6 +56,7 @@ private:
     void dev_name_num(devicekind dkind);
 
     void error(int errn); // a function to throw error
+    void semantic(int errn); // for semantic error dectection
 
  public:
     bool readin ();

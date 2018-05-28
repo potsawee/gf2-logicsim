@@ -34,7 +34,6 @@ bool parser::readin (void)
 		smz->getsymbol(cursym, curid, curnum);
 	}
 
-	/* Semantic error detection */
 	if(errorcount == 0){
 		// cout << "0 error dectected" << endl;
 		return true;
@@ -60,7 +59,7 @@ parser::parser (network* network_mod, devices* devices_mod,
 
 }
 
-/* Private routines */
+/* 1. Devices */
 /* 1. Devices */
 void parser::devicelist()
 {
@@ -74,12 +73,13 @@ void parser::devicelist()
 }
 void parser::device() // scan up to ',' or ';'
 {
-	smz->getsymbol(cursym, curid, curnum);
+	smz->getsymbol(cursym, curid, curnum); // expect SWITCH, CLOCK etc.
 	if(cursym != namesym){
 		error(2);
 		return;
 	}
 	// here cursym == namesym, so curid tells the NAME
+
 	devicekind dkind = dmz->devkind(curid);
 
 	bool wrongkind = false;
@@ -256,15 +256,26 @@ name parser::name1()
 	if (cursym == namesym){
 		// cout << "parser::name() => ";
 		// nmz->writename(curid);
+
+		/* --------- Semantic error #1,2 ------- */
+		// 1. two devices cannot have the same name
+		// 2. device names cannot be the same as reserved keyword
+		devlink finddev = netz->finddevice(curid); // return NULL if not defined yet
+		if(finddev)
+		{
+			semantic(1);
+		}
+		// TODO: semantic #2
+		/* ------------------------------------- */
+
 		name deviceid = curid;
 		return deviceid;
 	}
 	else {
 		error(8);
-		return -1;
 	}
+	return -1; // it won't reach this just make warning disappear [error(8) throw error]
 }
-
 
 
 /* 2. Connections */
@@ -277,6 +288,14 @@ void parser::connectionlist()
 	}
 	if (cursym != semicol)
 		error(1);
+
+	/* --------- Semantic error #3 --------- */
+	// 3. every input should be connected to a (valid) output
+	bool ok;
+	netz->checknetwork(ok);
+	if(!ok)
+		semantic(3);
+	/* ------------------------------------- */
 }
 void parser::connection()
 {
@@ -455,7 +474,9 @@ void parser::monitor1()
 		error(33);
 	}
 }
-//
+
+
+/* 4. Error Handling */
 void parser::error(int errn)
 {
 	errorcount++;
@@ -502,5 +523,23 @@ void parser::error(int errn)
 		case 32: cout << "connection error. hint: 'output => input'" << endl; break;
 		case 33: cout << "monitor error. hint: check the signal" << endl; break;
 		case 99: cout << "special error" << endl; break;
+	}
+}
+void parser::semantic(int errn)
+{
+	errorcount++;
+	if(errn == 3)
+		smz->skip_dueto_error(cursym, curid, curnum, false);
+	else
+		smz->skip_dueto_error(cursym, curid, curnum);
+	cout << "***ERROR: ";
+	switch (errn)
+	{
+		case 1: cout << "device name invalid - two devices cannot have the same name" << endl;
+				throw semanticerror; break;
+		case 2: cout << "device name invalid - cannot use reserved keyword" << endl;
+				throw semanticerror; break;
+		case 3: cout << "CONNTECTIONS: every input should be connected to a (valid) output" << endl;
+				break;
 	}
 }

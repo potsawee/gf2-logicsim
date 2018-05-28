@@ -5,7 +5,6 @@ using namespace std;
 
 /* The parser for the circuit definition files */
 
-
 bool parser::readin (void)
 {
 	/* over to you */
@@ -99,7 +98,7 @@ void parser::device() // scan up to ',' or ';'
 		}
 	}
 	catch(errortype err){
-		return;
+		return; // error() already moved the symbol to ',' or ';'
 	}
 	if(!wrongkind)
 		smz->getsymbol(cursym, curid, curnum);
@@ -107,15 +106,10 @@ void parser::device() // scan up to ',' or ';'
 		error(2); //a device definition is expected
 }
 
-void parser::clockdev()
-{
-	devicekind dkind = aclock;
-	dev_name_num(dkind);
-}
 void parser::switchdev()
 {
 	devicekind dkind = aswitch;
-	int did; // device id
+	name did; // device id
 	int variant;
 	bool ok;
 	smz->getsymbol(cursym, curid, curnum);
@@ -130,28 +124,25 @@ void parser::switchdev()
 				}
 				else{
 					error(3);
-					throw devicedeferror;
 				}
 				smz->getsymbol(cursym, curid, curnum);
 				if(cursym != rightbrk){
 					error(4);
-					throw devicedeferror;
 				}
 			}
 			else {
 				error(5);
-				throw devicedeferror;
 			}
 		}
 		else{
 			error(6);
-			throw devicedeferror;
 		}
 	}
 	else{
 		error(7);
-		throw devicedeferror;
 	}
+	// Up to this stage the switch must have been defiened correctly
+	// So make a call to makedevice
 	dmz->makedevice(dkind, did, variant, ok);
 	if(!ok){
 		error(31);
@@ -160,8 +151,28 @@ void parser::switchdev()
 void parser::dtypedev()
 {
 	devicekind dkind = dtype;
-	int did; // device id
+	name did; // device id
 	int variant=0;
+	bool ok;
+	smz->getsymbol(cursym, curid, curnum);
+	if (cursym == equals){
+		did = name1();
+	}
+	else{
+		error(7);
+	}
+	// Up to this stage the dtype must have been defined correctly
+	// So make a call to makedevice
+	dmz->makedevice(dkind, did, variant, ok);
+	if(!ok){
+		error(31);
+	}
+}
+void parser::xordev()
+{
+	devicekind dkind = xorgate;
+	name did; // device id
+	int variant = 0;
 	bool ok;
 	smz->getsymbol(cursym, curid, curnum);
 	if (cursym == equals){
@@ -174,6 +185,11 @@ void parser::dtypedev()
 	if(!ok){
 		error(31);
 	}
+}
+void parser::clockdev()
+{
+	devicekind dkind = aclock;
+	dev_name_num(dkind);
 }
 void parser::anddev()
 {
@@ -195,27 +211,9 @@ void parser::nordev()
 	devicekind dkind = norgate;
 	dev_name_num(dkind);
 }
-void parser::xordev()
-{
-	devicekind dkind = xorgate;
-	int did; // device id
-	int variant = 0;
-	bool ok;
-	smz->getsymbol(cursym, curid, curnum);
-	if (cursym == equals){
-		did = name1();
-	}
-	else{
-		error(7);
-	}
-	dmz->makedevice(dkind, did, variant, ok);
-	if(!ok){
-		error(31);
-	}
-}
 void parser::dev_name_num(devicekind dkind)
 {
-	int did; // device id
+	name did; // device id
 	int variant;
 	bool ok;
 	smz->getsymbol(cursym, curid, curnum);
@@ -228,7 +226,6 @@ void parser::dev_name_num(devicekind dkind)
 
 				if(dkind != aclock && curnum > 16){
 					error(12);
-					throw devicedeferror;
 				}
 
 				variant = curnum;
@@ -236,22 +233,18 @@ void parser::dev_name_num(devicekind dkind)
 				smz->getsymbol(cursym, curid, curnum);
 				if(cursym != rightbrk){
 					error(4);
-					throw devicedeferror;
 				}
 			}
 			else {
 				error(5);
-				throw devicedeferror;
 			}
 		}
 		else{
 			error(6);
-			throw devicedeferror;
 		}
 	}
 	else{
 		error(7);
-		throw devicedeferror;
 	}
 	dmz->makedevice(dkind, did, variant, ok);
 	if(!ok){
@@ -264,7 +257,7 @@ name parser::name1()
 	if (cursym == namesym){
 		// cout << "parser::name() => ";
 		// nmz->writename(curid);
-		int deviceid = curid;
+		name deviceid = curid;
 		return deviceid;
 	}
 	else {
@@ -288,21 +281,21 @@ void parser::connectionlist()
 }
 void parser::connection()
 {
-	int inputdev, inputport, outputdev, outputport;
+	name inputdev, inputport, outputdev, outputport;
 	bool ok;
 	signame(inputdev, inputport);
 	if (cursym == equals){
 		signame(outputdev, outputport);
 	}
 	else {
-		error(99);
+		error(7);
 	}
 	netz->makeconnection(inputdev, inputport, outputdev, outputport, ok);
 	if(!ok){
 		error(32);
 	}
 }
-void parser::signame(int& dev, int& port)
+void parser::signame(name& dev, name& port)
 {
 	smz->getsymbol(cursym, curid, curnum);
 	if(cursym == namesym){ // expect name to come first e.g. 'G1'
@@ -326,7 +319,7 @@ name parser::portname()
 	if (cursym == namesym){
 		// cout << "portname = ";
 		// nmz->writename(curid);
-		int portid = curid;
+		name portid = curid;
 		return portid;
 	}
 	else {
@@ -348,9 +341,9 @@ void parser::monitorlist()
 }
 void parser::monitor1()
 {
-	int monid; // mon id
-	int devid; // device id (to be monitored)
-	int outputport; // output port of the deivce
+	name monid; // mon id
+	name devid; // device id (to be monitored)
+	name outputport; // output port of the deivce
 	bool ok;
 	try{
 		monid = name1();
@@ -382,17 +375,23 @@ void parser::error(int errn)
 		case 0: cout << "undefined error" << endl; break;
 		case 1: cout << "a semicolon is expected" << endl; break;
 		case 2: cout << "a device definition is wrong" << endl; break;
-		case 3: cout << "Initial state is either 0 or 1" << endl; break;
+		case 3: cout << "Initial state is either 0 or 1" << endl;
+				throw devicedeferror; break;
 		case 4: cout << "expect a ) symbol " << endl; break;
+				throw devicedeferror; break;
 		case 5: cout << "expect a number symbol" << endl; break;
+				throw devicedeferror; break;
 		case 6: cout << "expect a ( symbol " << endl; break;
+				throw devicedeferror; break;
 		case 7: cout << "expect an '=' symbol" << endl; break;
+				throw devicedeferror; break;
 		case 8: cout << "name error. hint: name must start with a letter or '_'" << endl;
 				throw nameerror; break;
 		case 9: cout << "unexpected expression after ;" << endl; break;
 		case 10: cout << "signalname definition error" << endl; break;
 		case 11: cout << "portname definition error" << endl; break;
 		case 12: cout << "the maximum number of inputs is 16" << endl; break;
+				throw devicedeferror; break;
 		case 31: cout << "Makedevice error" << endl; break;
 		case 32: cout << "makeconnection error" << endl; break;
 		case 33: cout << "Makemonitor error" << endl; break;

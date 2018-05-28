@@ -105,7 +105,6 @@ void parser::device() // scan up to ',' or ';'
 	else
 		error(2); //a device definition is expected
 }
-
 void parser::switchdev()
 {
 	devicekind dkind = aswitch;
@@ -281,52 +280,142 @@ void parser::connectionlist()
 }
 void parser::connection()
 {
-	name inputdev, inputport, outputdev, outputport;
+	/* change monday 28 may 2018
+	connection: signalout => signalin
+	e.g. d1.Q => xor1.I1
+	------------------------- */
+	name outputdev, outputport, inputdev, inputport;
 	bool ok;
-	signame(inputdev, inputport);
-	if (cursym == equals){
-		signame(outputdev, outputport);
+	try{
+		signalout(outputdev, outputport);
+
+		smz->getsymbol(cursym, curid, curnum); // expect '='
+		if(cursym != equals)
+			error(18);
+		smz->getsymbol(cursym, curid, curnum); // expect '>'
+		if(cursym != greaterthan)
+			error(18);
+
+		signalin(inputdev, inputport);
+
 	}
-	else {
-		error(7);
+	catch (errortype err){
+		return; // error() already moved the symbol to ',' or ';'
 	}
+
+	smz->getsymbol(cursym, curid, curnum); // to move to cursym to ',' or ';'
+
 	netz->makeconnection(inputdev, inputport, outputdev, outputport, ok);
 	if(!ok){
 		error(32);
 	}
 }
-void parser::signame(name& dev, name& port)
+void parser::signalout(name& dev, name& port)
 {
+	// note that only DTYPE has two output ports
 	smz->getsymbol(cursym, curid, curnum);
 	if(cursym == namesym){ // expect name to come first e.g. 'G1'
 		dev = curid;
-		smz->getsymbol(cursym, curid, curnum); // either '.' or no port
-		if(cursym == fullstop){
-			port = portname();
+		/* find device kind */
+		devlink dlink = netz->finddevice(dev);
+		devicekind dkind = dlink->kind;
+		/* ---------------- */
+		if(dkind == dtype){
 			smz->getsymbol(cursym, curid, curnum);
+			if(cursym == fullstop){
+				dtypeout(port);
+			}
+			else
+				error(14);
 		}
-		else{
+		else {
 			port = blankname;
 		}
 	}
 	else { // if the first symbol when signame() is called is NOT name => error
-		error(10);
+		error(20);
 	}
 }
-name parser::portname()
+void parser::signalin(name& dev, name& port)
 {
-	smz->getsymbol(cursym, curid, curnum); // expect I+number OR DATA CLK etc..
-	if (cursym == namesym){
-		// cout << "portname = ";
-		// nmz->writename(curid);
-		name portid = curid;
-		return portid;
+	// note that only DTYPE, gates, xor have more than 1 input ports
+	smz->getsymbol(cursym, curid, curnum);
+	if(cursym == namesym){ // expect name to come first e.g. 'G1'
+		dev = curid;
+		/* find device kind */
+		devlink dlink = netz->finddevice(dev);
+		devicekind dkind = dlink->kind;
+		/* ---------------- */
+		if(dkind == dtype){
+			smz->getsymbol(cursym, curid, curnum);
+			if(cursym == fullstop){
+				dtypein(port);
+			}
+			else
+				error(15);
+		}
+		else if(dkind == xorgate){
+			smz->getsymbol(cursym, curid, curnum);
+			if(cursym == fullstop){
+				gatein(port, dkind);
+			}
+			else
+				error(16);
+		}
+		else if(dkind == andgate || dkind == nandgate || dkind == orgate || dkind == norgate){
+			smz->getsymbol(cursym, curid, curnum);
+			if(cursym == fullstop){
+				gatein(port, dkind);
+			}
+			else
+				error(17);
+		}
+		else { // CLOCK or SWITCH
+			error(19);
+		}
+	}
+	else { // if the first symbol when signame() is called is NOT name => error
+		error(20);
+	}
+}
+void parser::dtypeout(name& port)
+{
+	name q    = nmz->lookup("Q");
+	name qbar = nmz->lookup("QBAR");
+	smz->getsymbol(cursym, curid, curnum); // expect Q or QBAR
+	if (curid == q || curid == qbar){
+		port = curid;
 	}
 	else {
-		error(11);
-		return -999;
+		error(14);
 	}
 }
+void parser::dtypein(name& port)
+{
+	name data = nmz->lookup("DATA");
+    name clk  = nmz->lookup("CLK");
+    name set  = nmz->lookup("SET");
+    name clr  = nmz->lookup("CLEAR");
+	smz->getsymbol(cursym, curid, curnum); // expect DATA, CLK, SET, CLEAR
+	if (curid == data || curid == clk || curid == set || curid == clr){
+		port = curid;
+	}
+	else {
+		error(15);
+	}
+}
+void parser::gatein(name& port, devicekind dkind)
+{
+	/* TODO: Improve->check is the port is valid */
+	smz->getsymbol(cursym, curid, curnum);
+	if(dkind == xorgate){
+		port = curid;
+	}
+	else{
+		port = curid;
+	}
+}
+
 
 /* 3. Monitors */
 void parser::monitorlist()
@@ -341,24 +430,20 @@ void parser::monitorlist()
 }
 void parser::monitor1()
 {
-	name monid; // mon id
-	name devid; // device id (to be monitored)
-	name outputport; // output port of the deivce
+	name devid; 		// device id (to be monitored)
+	name outputport; 	// output port of the deivce
 	bool ok;
+
+	/* --------- signal to be monitored --------- */
 	try{
-		monid = name1();
+		signalout(devid, outputport);
 	}
-	catch(errortype err){
-		if(err == nameerror)
-			return;
+	catch (errortype err){
+		return; // error() already moved the symbol to ',' or ';'
 	}
-	smz->getsymbol(cursym, curid, curnum);
-	if (cursym == equals){
-		signame(devid, outputport);
-	}
-	else {
-		error(7);
-	}
+	/* --------- signal to be monitored --------- */
+	smz->getsymbol(cursym, curid, curnum); // expect ',' or ';'
+
 	mmz->makemonitor(devid, outputport, ok);
 	if(!ok){
 		error(33);
@@ -377,24 +462,39 @@ void parser::error(int errn)
 		case 2: cout << "a device definition is wrong" << endl; break;
 		case 3: cout << "Initial state is either 0 or 1" << endl;
 				throw devicedeferror; break;
-		case 4: cout << "expect a ) symbol " << endl; break;
+		case 4: cout << "expect a ) symbol " << endl;
 				throw devicedeferror; break;
-		case 5: cout << "expect a number symbol" << endl; break;
+		case 5: cout << "expect a number symbol" << endl;
 				throw devicedeferror; break;
-		case 6: cout << "expect a ( symbol " << endl; break;
+		case 6: cout << "expect a ( symbol " << endl;
 				throw devicedeferror; break;
-		case 7: cout << "expect an '=' symbol" << endl; break;
+		case 7: cout << "expect an '=' symbol" << endl;
 				throw devicedeferror; break;
 		case 8: cout << "name error. hint: name must start with a letter or '_'" << endl;
 				throw nameerror; break;
 		case 9: cout << "unexpected expression after ;" << endl; break;
-		case 10: cout << "signalname definition error" << endl; break;
-		case 11: cout << "portname definition error" << endl; break;
-		case 12: cout << "the maximum number of inputs is 16" << endl; break;
+
+		case 12: cout << "the maximum number of inputs is 16" << endl;
 				throw devicedeferror; break;
+
+		case 14: cout << "Q or QBAR is expected for dtype output" << endl;
+				throw signalerror; break;
+		case 15: cout << "DATA, CLK, SET, CLEAR is expected for dtype input" << endl;
+				throw signalerror; break;
+		case 16: cout << "XOR input I1 or I2" << endl;
+				throw signalerror; break;
+		case 17: cout << "gate input I1 to I16" << endl;
+				throw signalerror; break;
+		case 18: cout << "expect => after signalout" << endl;
+				throw signalerror; break;
+		case 19: cout << "invalid input device" << endl;
+				throw signalerror; break;
+		case 20: cout << "name of a device is expected" << endl;
+				throw signalerror; break;
+
 		case 31: cout << "Makedevice error" << endl; break;
-		case 32: cout << "makeconnection error" << endl; break;
-		case 33: cout << "Makemonitor error" << endl; break;
+		case 32: cout << "connection error. hint: 'output => input'" << endl; break;
+		case 33: cout << "monitor error. hint: check the signal" << endl; break;
 		case 99: cout << "special error" << endl; break;
 	}
 }

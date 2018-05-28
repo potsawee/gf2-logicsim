@@ -9,6 +9,7 @@ using namespace std;
 typedef int name;
 typedef string namestring;
 
+const int maxlength = 8;     /* max chars in a name string   */
 const name blankname = -1;   /* special name                 */
 const name dev_id = -50;
 const name con_id = -51;

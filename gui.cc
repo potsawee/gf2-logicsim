@@ -513,12 +513,28 @@ void MyFrame::OnCheck0(wxCommandEvent &event)
   if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
   // todo: two unchecked boxes should not be allowed
   {
-    switchState1->SetValue(!(switchState1->GetValue()));
-    switchVec[currentSwitchIndex].objVal = 0;
-    logMessagePanel->AppendText(
-    getCurrentTime()+
-    switchVec[currentSwitchIndex].objName +
-    " is set to 0.\n");
+    bool ok;
+    dmz->setswitch(
+      switchVec[currentSwitchIndex].dev,
+      low,
+      ok
+    );
+    if(ok)
+    {
+      switchState1->SetValue(!(switchState1->GetValue()));
+      switchVec[currentSwitchIndex].objVal = 0;
+      logMessagePanel->AppendText(
+      getCurrentTime()+
+      switchVec[currentSwitchIndex].objName +
+      " is set to 0.\n");
+    }
+    else
+    {
+      logMessagePanel->AppendText(
+      getCurrentTime()+
+      switchVec[currentSwitchIndex].objName +
+      " is not set to 0.\n");
+    }
   }
 }
 
@@ -527,12 +543,28 @@ void MyFrame::OnCheck1(wxCommandEvent &event)
   if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
   // todo: two unchecked boxes should not be allowed
   {
-    switchState0->SetValue(!(switchState0->GetValue()));
-    switchVec[currentSwitchIndex].objVal = 1;
-    logMessagePanel->AppendText(
-    getCurrentTime()+
-    switchVec[currentSwitchIndex].objName +
-    " is set to 1.\n");
+    bool ok;
+    dmz->setswitch(
+      switchVec[currentSwitchIndex].dev,
+      high,
+      ok
+    );
+    if(ok)
+    {
+      switchState0->SetValue(!(switchState0->GetValue()));
+      switchVec[currentSwitchIndex].objVal = 1;
+      logMessagePanel->AppendText(
+      getCurrentTime()+
+      switchVec[currentSwitchIndex].objName +
+      " is set to 1.\n");
+    }
+    else
+    {
+      logMessagePanel->AppendText(
+      getCurrentTime()+
+      switchVec[currentSwitchIndex].objName +
+      " is not set to 1.\n");     
+    }
   }  
 }
 

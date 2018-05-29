@@ -258,10 +258,13 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 	// }
 	if(print)
 		print_line_error();
-
-	while(!(s == comma || s == semicol)){
-		getsymbol(s, id, num);
+	eofile = !(inf.get(curch));
+	if(curch != '\n'){
+		while(!(eofile || s == comma || s == semicol || curch == '\n')){
+			getsymbol(s, id, num);
+		}		
 	}
+	
 }
 void scanner::print_line_error()
 {

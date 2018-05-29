@@ -54,6 +54,14 @@ void names::writename (name id)
         cout << "(names::writename) the id is out of range." << endl;
 }
 
+namestring names::getname (name id)
+{
+    if(id >= 0 && id < name_table.size())
+        return name_table[id];
+    else
+        return "";
+}
+
 int names::namelength (name id)
 {
     if(id >= 0 && id < name_table.size())

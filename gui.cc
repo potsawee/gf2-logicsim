@@ -55,6 +55,24 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 
   if ((cyclesdisplayed >= 0) && (mmz->moncount() > 0)) { // draw the first monitor signal, get trace from monitor class
 
+    
+
+			glEnable(GL_LINE_STIPPLE); 
+			glLineStipple(2,0xAAAA); // dashed lines, factor 2
+			glColor3f(0.7,0.7,0.7);
+			
+			glBegin(GL_LINE_STRIP);			
+			glVertex2f(50, 10);
+			glVertex2f(500, 10);
+			glEnd();
+			
+			glBegin(GL_LINE_STRIP);			
+			glVertex2f(50, 30);
+			glVertex2f(500, 30);
+			glEnd();
+			
+			glDisable(GL_LINE_STIPPLE);
+
     glColor3f(1., 0.0, 0.0);
     glBegin(GL_LINE_STRIP);
     for (i=0; i<cyclesdisplayed; i++) {

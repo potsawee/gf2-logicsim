@@ -5,12 +5,12 @@
 #include <OpenGL/gl.h>
 #include <GLUT/glut.h>
 #else
-#include <GL/gl.h>
+#include <GL/glut.h>
 #endif
 
 #include "wx_icon.xpm"
 #include <iostream>
-#include <time.h>
+#include <algorithm>
 using namespace std;
 
 // MyGLCanvas ////////////////////////////////////////////////////////////////////////////////////
@@ -74,26 +74,31 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 			glDisable(GL_LINE_STIPPLE);
 
     glColor3f(1., 0.0, 0.0);
-    glBegin(GL_LINE_STRIP);
-    for (i=0; i<cyclesdisplayed; i++) {
-      if (mmz->getsignaltrace(0, i, s)) {
-        if (s==low) y = 10.0;
-        if (s==high) y = 30.0;
-        glVertex2f(20*i+10.0, y); 
-        glVertex2f(20*i+30.0, y);
+    for(int j = 0; j < mmz->moncount(); ++j)
+    {
+      glBegin(GL_LINE_STRIP);
+      for (i=0; i<cyclesdisplayed; i++) 
+      {
+        if (mmz->getsignaltrace(j, i, s)) 
+        {
+          if (s==low) y = 30.0*j+10.0;
+          if (s==high) y = 30.0*j+30.0;
+          glVertex2f(20*i+10.0, y); 
+          glVertex2f(20*i+30.0, y);
+        }
       }
+      glEnd();
     }
-    glEnd();
-    glBegin(GL_LINE_STRIP);
-    for (i=0; i<cyclesdisplayed; i++) {
-      if (mmz->getsignaltrace(1, i, s)) {
-        if (s==low) y = 50.0;
-        if (s==high) y = 70.0;
-        glVertex2f(20*i+10.0, y); 
-        glVertex2f(20*i+30.0, y);
-      }
-    }
-    glEnd();
+    // glBegin(GL_LINE_STRIP);
+    // for (i=0; i<cyclesdisplayed; i++) {
+    //   if (mmz->getsignaltrace(1, i, s)) {
+    //     if (s==low) y = 50.0;
+    //     if (s==high) y = 70.0;
+    //     glVertex2f(20*i+10.0, y); 
+    //     glVertex2f(20*i+30.0, y);
+    //   }
+    // }
+    // glEnd();
 
   } else { // draw an artificial trace
 

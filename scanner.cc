@@ -85,6 +85,16 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 			case ')': s = rightbrk; break;
 			case '.': s = fullstop; break;
 			case '>': s = greaterthan; break;
+			case '/': {	s = slash;
+						skipcomments();
+						getsymbol(s, id, num);
+						break;
+						}
+			case '\n':{	s = eoline;
+						linenum ++;
+						getsymbol(s, id, num);
+						break;
+						}
             // default:  s = badsym; cout << "BADSYM" << endl; break;
 			default:  s = badsym; break;
         }
@@ -173,9 +183,7 @@ void scanner::skipspaces()
 {
     while(!eofile){
         if(isspace(curch)){
-			if(curch == '\n')
-				linenum++;
-            eofile = !(inf.get(curch));
+			eofile = !(inf.get(curch));
 		}
         else
             return;
@@ -183,6 +191,33 @@ void scanner::skipspaces()
 }
 
 // TODO: Skip comments!!
+void scanner::skipcomments()
+{
+	while(!eofile){
+		if(curch == '/'){
+			eofile = (!inf.get(curch));
+			if (curch == '/'){
+				//skip to the end of current line
+				while (!eofile && curch != '\n'){
+					eofile = (!inf.get(curch));
+					if (curch == '\n') 
+						linenum ++;
+				}
+			}
+			else if (curch == '*'){
+				//skip to '*/'
+				prevch = curch;
+				while (!eofile && (prevch != '*' || curch != '/')){
+					eofile = (!inf.get(curch));
+					if (curch == '\n') 
+						linenum ++;
+					if (eofile) 
+ 						cout<<("Error: Comment not closed")<<endl;
+				}
+			}
+		}
+	}
+} 
 // void scanner::skipcomments(ifstream *infp, char& curch, bool& eofile)
 // {
 // 	if (curch =='/') {

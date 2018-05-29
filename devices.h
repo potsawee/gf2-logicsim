@@ -3,6 +3,7 @@
 
 #include "names.h"
 #include "network.h"
+#include "time.h"
 
 class devices{
   names* nmz;      // the version of the names module we use.

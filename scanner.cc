@@ -85,17 +85,16 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 			case ')': s = rightbrk; break;
 			case '.': s = fullstop; break;
 			case '>': s = greaterthan; break;
-			case '/': {	s = slash;
+			case '/': s = slash;
 						skipcomments();
 						getsymbol(s, id, num);
 						break;
-						}
-			case '\n':{	s = eoline;
+
+			case '\n': s = eoline;
 						linenum ++;
 						getsymbol(s, id, num);
 						break;
-						}
-            // default:  s = badsym; cout << "BADSYM" << endl; break;
+
 			default:  s = badsym; break;
         }
 		eofile = !(inf.get(curch));
@@ -162,27 +161,15 @@ void scanner::getname(name& id, bool& is_keyword)
     return;
 }
 
-// void scanner::getch()
-// {
-// 	prevch = curch;
-// 	eofile = (inf.get(curch) == 0);
-// 	if (curch == '\n') linenum ++;
-// 	if (eoline) {
-// 		currentline.clear(); //clear the current line
-// 		skipspaces();
-// 		eoline = false;//reset eoline
-// 	}
-// 	if(prevch != '\n'){
-// 		currentline.push_back(prevch);
-// 	}
-// }
-
 void scanner::skipspaces()
 // return a non white-space character in curch
 // This function updates inf, curch, eofile
 {
     while(!eofile){
         if(isspace(curch)){
+			if(curch == '\n'){
+				linenum++;
+			}
 			eofile = !(inf.get(curch));
 		}
         else
@@ -190,22 +177,18 @@ void scanner::skipspaces()
     }
 }
 
-// TODO: Skip comments!!
 void scanner::skipcomments()
-{	
-	cout <<"skipping comments"<<endl;
-	while(!eofile){	
+{
+	while(!eofile){
 		eofile = !(inf.get(curch));
 		if (curch == '/'){
-			//cout <<"curch is '/'. Lets skip to the end of current line" <<endl;
-			//skip to the end of current line
 			while (!eofile && curch != '\n'){
-				//cout <<"Not yet"<<endl;
-				//cout <<"curch is " << curch <<endl;
 				eofile = !(inf.get(curch));
 				if (curch == '\n') {
+
 					//cout <<"It's the end of a line"<<endl;
-					linenum ++;
+					// cout << "linenum2++" << endl;
+					// linenum ++; @potsawee DOUBLE counting!
 					break;
 				}
 			}
@@ -216,9 +199,10 @@ void scanner::skipcomments()
 			while (!eofile && !(prevch == '*' && curch == '/')){
 				prevch = curch;
 				eofile = !(inf.get(curch));
-				if (curch == '\n') 
+				if (curch == '\n'){
 					linenum ++;
-				if (eofile) 
+				}
+				if (eofile)
  					cout<<("Error: Comment not closed")<<endl;
 			}
 			prevch = curch;
@@ -226,34 +210,7 @@ void scanner::skipcomments()
 		}
 		return;
 	}
-} 
-// void scanner::skipcomments(ifstream *infp, char& curch, bool& eofile)
-// {
-// 	if (curch =='/') {
-// 		eofile = (inf.get(curch) == 0);
-// 		if (curch == '\n') linenum ++;
-// 		while (!eofile && prevch != '/') {
-// 			prevch = curch;
-// 			eofile = (inf.get(curch) == 0);
-// 			if (curch == '\n') linenum ++;
-// 		}
-// 		if (eofile) {
-// 			cout<<("Error: Comment not closed")<<endl;
-// 		}
-// 		skipspaces();
-// 	}
-// }
-
-// string scanner::getline()
-// {
-// 	if(cursym != semicol && cursym != colon && cursym != comma){
-// 		while (curch !=':' && curch !=';' && curch !=',' && !eofile) {
-// 			getch();
-// 		}
-// 		currentline.push_back(curch);
-// 	}
-// 	return currentline;
-// }
+}
 
 void scanner::skipcolon()
 {
@@ -262,18 +219,16 @@ void scanner::skipcolon()
 }
 void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 {
-	// while(!(curch == ',' || curch == ';')){
-	// 	eofile = !(inf.get(curch));
-	// }
+
 	if(print)
 		print_line_error();
 	eofile = !(inf.get(curch));
 	if(curch != '\n'){
 		while(!(eofile || s == comma || s == semicol || curch == '\n')){
 			getsymbol(s, id, num);
-		}		
+		}
 	}
-	
+
 }
 void scanner::print_line_error()
 {

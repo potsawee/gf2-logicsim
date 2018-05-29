@@ -1,5 +1,6 @@
 /*  Unit test for the scanner class
     date: 26 May 2018
+    updated: 29 May 2018 => showing string of the symbol name
     @Potsawee
 */
 
@@ -14,6 +15,9 @@
 #include <string>
 
 using namespace std;
+
+string symnum_to_symstring(int num);
+
 int main(int argc, char **argv)
 {
     names my_names;
@@ -41,7 +45,7 @@ int main(int argc, char **argv)
             break;
         }
 
-        cout << "cursym: " << cursym << endl;
+        cout << "cursym: " << symnum_to_symstring(cursym) << endl;
 
         if(cursym == namesym)
         {
@@ -64,4 +68,26 @@ int main(int argc, char **argv)
     cout << "end of testing" << endl;
 
     return 0;
+}
+
+string symnum_to_symstring(int num)
+{
+    switch (num) {
+        case 0: return "namesym";
+    	case 1: return "numsym";
+        case 2: return "devsym";
+        case 3: return "consym";
+        case 4: return "monsym";
+    	case 5: return "comma";
+    	case 6: return "semicol";
+    	case 7: return "colon";
+    	case 8: return "equal";
+    	case 9: return "leftbracket";
+    	case 10: return "rightbracket";
+    	case 11: return "fullstop";
+    	case 12: return "greaterthan";
+    	case 13: return "badsym";
+    	case 14: return "eofsym";
+        default: return "undefined sym!!";
+    }
 }

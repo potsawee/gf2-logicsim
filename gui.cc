@@ -291,9 +291,9 @@ MyFrame::MyFrame(wxWindow *parent,
     0,
     wxALL,
     10);
-
+	filePathBox = new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(800, -1), wxTE_PROCESS_ENTER);
   filePathSizer->Add(
-    new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(800, -1), wxTE_PROCESS_ENTER),
+    filePathBox,
     0,
     wxEXPAND | wxALL,
     10);
@@ -441,8 +441,13 @@ void MyFrame::OnAbout(wxCommandEvent &event)
 void MyFrame::OnOpen(wxCommandEvent &event)
   // Event handler for the about menu item
 {
-  wxDirDialog openBox(this, "Select a definition file (.gf2)", "", wxDD_DEFAULT_STYLE, wxDefaultPosition,  wxDefaultSize, wxDirDialogNameStr);
-  openBox.ShowModal();
+    wxFileDialog openFileDialog(this, _("Open a circuit definition file"), "", "",
+               "GF2 files (*.gf2)|*.gf2", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+	if(openFileDialog.ShowModal() == wxID_CANCEL)
+		return;			// user changed idea..
+    // proceed loading the file chosen by the user
+    filePath = openFileDialog.GetPath();
+    filePathBox->SetValue(filePath);
 }
 /* --------------------- */
 

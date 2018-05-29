@@ -549,9 +549,9 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
     currentSetIndex = updateCurrentChoice((monitorSet->GetStringSelection()).ToStdString(), &setVec);
     bool ok = true;
     mmz->makemonitor(setVec[currentSetIndex].dev, setVec[currentSetIndex].output, ok);
-    std::cout << setVec[currentSetIndex].objName << "    "
-    << setVec[currentSetIndex].dev << "    "
-    << setVec[currentSetIndex].output << "\n";
+    // std::cout << setVec[currentSetIndex].objName << "    "
+    // << setVec[currentSetIndex].dev << "    "
+    // << setVec[currentSetIndex].output << "\n";
     if(ok)
     {
       logMessagePanel->AppendText(
@@ -692,6 +692,7 @@ void MyFrame::loadFile(wxString s)
             tempObj.objVal = 1;
           }
           switchVec.push_back(tempObj);
+          signalList.push_back(tempObj);
         }
         else
         {

@@ -5,12 +5,11 @@
 #include <OpenGL/gl.h>
 #include <GLUT/glut.h>
 #else
-#include <GL/gl.h>
+#include <GL/glut.h>
 #endif
 
 #include "wx_icon.xpm"
 #include <iostream>
-#include <time.h>
 using namespace std;
 
 // MyGLCanvas ////////////////////////////////////////////////////////////////////////////////////

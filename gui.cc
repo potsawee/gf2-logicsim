@@ -20,10 +20,10 @@ BEGIN_EVENT_TABLE(MyGLCanvas, wxGLCanvas)
   EVT_PAINT(MyGLCanvas::OnPaint)
   EVT_MOUSE_EVENTS(MyGLCanvas::OnMouse)
 END_EVENT_TABLE()
-  
+
 int wxglcanvas_attrib_list[5] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, 0};
 
-MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, names* names_mod, const wxPoint& pos, 
+MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, names* names_mod, const wxPoint& pos,
 		       const wxSize& size, long style, const wxString& name, const wxPalette& palette):
   wxGLCanvas(parent, id, wxglcanvas_attrib_list, pos, size, style, name, palette)
   // Constructor - initialises private variables
@@ -55,35 +55,35 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 
   if ((cyclesdisplayed >= 0) && (mmz->moncount() > 0)) { // draw the first monitor signal, get trace from monitor class
 
-    
 
-			glEnable(GL_LINE_STIPPLE); 
+
+			glEnable(GL_LINE_STIPPLE);
 			glLineStipple(2,0xAAAA); // dashed lines, factor 2
 			glColor3f(0.7,0.7,0.7);
-			
-			glBegin(GL_LINE_STRIP);			
+
+			glBegin(GL_LINE_STRIP);
 			glVertex2f(50, 10);
 			glVertex2f(500, 10);
 			glEnd();
-			
-			glBegin(GL_LINE_STRIP);			
+
+			glBegin(GL_LINE_STRIP);
 			glVertex2f(50, 30);
 			glVertex2f(500, 30);
 			glEnd();
-			
+
 			glDisable(GL_LINE_STIPPLE);
 
     glColor3f(1., 0.0, 0.0);
     for(int j = 0; j < mmz->moncount(); ++j)
     {
       glBegin(GL_LINE_STRIP);
-      for (i=0; i<cyclesdisplayed; i++) 
+      for (i=0; i<cyclesdisplayed; i++)
       {
-        if (mmz->getsignaltrace(j, i, s)) 
+        if (mmz->getsignaltrace(j, i, s))
         {
           if (s==low) y = 30.0*j+10.0;
           if (s==high) y = 30.0*j+30.0;
-          glVertex2f(20*i+10.0, y); 
+          glVertex2f(20*i+10.0, y);
           glVertex2f(20*i+30.0, y);
         }
       }
@@ -94,7 +94,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
     //   if (mmz->getsignaltrace(1, i, s)) {
     //     if (s==low) y = 50.0;
     //     if (s==high) y = 70.0;
-    //     glVertex2f(20*i+10.0, y); 
+    //     glVertex2f(20*i+10.0, y);
     //     glVertex2f(20*i+30.0, y);
     //   }
     // }
@@ -107,11 +107,11 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
     for (i=0; i<15; i++) {
       if (i%3) y = 10.0;
       else y = 30.0;
-      glVertex2f(20*i+10.0, y); 
+      glVertex2f(20*i+10.0, y);
       glVertex2f(20*i+30.0, y);
     }
     glEnd();
-    
+
   }
 
   // Example of how to use GLUT to draw text on the canvas
@@ -138,7 +138,7 @@ void MyGLCanvas::InitGL()
   glViewport(0, 0, (GLint) w, (GLint) h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0, w, 0, h, -1, 1); 
+  glOrtho(0, w, 0, h, -1, 1);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glTranslated(pan_x, pan_y, 0.0);
@@ -217,11 +217,12 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_EXIT, MyFrame::OnExit)
   EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
+  EVT_MENU(wxID_OPEN, MyFrame::OnOpen)
   EVT_BUTTON(MY_BUTTON_RUN, MyFrame::OnButtonRUN)
   EVT_BUTTON(MY_BUTTON_RESET, MyFrame::OnButtonRESET)
   EVT_BUTTON(MY_BUTTON_LOAD, MyFrame::OnButtonLOAD)
   EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
-  
+
   // load files
   EVT_TEXT(MY_TEXTCTRL_FILEPATH, MyFrame::OnPathChange)
   EVT_TEXT_ENTER(MY_TEXTCTRL_FILEPATH, MyFrame::OnPathEnter)
@@ -234,14 +235,14 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_BUTTON(MY_BUTTON_ZAP, MyFrame::OnButtonZAP)
 
 END_EVENT_TABLE()
-  
-MyFrame::MyFrame(wxWindow *parent, 
-  const wxString& title, 
-  const wxPoint& pos, 
+
+MyFrame::MyFrame(wxWindow *parent,
+  const wxString& title,
+  const wxPoint& pos,
   const wxSize& size,
-	names *names_mod, 
-  devices *devices_mod, 
-  monitor *monitor_mod, 
+	names *names_mod,
+  devices *devices_mod,
+  monitor *monitor_mod,
   network *network_mod,
   long style):
   wxFrame(parent, wxID_ANY, title, pos, size, style)
@@ -276,7 +277,7 @@ MyFrame::MyFrame(wxWindow *parent,
   wxMenu *editMenu = new wxMenu;
   editMenu->Append(wxID_UNDO, "&Undo");
   editMenu->Append(wxID_REDO, "&Redo");
-  
+
   wxMenuBar *menuBar = new wxMenuBar;
   menuBar->Append(fileMenu, "&File");
   menuBar->Append(editMenu, "&Edit");
@@ -286,42 +287,42 @@ MyFrame::MyFrame(wxWindow *parent,
   wxBoxSizer *overallSizer = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer *filePathSizer = new wxBoxSizer(wxHORIZONTAL);
   filePathSizer->Add(
-    new wxButton(this, MY_BUTTON_LOAD, "Load"), 
-    0, 
-    wxALL, 
+    new wxButton(this, MY_BUTTON_LOAD, "Load"),
+    0,
+    wxALL,
     10);
 
   filePathSizer->Add(
-    new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(800, -1), wxTE_PROCESS_ENTER), 
-    0, 
-    wxEXPAND | wxALL, 
+    new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(800, -1), wxTE_PROCESS_ENTER),
+    0,
+    wxEXPAND | wxALL,
     10);
-    
-  
+
+
   wxBoxSizer *bottomSizer = new wxBoxSizer(wxHORIZONTAL);
 
   wxBoxSizer *displaySizer = new wxBoxSizer(wxVERTICAL);
 
   canvas = new MyGLCanvas(
-    this, 
-    wxID_ANY, 
-    mmz, 
-    nmz, 
-    wxPoint(-1, -1), 
+    this,
+    wxID_ANY,
+    mmz,
+    nmz,
+    wxPoint(-1, -1),
     wxSize(500, 400));
 
   displaySizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
   displaySizer->Add(
-    new wxStaticText(this, wxID_ANY, "Log Activity"), 
-    0, 
-    wxTOP|wxLEFT|wxRIGHT, 
+    new wxStaticText(this, wxID_ANY, "Log Activity"),
+    0,
+    wxTOP|wxLEFT|wxRIGHT,
     10);
 
-  logMessagePanel = new wxTextCtrl(this, 
-      MY_TEXTCTRL_LOG, 
-      "", 
-      wxDefaultPosition, 
-      wxSize(500, 100), 
+  logMessagePanel = new wxTextCtrl(this,
+      MY_TEXTCTRL_LOG,
+      "",
+      wxDefaultPosition,
+      wxSize(500, 100),
       wxTE_MULTILINE|wxTE_READONLY);
 
   displaySizer->Add(
@@ -331,7 +332,7 @@ MyFrame::MyFrame(wxWindow *parent,
     10);
 
   bottomSizer->Add(displaySizer, 0, wxALIGN_LEFT);
-  
+
   //bottom-right config-op panel
   wxBoxSizer *bottomRightSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -340,8 +341,8 @@ MyFrame::MyFrame(wxWindow *parent,
   // switch sizers
   wxStaticBoxSizer *switchSizer = new wxStaticBoxSizer(wxHORIZONTAL, configSizer->GetStaticBox(), "Switches");
   switchChoice = new wxChoice(
-    switchSizer->GetStaticBox(), 
-    MY_CHOICE_LIST_SWITCHES, 
+    switchSizer->GetStaticBox(),
+    MY_CHOICE_LIST_SWITCHES,
     wxDefaultPosition,
     wxDefaultSize,
     0,
@@ -362,7 +363,7 @@ MyFrame::MyFrame(wxWindow *parent,
   wxBoxSizer *monitorSetSizer = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer *monitorZapSizer = new wxBoxSizer(wxHORIZONTAL);
   monitorSet = new wxChoice(
-    monitorCtrlSizer->GetStaticBox(), 
+    monitorCtrlSizer->GetStaticBox(),
     MY_CHOICE_MONITOR_SET,
     wxDefaultPosition,
     wxDefaultSize,
@@ -374,7 +375,7 @@ MyFrame::MyFrame(wxWindow *parent,
   monitorSetSizer->Add(monitorSet, 0, wxALL, 5);
   monitorSetSizer->Add(new wxButton(monitorCtrlSizer->GetStaticBox(), MY_BUTTON_SET, "Set"), 0, wxALL, 10);
   monitorZap = new wxChoice(
-    monitorCtrlSizer->GetStaticBox(), 
+    monitorCtrlSizer->GetStaticBox(),
     MY_CHOICE_MONITOR_ZAP,
     wxDefaultPosition,
     wxDefaultSize,
@@ -435,6 +436,15 @@ void MyFrame::OnAbout(wxCommandEvent &event)
   wxMessageDialog about(this, "Example wxWidgets GUI\nAndrew Gee\nJune 2014", "About Logsim", wxICON_INFORMATION | wxOK);
   about.ShowModal();
 }
+
+// @Potsawee 29 May 2018 //
+void MyFrame::OnOpen(wxCommandEvent &event)
+  // Event handler for the about menu item
+{
+  wxDirDialog openBox(this, "Select a definition file (.gf2)", "", wxDD_DEFAULT_STYLE, wxDefaultPosition,  wxDefaultSize, wxDirDialogNameStr);
+  openBox.ShowModal();
+}
+/* --------------------- */
 
 void MyFrame::OnButtonRUN(wxCommandEvent &event)
   // Event handler for the push button
@@ -533,7 +543,7 @@ void MyFrame::OnCheck1(wxCommandEvent &event)
     getCurrentTime()+
     switchVec[currentSwitchIndex].objName +
     " is set to 1.\n");
-  }  
+  }
 }
 
 void MyFrame::OnButtonSET(wxCommandEvent& event)
@@ -554,7 +564,7 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
       logMessagePanel->AppendText(
         getCurrentTime()+
         "Monitor "+
-        monitorSet->GetStringSelection() + 
+        monitorSet->GetStringSelection() +
         " is set.\n");
       monitorSet->Delete(currentSetIndex);
       setVec[currentSetIndex].objVal = !setVec[currentSetIndex].objVal;
@@ -566,14 +576,14 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
       {
         monitorZap->Append(it->objName);
       }
-      currentSetIndex = 0; 
+      currentSetIndex = 0;
     }
     else
     {
       logMessagePanel->AppendText(
         getCurrentTime()+
         "Monitor "+
-        monitorZap->GetStringSelection() + 
+        monitorZap->GetStringSelection() +
         " is not set successfully.\n");
     }
   }
@@ -597,7 +607,7 @@ void MyFrame::OnButtonZAP(wxCommandEvent& event)
       logMessagePanel->AppendText(
         getCurrentTime()+
         "Monitor "+
-        monitorZap->GetStringSelection() + 
+        monitorZap->GetStringSelection() +
         " is zapped.\n");
       monitorZap->Delete(currentZapIndex);
       zapVec[currentZapIndex].objVal = !zapVec[currentZapIndex].objVal;
@@ -616,10 +626,10 @@ void MyFrame::OnButtonZAP(wxCommandEvent& event)
       logMessagePanel->AppendText(
         getCurrentTime()+
         "Monitor "+
-        monitorZap->GetStringSelection() + 
+        monitorZap->GetStringSelection() +
         " is not zapped successfully.\n");
     }
-    
+
   }
 
 }
@@ -660,7 +670,7 @@ void MyFrame::loadFile(wxString s)
       logMessagePanel->AppendText(
         getCurrentTime()+
         "Logic Definition File Error.\n");
-    }  
+    }
     else
     {
       logMessagePanel->AppendText(
@@ -696,7 +706,7 @@ void MyFrame::loadFile(wxString s)
       {
         switchChoice->Append(it->objName);
       }
-      // current switch choice by default is 
+      // current switch choice by default is
       currentSwitchIndex = 0;
       // set the value for the first switch
       // todo: find a better way to initialise
@@ -739,7 +749,7 @@ void MyFrame::loadFile(wxString s)
       {
         monitorZap->Append(it->objName);
       }
-      currentSetIndex = 0; 
+      currentSetIndex = 0;
       currentZapIndex = 0;
     }
   }
@@ -749,7 +759,7 @@ void MyFrame::loadFile(wxString s)
       getCurrentTime()+
       "File does not exist.\n");
   }
-  
+
 }
 
 int MyFrame::updateCurrentChoice(std::string choiceName, std::vector<MyChoiceObj>* vec)

@@ -66,6 +66,16 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
       }
     }
     glEnd();
+    glBegin(GL_LINE_STRIP);
+    for (i=0; i<cyclesdisplayed; i++) {
+      if (mmz->getsignaltrace(1, i, s)) {
+        if (s==low) y = 50.0;
+        if (s==high) y = 70.0;
+        glVertex2f(20*i+10.0, y); 
+        glVertex2f(20*i+30.0, y);
+      }
+    }
+    glEnd();
 
   } else { // draw an artificial trace
 
@@ -513,23 +523,36 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
   }
   else
   {
-  currentSetIndex = updateCurrentChoice((monitorSet->GetStringSelection()).ToStdString(), &setVec);
-  logMessagePanel->AppendText(
-    getCurrentTime()+
-    "Monitor "+
-    monitorSet->GetStringSelection() + 
-    " is set.\n");
-  monitorSet->Delete(currentSetIndex);
-  setVec[currentSetIndex].objVal = !setVec[currentSetIndex].objVal;
-  zapVec.push_back(setVec[currentSetIndex]);
-  std::sort(zapVec.begin(), zapVec.end());
-  setVec.erase(setVec.begin()+currentSetIndex);
-  monitorZap->Clear();
-  for(std::vector<MyChoiceObj>::iterator it = zapVec.begin() ; it != zapVec.end(); ++it)
-  {
-    monitorZap->Append(it->objName);
-  }
-  currentSetIndex = 0;
+    currentSetIndex = updateCurrentChoice((monitorSet->GetStringSelection()).ToStdString(), &setVec);
+    bool ok = true;
+    mmz->makemonitor(setVec[currentZapIndex].dev, setVec[currentZapIndex].output, ok);
+    if(ok)
+    {
+      logMessagePanel->AppendText(
+        getCurrentTime()+
+        "Monitor "+
+        monitorSet->GetStringSelection() + 
+        " is set.\n");
+      monitorSet->Delete(currentSetIndex);
+      setVec[currentSetIndex].objVal = !setVec[currentSetIndex].objVal;
+      zapVec.push_back(setVec[currentSetIndex]);
+      std::sort(zapVec.begin(), zapVec.end());
+      setVec.erase(setVec.begin()+currentSetIndex);
+      monitorZap->Clear();
+      for(std::vector<MyChoiceObj>::iterator it = zapVec.begin() ; it != zapVec.end(); ++it)
+      {
+        monitorZap->Append(it->objName);
+      }
+      currentSetIndex = 0; 
+    }
+    else
+    {
+      logMessagePanel->AppendText(
+        getCurrentTime()+
+        "Monitor "+
+        monitorZap->GetStringSelection() + 
+        " is not set successfully.\n");
+    }
   }
 }
 
@@ -543,24 +566,39 @@ void MyFrame::OnButtonZAP(wxCommandEvent& event)
   }
   else
   {
-  currentZapIndex = updateCurrentChoice((monitorZap->GetStringSelection()).ToStdString(), &zapVec);
-  logMessagePanel->AppendText(
-    getCurrentTime()+
-    "Monitor "+
-    monitorZap->GetStringSelection() + 
-    " is zapped.\n");
-  monitorZap->Delete(currentZapIndex);
-  zapVec[currentZapIndex].objVal = !zapVec[currentZapIndex].objVal;
-  setVec.push_back(zapVec[currentZapIndex]);
-  std::sort(setVec.begin(), setVec.end());
-  zapVec.erase(zapVec.begin()+currentZapIndex);
-  monitorSet->Clear();
-  for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
-  {
-    monitorSet->Append(it->objName);
+    currentZapIndex = updateCurrentChoice((monitorZap->GetStringSelection()).ToStdString(), &zapVec);
+    bool ok = true;
+    mmz->remmonitor(zapVec[currentZapIndex].dev, zapVec[currentZapIndex].output, ok);
+    if(ok)
+    {
+      logMessagePanel->AppendText(
+        getCurrentTime()+
+        "Monitor "+
+        monitorZap->GetStringSelection() + 
+        " is zapped.\n");
+      monitorZap->Delete(currentZapIndex);
+      zapVec[currentZapIndex].objVal = !zapVec[currentZapIndex].objVal;
+      setVec.push_back(zapVec[currentZapIndex]);
+      std::sort(setVec.begin(), setVec.end());
+      zapVec.erase(zapVec.begin()+currentZapIndex);
+      monitorSet->Clear();
+      for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
+      {
+        monitorSet->Append(it->objName);
+      }
+      currentZapIndex = 0;
+    }
+    else
+    {
+      logMessagePanel->AppendText(
+        getCurrentTime()+
+        "Monitor "+
+        monitorZap->GetStringSelection() + 
+        " is not zapped successfully.\n");
+    }
+    
   }
-  currentZapIndex = 0;
-  }
+
 }
 
 

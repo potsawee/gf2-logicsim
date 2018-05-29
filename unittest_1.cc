@@ -25,7 +25,7 @@ int main(int argc, char **argv)
     devices my_devices(&my_names, &my_network);
     monitor my_monitor(&my_names, &my_network);
 
-    const char file_path[] = "unittest_1_def";
+    const char file_path[] = "rcounter";
 
     scanner my_scanner(&my_names, file_path);
 

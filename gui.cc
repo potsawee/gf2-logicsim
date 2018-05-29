@@ -548,7 +548,10 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
   {
     currentSetIndex = updateCurrentChoice((monitorSet->GetStringSelection()).ToStdString(), &setVec);
     bool ok = true;
-    mmz->makemonitor(setVec[currentZapIndex].dev, setVec[currentZapIndex].output, ok);
+    mmz->makemonitor(setVec[currentSetIndex].dev, setVec[currentSetIndex].output, ok);
+    std::cout << setVec[currentSetIndex].objName << "    "
+    << setVec[currentSetIndex].dev << "    "
+    << setVec[currentSetIndex].output << "\n";
     if(ok)
     {
       logMessagePanel->AppendText(
@@ -573,7 +576,7 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
       logMessagePanel->AppendText(
         getCurrentTime()+
         "Monitor "+
-        monitorZap->GetStringSelection() + 
+        monitorSet->GetStringSelection() + 
         " is not set successfully.\n");
     }
   }
@@ -667,6 +670,7 @@ void MyFrame::loadFile(wxString s)
         getCurrentTime()+
         "File loaded from  "+
         s + "\n");
+      std::vector<MyChoiceObj> signalList;
 
       devlink currentDevice = netz->devicelist();
 	    name currentID;
@@ -689,8 +693,42 @@ void MyFrame::loadFile(wxString s)
           }
           switchVec.push_back(tempObj);
         }
+        else
+        {
+          outplink currentOutput = currentDevice->olist;
+          if(currentOutput->id==-1)
+          {
+            MyChoiceObj tempObj;
+            tempObj.dev = currentID;
+            tempObj.output = -1;
+            tempObj.objName = devName;
+            tempObj.objVal = 0;
+            signalList.push_back(tempObj);
+          }
+          else
+          {
+            while(currentOutput != NULL)
+            {
+              MyChoiceObj tempObj;
+              tempObj.dev = currentID;
+              tempObj.output = currentOutput->id;
+              tempObj.objName = devName+"."+nmz->getname(currentOutput->id);
+              tempObj.objVal = 0;
+              signalList.push_back(tempObj);
+              currentOutput = currentOutput->next;
+            }
+          }
+        }
         currentDevice = currentDevice->next;
       }
+      // for(int mm = 0; mm < signalList.size(); ++mm)
+      // {
+      //   std::cout << signalList[mm].objName << "\t"
+      //   << signalList[mm].dev << "\t"
+      //   << signalList[mm].output << "\t"
+      //   << "\n";
+      // }
+
       std::sort(switchVec.begin(), switchVec.end());
       for(std::vector<MyChoiceObj>::iterator it = switchVec.begin() ; it != switchVec.end(); ++it)
       {
@@ -711,7 +749,6 @@ void MyFrame::loadFile(wxString s)
         switchState0->SetValue(1);
       }
 
-
       int monitorCount = mmz->moncount();
       name dev, output;
       for(int i = 0; i < monitorCount; ++i)
@@ -729,18 +766,36 @@ void MyFrame::loadFile(wxString s)
         {
           monitorName = nmz->getname(dev) + "." + nmz->getname(output);
         }
-        tempObj.objName = monitorName;
-        tempObj.objVal = 1;
-        zapVec.push_back(tempObj);
+        for(int m = 0; m < signalList.size(); ++m)
+        {
+          if(monitorName == signalList[m].objName)
+          {
+            tempObj.objName = monitorName;
+            tempObj.objVal = 1;
+            zapVec.push_back(tempObj);
+            signalList.erase(signalList.begin()+m);
+          }
+        }
       }
-      std::cout << mmz->moncount();
       std::sort(zapVec.begin(), zapVec.end());
       for(std::vector<MyChoiceObj>::iterator it = zapVec.begin() ; it != zapVec.end(); ++it)
       {
         monitorZap->Append(it->objName);
       }
-      currentSetIndex = 0; 
       currentZapIndex = 0;
+      
+      for(int n = 0; n < signalList.size(); ++n)
+      {
+        setVec.push_back(signalList[n]);
+      }
+      std::sort(setVec.begin(), setVec.end());
+      for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
+      {
+        monitorSet->Append(it->objName);
+      }
+      currentSetIndex = 0;
+      std::cout<< signalList.size() << "\n";
+
     }
   }
   else

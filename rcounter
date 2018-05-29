@@ -29,4 +29,4 @@ CONNECTIONS:
     d4.QBAR => d4.DATA,
     d5.QBAR => d5.DATA;
 MONITORS:
-    ck, d1.Q;
+    ck, d1.Q, d2.Q, d3.Q, d4.Q;

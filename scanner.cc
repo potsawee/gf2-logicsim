@@ -85,6 +85,16 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 			case ')': s = rightbrk; break;
 			case '.': s = fullstop; break;
 			case '>': s = greaterthan; break;
+			case '/': {	s = slash;
+						skipcomments();
+						getsymbol(s, id, num);
+						break;
+						}
+			case '\n':{	s = eoline;
+						linenum ++;
+						getsymbol(s, id, num);
+						break;
+						}
             // default:  s = badsym; cout << "BADSYM" << endl; break;
 			default:  s = badsym; break;
         }
@@ -173,9 +183,7 @@ void scanner::skipspaces()
 {
     while(!eofile){
         if(isspace(curch)){
-			if(curch == '\n')
-				linenum++;
-            eofile = !(inf.get(curch));
+			eofile = !(inf.get(curch));
 		}
         else
             return;
@@ -183,6 +191,42 @@ void scanner::skipspaces()
 }
 
 // TODO: Skip comments!!
+void scanner::skipcomments()
+{	
+	cout <<"skipping comments"<<endl;
+	while(!eofile){	
+		eofile = !(inf.get(curch));
+		if (curch == '/'){
+			//cout <<"curch is '/'. Lets skip to the end of current line" <<endl;
+			//skip to the end of current line
+			while (!eofile && curch != '\n'){
+				//cout <<"Not yet"<<endl;
+				//cout <<"curch is " << curch <<endl;
+				eofile = !(inf.get(curch));
+				if (curch == '\n') {
+					//cout <<"It's the end of a line"<<endl;
+					linenum ++;
+					break;
+				}
+			}
+		}
+		else if (curch == '*'){
+			//skip to '*/'
+			prevch = curch;
+			while (!eofile && !(prevch == '*' && curch == '/')){
+				prevch = curch;
+				eofile = !(inf.get(curch));
+				if (curch == '\n') 
+					linenum ++;
+				if (eofile) 
+ 					cout<<("Error: Comment not closed")<<endl;
+			}
+			prevch = curch;
+			eofile = !(inf.get(curch));
+		}
+		return;
+	}
+} 
 // void scanner::skipcomments(ifstream *infp, char& curch, bool& eofile)
 // {
 // 	if (curch =='/') {
@@ -223,10 +267,13 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 	// }
 	if(print)
 		print_line_error();
-
-	while(!(s == comma || s == semicol)){
-		getsymbol(s, id, num);
+	eofile = !(inf.get(curch));
+	if(curch != '\n'){
+		while(!(eofile || s == comma || s == semicol || curch == '\n')){
+			getsymbol(s, id, num);
+		}		
 	}
+	
 }
 void scanner::print_line_error()
 {

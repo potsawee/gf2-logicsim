@@ -22,7 +22,7 @@ using namespace std;
 // Use the definition provided in network.h instead!
 typedef enum {namesym, numsym, devsym, consym, monsym,
 	comma, semicol, colon, equals, leftbrk, rightbrk, fullstop, greaterthan,
-	badsym, eofsym } symbol;
+	badsym, eofsym, slash, eoline } symbol;
 
 	/*
 	for unit testing comparison
@@ -39,6 +39,8 @@ typedef enum {namesym, numsym, devsym, consym, monsym,
 	12		= >
 	13		= badsym
 	14		= eofsym
+	15		= /
+	16		='\n'
 	*/
 
 typedef int name;
@@ -49,7 +51,7 @@ private:
     ifstream inf; //input definition file
     char curch; //current input character
     // string currentline;	//current line
-	// char prevch; //previous input character
+	char prevch; //previous input character
     bool eofile; //true when end of file is reached
     // bool eoline; //true when end of line is reached
     // symbol cursym; //current symbol
@@ -59,7 +61,7 @@ private:
     // void getch(char& curch); //reads next character, updates curch
     // void incrChar(); //gets next character
     void skipspaces(); //skips spaces
-    // void skipcomments(ifstream *infp, char& curch, bool& eofile); //skips comments
+    void skipcomments(); //skips comments
     // string getline(); //gets current line
     void getnumber(int& num); //reads number
     void getname(name& id, bool& is_keyword); 	//reads name

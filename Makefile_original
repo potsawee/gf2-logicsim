@@ -1,6 +1,7 @@
 OPENGL_LIBS = -lglut -lGL -lGLU
 
-CXX = $(shell /homes/ahg13/wxWidgets-3.0.3/gtk-build/wx-config --version=3.0 --cxx)
+#CXX = $(shell /homes/ahg13/wxWidgets-3.0.3/gtk-build/wx-config --version=3.0 --cxx)
+CXX = g++ --std=c++11
 
 SRC = logsim.cc names.cc scanner.cc network.cc parser.cc monitor.cc devices.cc userint.cc gui.cc guitest.cc
 

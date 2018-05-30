@@ -57,23 +57,22 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 
     
 
-			glEnable(GL_LINE_STIPPLE); 
-			glLineStipple(2,0xAAAA); // dashed lines, factor 2
-			glColor3f(0.7,0.7,0.7);
+    glEnable(GL_LINE_STIPPLE); 
+    glLineStipple(2,0xAAAA); // dashed lines, factor 2
+    glColor3f(0.7,0.7,0.7);
+    
+    glBegin(GL_LINE_STRIP);			
+    glVertex2f(50, 10);
+    glVertex2f(500, 10);
+    glEnd();
+    
+    glBegin(GL_LINE_STRIP);			
+    glVertex2f(50, 30);
+    glVertex2f(500, 30);
+    glEnd();
 			
-			glBegin(GL_LINE_STRIP);			
-			glVertex2f(50, 10);
-			glVertex2f(500, 10);
-			glEnd();
-			
-			glBegin(GL_LINE_STRIP);			
-			glVertex2f(50, 30);
-			glVertex2f(500, 30);
-			glEnd();
-			
-			glDisable(GL_LINE_STIPPLE);
-
-    SetSize(cyclesdisplayed*30+50, 600);    
+    glDisable(GL_LINE_STIPPLE);
+    
     glColor3f(1., 0.0, 0.0);
     for(int j = 0; j < mmz->moncount(); ++j)
     {
@@ -317,7 +316,7 @@ MyFrame::MyFrame(wxWindow *parent,
     monitor_mod, 
     names_mod, 
     wxDefaultPosition, 
-    wxSize(600, 500));
+    wxSize(500, 600));
   // displaySizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
   swinSizer->Add(canvas, 1, wxRIGHT|wxBOTTOM|wxEXPAND, 20);
 	scrolledWindow->SetSizer(swinSizer);
@@ -457,7 +456,14 @@ void MyFrame::OnButtonRUN(wxCommandEvent &event)
   cyclescompleted = 0;
   dmz->initdevices ();
   mmz->resetmonitor ();
-  runnetwork(spin->GetValue());
+  ncycles = spin->GetValue();
+  // todo: change 20 to signal size, scale according to the number of monitors accordingly
+  if((ncycles+cyclescompleted)*20+50>500)
+  {
+    canvas->SetSize((ncycles+cyclescompleted)*20+50, 600);
+    scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+5, 20);
+  }
+  runnetwork(ncycles);
   canvas->Render("Run button pressed", cyclescompleted);
   logMessagePanel->AppendText(getCurrentTime()+"Start running.\n");
 }
@@ -483,6 +489,12 @@ void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
   std::cout << "Some text" << ncycles << "\n";
   if(cyclescompleted>0)
   {
+    // todo: change 20 to signal size, scale according to the number of monitors accordingly
+    if((ncycles+cyclescompleted)*20+50>500)
+    {
+      canvas->SetSize((ncycles+cyclescompleted)*20+50, 600);
+      scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+5, 20);
+    }
     runnetwork(ncycles);
     canvas->Render("Continue button pressed", cyclescompleted);
     logMessagePanel->AppendText(getCurrentTime()+"Continue running.\n");

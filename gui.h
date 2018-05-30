@@ -50,6 +50,7 @@ class MyChoiceObj
   std::string objName;
   name dev;
   name output;
+  devicekind kind;
 };
 
 class MyGLCanvas;
@@ -135,6 +136,35 @@ class MyGLCanvas: public wxGLCanvas
 	     const wxString& name = "MyGLCanvas", const wxPalette &palette=wxNullPalette); // constructor
   void Render(wxString example_text = "", int cycles = -1); // function to draw canvas contents
   void SetDefault(monitor *monitor_mod, names *names_mod);
+
+  int period;
+  int height;
+  float colourBox[10][3] = {
+    {0.0, 0.0, 0.0},  // black
+    {0.0, 0.0, 0.7},  // Dark Blue
+    {0.3, 0.3, 1.0},  // Light Blue
+    {0.0, 1.0, 1.0},  // Cyan
+    {0.0, 0.7, 0.0},  // Dark Green
+    {0.3, 1.0, 0.3},  // Light Green
+    {1.0, 0.0, 1.0},  // Magneta
+    {1.0, 0.0, 0.0},  // Red
+    {1.0, 0.5, 0.0},  // Orange
+    {0.5, 0.35, 0.05}   // Yellow
+  };
+
+  float colourBoxLight[10][3] = {
+    {0.7, 0.7, 0.7},  // black
+    {0.5, 0.5, 1.0},  // Dark Blue
+    {0.7, 0.7, 1.0},  // Light Blue
+    {0.7, 1.0, 1.0},  // Cyan
+    {0.5, 1.0, 0.5},  // Dark Green
+    {0.7, 1.0, 0.7},  // Light Green
+    {1.0, 0.7, 1.0},  // Magneta
+    {1.0, 0.5, 0.5},  // Red
+    {1.0, 0.7, 0.7},  // Orange
+    {0.7, 0.55, 0.3}   // Yellow
+  };
+
  private:
   wxGLContext *context;              // OpenGL rendering context
   bool init;                         // has the OpenGL context been initialised?

@@ -32,6 +32,8 @@ MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, na
   mmz = monitor_mod;
   nmz = names_mod;
   SetDefault(mmz, nmz);
+  period = 20;
+  height = 20;
 }
 
 void MyGLCanvas::Render(wxString example_text, int cycles)
@@ -56,56 +58,143 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
   int xx, yy;
   xx = GetParent()->GetScrollPos(wxHORIZONTAL);
   yy = GetParent()->GetScrollPos(wxVERTICAL);
-  std::cout << xx << "    " << yy << std::endl;
-    
-  if ((cyclesdisplayed >= 0) && (mmz->moncount() > 0)) { // draw the first monitor signal, get trace from monitor class
+  // std::cout << xx << "    " << yy << std::endl;
 
-    
-
-    glEnable(GL_LINE_STIPPLE); 
-			
-    glDisable(GL_LINE_STIPPLE);
-    
-    glColor3f(1., 0.0, 0.0);
+  if ((cyclesdisplayed >= 0) && (mmz->moncount() > 0)) 
+  { // draw the first monitor signal, get trace from monitor class
     for(int j = 0; j < mmz->moncount(); ++j)
     {
+      int yLow = 300 - 50*j;
+      int yHigh = yLow + height;
+
+      // doted 0 and 1 lines
+      glEnable(GL_LINE_STIPPLE); 
+      glLineStipple(2,0xAAAA); // dashed lines, factor 2
+	    glColor3f(0.7,0.7,0.7);   
+      glBegin(GL_LINE_STRIP);			
+      glVertex2f(100, yLow);
+      glVertex2f(cyclesdisplayed*20+50, yLow);
+      glEnd();
+
+      glBegin(GL_LINE_STRIP);			
+      glVertex2f(100, yHigh);
+      glVertex2f(cyclesdisplayed*20+100, yHigh);
+      glEnd();
+      glDisable(GL_LINE_STIPPLE);
+
+      // marking 0 and 1
+      glColor3f(0.7,0.7,0.7);
+			glRasterPos2f(100, yHigh+4);
+			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, '1');
+			
+			glRasterPos2f(100, yLow+4);
+			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, '0');
+      
+      // fill areas below high signals
+      for(i = 0; i < cyclesdisplayed; ++i)
+      {
+        if(mmz->getsignaltrace(j, i, s))
+        {
+          if(s==high)
+          {
+            glColor3f(colourBoxLight[j][0], colourBoxLight[j][1], colourBoxLight[j][2]);
+            glBegin(GL_QUADS);
+                glVertex2f(period*i+100.0, yHigh);
+                glVertex2f(period*i+100.0, yLow);
+                glVertex2f(period*i+120.0, yLow);
+                glVertex2f(period*i+120.0, yHigh);
+            glEnd();            
+          }
+        }
+      }
+      // draw signal
+      glColor3f(colourBox[j][0], colourBox[j][1], colourBox[j][2]);
+      glLineWidth(2);
       glBegin(GL_LINE_STRIP);
       for (i=0; i<cyclesdisplayed; i++) 
       {
         if (mmz->getsignaltrace(j, i, s)) 
         {
-          if (s==low) y = 30.0*j+10.0;
-          if (s==high) y = 30.0*j+30.0;
-          glVertex2f(20*i+10.0, y); 
-          glVertex2f(20*i+30.0, y);
+          if (s==low) y = yLow;
+          if (s==high) y = yHigh;
+          glVertex2f(period*i+100.0, y); 
+          glVertex2f(period*i+120.0, y);
         }
       }
       glEnd();
-      
-      glLineStipple(2,0xAAAA); // dashed lines, factor 2
-	  glColor3f(0.7,0.7,0.7);   
-      glBegin(GL_LINE_STRIP);			
-      glVertex2f(10, 30*j+10);
-      glVertex2f(cyclesdisplayed*20, 30*j+10);
-      glEnd();
-    
-      glBegin(GL_LINE_STRIP);			
-      glVertex2f(10, 30*j+30);
-      glVertex2f(cyclesdisplayed*20, 30*j+30);
-      glEnd();
-    }
-  } else { // draw an artificial trace
+      glLineWidth(1);
+      // set cycle mark
+      for (i=0; i<cyclesdisplayed; i++) 
+      {
+				glBegin(GL_LINE_STRIP);
+				glColor3f(0.7, 0.7, 0.7); // set line colour to grey
+				glVertex2f(20*i+100.0, yLow); 
+				glVertex2f(20*i+100.0, yLow-5);
+				glEnd();
+			}
 
-    glColor3f(0.0, 1.0, 0.0);
-    glBegin(GL_LINE_STRIP);
-    for (i=0; i<15; i++) {
-      if (i%3) y = 10.0;
-      else y = 30.0;
-      glVertex2f(20*i+10.0, y); 
-      glVertex2f(20*i+30.0, y);
+			for (i=5; i <= cyclesdisplayed; i+=5) 
+      {	
+				stringstream ss;
+				ss << (i);
+				wxString numstr = ss.str();
+				
+				glColor3f(0.7, 0.7, 0.7); // set font colour to black
+				glRasterPos2f(period*i+100, yLow-10);
+				for (int ch = 0; ch < numstr.Len(); ch++) {
+					glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, numstr[ch]);
+				}
+			}
     }
-    glEnd();
     
+    // white background for displaying signal labels
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_QUADS);
+        glVertex2f(20*xx+0.0, 550.0);
+        glVertex2f(20*xx+0.0, 50.0);
+        glVertex2f(20*xx+80.0, 50.0);
+        glVertex2f(20*xx+80.0, 550.0);
+    glEnd(); 
+
+    // signal labels
+		for (int j = 0; j < mmz->moncount(); j++) 
+    {
+      int yLow = 300 - 50*j;
+      int yHigh = yLow + height;
+      name dev, outp;
+			mmz->getmonname(j, dev, outp); 		// dev is now the id of the device
+			namestring sigName = nmz->getname(dev);
+      if (outp != -1)
+      {
+        sigName = sigName + "." + nmz->getname(outp);
+      }
+			glColor3f(0.0, 0.0, 0.0); 			// set text colour to black
+			glRasterPos2f(20*xx+30, yLow+10); 	// position is in (columns, rows) from bottom left corner
+			for (i = 0; i < sigName.length(); i++) 
+      {
+				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, sigName[i]);
+			}
+    }
+
+    // mark the cycle limit
+    glBegin(GL_LINE_STRIP);	
+    glColor3f(0.7,0.7,0.7);		
+    glVertex2f(maxcycles*20+100, 50);
+    glVertex2f(maxcycles*20+100, 550);
+    glEnd();
+  } 
+  else 
+  { // draw an artificial trace
+
+    // glColor3f(0.0, 1.0, 0.0);
+    // glBegin(GL_LINE_STRIP);
+    // for (i=0; i<15; i++) {
+    //   if (i%3) y = 10.0;
+    //   else y = 30.0;
+    //   glVertex2f(20*i+10.0, y); 
+    //   glVertex2f(20*i+30.0, y);
+    // }
+    // glEnd();
   }
 
   // Example of how to use GLUT to draw text on the canvas
@@ -313,7 +402,7 @@ MyFrame::MyFrame(wxWindow *parent,
     monitor_mod, 
     names_mod, 
     wxDefaultPosition, 
-    wxSize(500, 600));
+    wxSize(500, 200));
   // displaySizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
   swinSizer->Add(canvas, 1, wxRIGHT|wxBOTTOM|wxEXPAND, 20);
 	scrolledWindow->SetSizer(swinSizer);
@@ -800,6 +889,7 @@ void MyFrame::loadFile(wxString s)
           {
             tempObj.objVal = 1;
           }
+          tempObj.kind = currentDevice->kind;
           switchVec.push_back(tempObj);
           signalList.push_back(tempObj);
         }
@@ -813,6 +903,7 @@ void MyFrame::loadFile(wxString s)
             tempObj.output = -1;
             tempObj.objName = devName;
             tempObj.objVal = 0;
+            tempObj.kind = currentDevice->kind;
             signalList.push_back(tempObj);
           }
           else
@@ -824,6 +915,7 @@ void MyFrame::loadFile(wxString s)
               tempObj.output = currentOutput->id;
               tempObj.objName = devName+"."+nmz->getname(currentOutput->id);
               tempObj.objVal = 0;
+              tempObj.kind = currentDevice->kind;
               signalList.push_back(tempObj);
               currentOutput = currentOutput->next;
             }

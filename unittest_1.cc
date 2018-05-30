@@ -1,6 +1,17 @@
-/*  Unit test for the scanner class
+/*  Unit test for the 'SCANNER' class
+
+    Testing:
+    1. This program is intended to print out symbols sent from
+    the scanner to the parser one by one
+    2. If a symbol is 'namesym' the corresponding name will also be printed
+    3. If a symbol is 'numsym' the corresponding number will also be printed
+
+    Usage:
+    1. link this unittest to the names and scanner classes
+       e.g. g++ -g -o unittest_1 unittest_1.o scanner.o names.o
+    2. ./unittest_1 [filename]
+
     date: 26 May 2018
-    updated: 29 May 2018 => showing string of the symbol name
     @Potsawee
 */
 
@@ -21,13 +32,15 @@ string symnum_to_symstring(int num);
 int main(int argc, char **argv)
 {
     names my_names;
-    network my_network(&my_names);
-    devices my_devices(&my_names, &my_network);
-    monitor my_monitor(&my_names, &my_network);
 
-    const char file_path[] = "unittest_1_def";
+    if (argc != 2) {
+        cout << "Usage:         " << argv[0] << " [filename]" << endl;
+        exit(1);
+    }
 
-    scanner my_scanner(&my_names, file_path);
+    // argv[1] contains the file path
+    cout << "Definition file = " << argv[1] << endl;
+    scanner my_scanner(&my_names, argv[1]);
 
     char cont = 'y';
     cout << "continue?? (y/n): ";
@@ -59,7 +72,7 @@ int main(int argc, char **argv)
         }
 
         // my_scanner.print_curch();
-
+        cout << "--------------------------------" << endl;
         cout << "continue?? (y/n): ";
         cin >> cont;
 

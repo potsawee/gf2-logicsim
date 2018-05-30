@@ -79,7 +79,7 @@ class MyFrame: public wxFrame
   wxScrolledWindow* scrolledWindow;
 
   wxTextCtrl *logMessagePanel;
-
+  wxTextCtrl *filePathBox;
   std::vector<MyChoiceObj> switchVec;
   int currentSwitchIndex;
   wxChoice *switchChoice;
@@ -93,12 +93,14 @@ class MyFrame: public wxFrame
   std::vector<MyChoiceObj> setVec;  
   std::vector<MyChoiceObj> zapVec;
 
-  wxString filePath;
+  wxString filePath; //store location of path
 
   int cyclescompleted;                    // how many simulation cycles have been completed
   void runnetwork(int ncycles);           // function to run the logic network
   void OnExit(wxCommandEvent& event);     // event handler for exit menu item
   void OnAbout(wxCommandEvent& event);    // event handler for about menu item
+  void OnOpen(wxCommandEvent &event);
+  void OnSave(wxCommandEvent &event);
   void OnButtonRUN(wxCommandEvent& event);    // event handler for push button
   void OnButtonRESET(wxCommandEvent& event);  // event handler for reset button
   void OnButtonCONTINUE(wxCommandEvent& event);   // event handler for continue button

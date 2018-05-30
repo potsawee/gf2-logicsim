@@ -13,27 +13,38 @@ bool parser::readin (void)
 	smz->getsymbol(cursym, curid, curnum);
 
 	/* Syntax error detection */
+	if(cursym == devsym){ // "DEVICES:"
+		smz->skipcolon();
+		devicelist();
+	}
+	else{
+		error(51);
+		smz->skipcolon();
+		devicelist();
+	}
+	smz->getsymbol(cursym, curid, curnum);
+	if(cursym == consym){ // "CONNECTIONS:"
+		smz->skipcolon();
+		connectionlist();
+	}
+	else{
+		error(52);
+		smz->skipcolon();
+		connectionlist();
+	}
+	smz->getsymbol(cursym, curid, curnum);
+	if(cursym == monsym){ // "MONITORS:"
+		smz->skipcolon();
+		monitorlist();
+	}
+	else{
+		error(53);
+		smz->skipcolon();
+		monitorlist();
+	}
 	while(cursym != eofsym){
-		if(cursym == devsym){ // "DEVICES:"
-			smz->skipcolon();
-			devicelist();
-		}
-		else if(cursym == consym){ // "CONNECTIONS:"
-			smz->skipcolon();
-			connectionlist();
-		}
-		else if(cursym == monsym){ // "MONITORS:"
-			smz->skipcolon();
-			monitorlist();
-		}
-		else{
-			while(!(cursym == devsym || cursym == consym || cursym == monsym))
-				smz->getsymbol(cursym, curid, curnum);
-				error(9);
-		}
 		smz->getsymbol(cursym, curid, curnum);
 	}
-
 	if(errorcount == 0){
 		// cout << "0 error dectected" << endl;
 		return true;
@@ -254,18 +265,19 @@ name parser::name1()
 {
 	smz->getsymbol(cursym, curid, curnum);
 	if (cursym == namesym){
-		// cout << "parser::name() => ";
-		// nmz->writename(curid);
 
 		/* --------- Semantic error #1,2 ------- */
 		// 1. two devices cannot have the same name
-		// 2. device names cannot be the same as reserved keyword
 		devlink finddev = netz->finddevice(curid); // return NULL if not defined yet
 		if(finddev)
 		{
 			semantic(1);
 		}
-		// TODO: semantic #2
+		// 2. device names cannot be the same as reserved keyword
+		if(is_name_reserved(curid))
+		{
+			semantic(2);
+		}
 		/* ------------------------------------- */
 
 		name deviceid = curid;
@@ -275,6 +287,21 @@ name parser::name1()
 		error(8);
 	}
 	return -1; // it won't reach this just make warning disappear [error(8) throw error]
+}
+
+bool parser::is_name_reserved(name id)
+{
+	// To deal with semantic error #2
+	namestring namestr = nmz->getname(id);
+	if(nmz->is_keyword(namestr))
+		return true;
+	if(namestr == "SWITCH" || namestr == "CLOCK" || namestr == "AND" || namestr == "NAND" ||
+	namestr == "OR" || namestr == "NOR" || namestr == "XOR" || namestr == "DTYPE" ||
+	namestr == "DATA" || namestr == "CLK" || namestr == "SET" || namestr == "CLEAR" ||
+	namestr == "Q" || namestr == "QBAR")
+		return true;
+
+	return false;
 }
 
 
@@ -497,7 +524,8 @@ void parser::monitor1()
 void parser::error(int errn)
 {
 	errorcount++;
-	smz->skip_dueto_error(cursym, curid, curnum);
+	if(errn <= 50)
+		smz->skip_dueto_error(cursym, curid, curnum);
 	cout << "***ERROR " << errn << ": " ;
 	switch(errn)
 	{
@@ -539,7 +567,13 @@ void parser::error(int errn)
 		case 31: cout << "Makedevice error" << endl; break;
 		case 32: cout << "connection error. hint: 'output => input'" << endl; break;
 		case 33: cout << "monitor error. hint: check the signal" << endl; break;
-		case 99: cout << "special error" << endl; break;
+
+		case 51: smz->print_line_error();
+				cout << "'DEVICES:'' keyword expected" << endl; break;
+		case 52: smz->print_line_error();
+				cout << "'CONNECTIONS:'' keyword expected" << endl; break;
+		case 53: smz->print_line_error();
+				cout << "'MONITORS:'' keyword expected" << endl; break;
 	}
 }
 void parser::semantic(int errn)

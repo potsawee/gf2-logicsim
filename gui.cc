@@ -171,7 +171,7 @@ void MyGLCanvas::OnPaint(wxPaintEvent& event)
 void MyGLCanvas::OnSize(wxSizeEvent& event)
   // Event handler for when the canvas is resized
 {
-  init = false;; // this will force the viewport and projection matrices to be reconfigured on the next paint
+  init = false; // this will force the viewport and projection matrices to be reconfigured on the next paint
 }
 
 void MyGLCanvas::OnMouse(wxMouseEvent& event)
@@ -460,8 +460,11 @@ void MyFrame::OnButtonRUN(wxCommandEvent &event)
   // todo: change 20 to signal size, scale according to the number of monitors accordingly
   if((ncycles+cyclescompleted)*20+50>500)
   {
+	int x, y;
+	scrolledWindow->GetViewStart(&x, &y);
     canvas->SetSize((ncycles+cyclescompleted)*20+50, 600);
     scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+5, 20);
+    scrolledWindow->Scroll(x, y);
   }
   runnetwork(ncycles);
   canvas->Render("Run button pressed", cyclescompleted);
@@ -492,8 +495,11 @@ void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
     // todo: change 20 to signal size, scale according to the number of monitors accordingly
     if((ncycles+cyclescompleted)*20+50>500)
     {
+	  int x, y;
+	  scrolledWindow->GetViewStart(&x, &y);
       canvas->SetSize((ncycles+cyclescompleted)*20+50, 600);
       scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+5, 20);
+      scrolledWindow->Scroll(x, y);
     }
     runnetwork(ncycles);
     canvas->Render("Continue button pressed", cyclescompleted);

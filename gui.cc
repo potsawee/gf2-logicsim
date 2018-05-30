@@ -73,6 +73,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 			
 			glDisable(GL_LINE_STIPPLE);
 
+    SetSize(cyclesdisplayed*30+50, 600);    
     glColor3f(1., 0.0, 0.0);
     for(int j = 0; j < mmz->moncount(); ++j)
     {

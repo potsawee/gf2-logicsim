@@ -524,13 +524,14 @@ void parser::monitor1()
 void parser::error(int errn)
 {
 	errorcount++;
-	if(errn <= 50)
+	if(errn <= 50){
 		smz->skip_dueto_error(cursym, curid, curnum);
-	cout << "***ERROR " << errn << ": " ;
+		cout << "***ERROR " << errn << ": " ;
+	}
 	switch(errn)
 	{
 		case 0: cout << "undefined error" << endl; break;
-		case 1: cout << "a semicolon is expected" << endl; break;
+		case 1: cout << "a semicolon is expected before this expression" << endl; break;
 		case 2: cout << "a device definition is wrong" << endl; break;
 		case 3: cout << "Initial state is either 0 or 1" << endl;
 				throw devicedeferror; break;
@@ -568,12 +569,12 @@ void parser::error(int errn)
 		case 32: cout << "connection error. hint: 'output => input'" << endl; break;
 		case 33: cout << "monitor error. hint: check the signal" << endl; break;
 
-		case 51: smz->print_line_error();
-				cout << "'DEVICES:'' keyword expected" << endl; break;
-		case 52: smz->print_line_error();
-				cout << "'CONNECTIONS:'' keyword expected" << endl; break;
-		case 53: smz->print_line_error();
-				cout << "'MONITORS:'' keyword expected" << endl; break;
+		case 51: smz->print_line_error(8);
+				cout << "***ERROR 51: 'DEVICES:'' keyword expected" << endl; break;
+		case 52: smz->print_line_error(8);
+				cout << "***ERROR 52: 'CONNECTIONS:'' keyword expected" << endl; break;
+		case 53: smz->print_line_error(8);
+				cout << "***ERROR 53: 'MONITORS:'' keyword expected" << endl; break;
 	}
 }
 void parser::semantic(int errn)
@@ -583,6 +584,7 @@ void parser::semantic(int errn)
 		smz->skip_dueto_error(cursym, curid, curnum, false);
 	else
 		smz->skip_dueto_error(cursym, curid, curnum);
+
 	cout << "***ERROR 10" << errn << ": " ;
 	switch (errn)
 	{

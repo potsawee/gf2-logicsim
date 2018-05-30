@@ -88,12 +88,12 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 			case '/': s = slash;
 						skipcomments();
 						getsymbol(s, id, num);
-						break;
+						return;
 
 			case '\n': s = eoline;
 						linenum ++;
 						getsymbol(s, id, num);
-						break;
+						return;
 
 			default:  s = badsym; break;
         }

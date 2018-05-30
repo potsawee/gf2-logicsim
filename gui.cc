@@ -219,6 +219,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
   EVT_BUTTON(MY_BUTTON_RUN, MyFrame::OnButtonRUN)
   EVT_BUTTON(MY_BUTTON_RESET, MyFrame::OnButtonRESET)
+  EVT_MENU(wxID_SAVE, MyFrame::OnSave)
   EVT_BUTTON(MY_BUTTON_CONTINUE, MyFrame::OnButtonCONTINUE)
   EVT_BUTTON(MY_BUTTON_LOAD, MyFrame::OnButtonLOAD)
   EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
@@ -292,8 +293,9 @@ MyFrame::MyFrame(wxWindow *parent,
     wxALL, 
     10);
 
+	filePathBox = new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(800, -1), wxTE_PROCESS_ENTER);
   filePathSizer->Add(
-    new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(800, -1), wxTE_PROCESS_ENTER), 
+    filePathBox, 
     0, 
     wxEXPAND | wxALL, 
     10);
@@ -440,6 +442,33 @@ void MyFrame::OnExit(wxCommandEvent &event)
 {
   Close(true);
 }
+
+ void MyFrame::OnOpen(wxCommandEvent &event)
+   // Event handler for the about menu item
+ {
+  // wxDirDialog openBox(this, "Select a definition file (.gf2)", "", wxDD_DEFAULT_STYLE, wxDefaultPosition,  wxDefaultSize, wxDirDialogNameStr);
+  // openBox.ShowModal();
+    wxFileDialog openFileDialog(
+      this, 
+      _("Open a circuit definition file"), 
+      "", 
+      "",
+      "GF2 files (*.gf2)|*.gf2", 
+      wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+	if(openFileDialog.ShowModal() == wxID_CANCEL)
+		return;			// user changed idea..
+    // proceed loading the file chosen by the user
+  filePath = openFileDialog.GetPath();
+  filePathBox->SetValue(filePath);
+ }
+ /* --------------------- */
+
+void MyFrame::OnSave(wxCommandEvent &event)
+// Event Handler for 'Save'
+{
+	//@potsawee I still have no idea what to implement here haha
+}
+
 
 void MyFrame::OnAbout(wxCommandEvent &event)
   // Event handler for the about menu item
@@ -743,6 +772,13 @@ void MyFrame::loadFile(wxString s)
       logMessagePanel->AppendText(
         getCurrentTime()+
         "Logic Definition File Error.\n");
+
+                
+        /* --- Open gedit to edit to file --- */
+        string str = "gedit " + filePath.ToStdString();
+	    	const char *command = str.c_str();
+		    system(command);
+	    	/* ---------------------------------- */
     }  
     else
     {

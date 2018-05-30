@@ -53,23 +53,16 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
   }
   glClear(GL_COLOR_BUFFER_BIT);
 
+  int xx, yy;
+  xx = GetParent()->GetScrollPos(wxHORIZONTAL);
+  yy = GetParent()->GetScrollPos(wxVERTICAL);
+  std::cout << xx << "    " << yy << std::endl;
+    
   if ((cyclesdisplayed >= 0) && (mmz->moncount() > 0)) { // draw the first monitor signal, get trace from monitor class
 
     
 
     glEnable(GL_LINE_STIPPLE); 
-    glLineStipple(2,0xAAAA); // dashed lines, factor 2
-    glColor3f(0.7,0.7,0.7);
-    
-    glBegin(GL_LINE_STRIP);			
-    glVertex2f(50, 10);
-    glVertex2f(500, 10);
-    glEnd();
-    
-    glBegin(GL_LINE_STRIP);			
-    glVertex2f(50, 30);
-    glVertex2f(500, 30);
-    glEnd();
 			
     glDisable(GL_LINE_STIPPLE);
     
@@ -88,18 +81,19 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
         }
       }
       glEnd();
+      
+      glLineStipple(2,0xAAAA); // dashed lines, factor 2
+	  glColor3f(0.7,0.7,0.7);   
+      glBegin(GL_LINE_STRIP);			
+      glVertex2f(10, 30*j+10);
+      glVertex2f(cyclesdisplayed*20, 30*j+10);
+      glEnd();
+    
+      glBegin(GL_LINE_STRIP);			
+      glVertex2f(10, 30*j+30);
+      glVertex2f(cyclesdisplayed*20, 30*j+30);
+      glEnd();
     }
-    // glBegin(GL_LINE_STRIP);
-    // for (i=0; i<cyclesdisplayed; i++) {
-    //   if (mmz->getsignaltrace(1, i, s)) {
-    //     if (s==low) y = 50.0;
-    //     if (s==high) y = 70.0;
-    //     glVertex2f(20*i+10.0, y); 
-    //     glVertex2f(20*i+30.0, y);
-    //   }
-    // }
-    // glEnd();
-
   } else { // draw an artificial trace
 
     glColor3f(0.0, 1.0, 0.0);
@@ -116,7 +110,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 
   // Example of how to use GLUT to draw text on the canvas
   glColor3f(0.0, 0.0, 1.0);
-  glRasterPos2f(10, 100);
+  glRasterPos2f(20*xx, 300);
   for (i = 0; i < example_text.Len(); i++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, example_text[i]);
 
   // We've been drawing to the back buffer, flush the graphics pipeline and swap the back buffer to the front
@@ -526,7 +520,7 @@ void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
 	  int x, y;
 	  scrolledWindow->GetViewStart(&x, &y);
       canvas->SetSize((ncycles+cyclescompleted)*20+50, 600);
-      scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+5, 20);
+      scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+5, 30);
       scrolledWindow->Scroll(x, y);
     }
     runnetwork(ncycles);

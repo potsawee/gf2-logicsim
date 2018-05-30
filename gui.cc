@@ -297,20 +297,31 @@ MyFrame::MyFrame(wxWindow *parent,
     wxEXPAND | wxALL, 
     10);
     
-  
+  int* x,y;
+  wxSize s;
   wxBoxSizer *bottomSizer = new wxBoxSizer(wxHORIZONTAL);
 
   wxBoxSizer *displaySizer = new wxBoxSizer(wxVERTICAL);
 
+	scrolledWindow = new wxScrolledWindow(this, -1, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxHSCROLL|wxVSCROLL|wxALWAYS_SHOW_SB);
+  displaySizer->Add(scrolledWindow, 1, wxEXPAND|wxALL, 10);
+  wxBoxSizer *swinSizer = new wxBoxSizer(wxVERTICAL);
+	scrolledWindow->SetAutoLayout(true);
+  scrolledWindow->SetMinSize(wxSize(500, 400));
+	scrolledWindow->SetScrollRate(20,20);
   canvas = new MyGLCanvas(
-    this, 
+    scrolledWindow, 
     wxID_ANY, 
-    mmz, 
-    nmz, 
-    wxPoint(-1, -1), 
-    wxSize(500, 400));
+    monitor_mod, 
+    names_mod, 
+    wxDefaultPosition, 
+    wxSize(600, 500));
+  // displaySizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
+  swinSizer->Add(canvas, 1, wxRIGHT|wxBOTTOM|wxEXPAND, 20);
+	scrolledWindow->SetSizer(swinSizer);
+  // scrolledWindow->GetVirtualSize(&x, &y);
+  // std::cout << x << "   "<< y << "\n";
 
-  displaySizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
   displaySizer->Add(
     new wxStaticText(this, wxID_ANY, "Log Activity"), 
     0, 
@@ -330,7 +341,7 @@ MyFrame::MyFrame(wxWindow *parent,
     wxALL,
     10);
 
-  bottomSizer->Add(displaySizer, 0, wxALIGN_LEFT);
+  bottomSizer->Add(displaySizer, 1, wxEXPAND);
   
   //bottom-right config-op panel
   wxBoxSizer *bottomRightSizer = new wxBoxSizer(wxVERTICAL);

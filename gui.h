@@ -76,6 +76,8 @@ class MyFrame: public wxFrame
   scanner *smz;
   parser *pmz;
 
+  wxScrolledWindow* scrolledWindow;
+
   wxTextCtrl *logMessagePanel;
 
   std::vector<MyChoiceObj> switchVec;

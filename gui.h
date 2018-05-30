@@ -100,6 +100,7 @@ class MyFrame: public wxFrame
   void OnExit(wxCommandEvent& event);     // event handler for exit menu item
   void OnAbout(wxCommandEvent& event);    // event handler for about menu item
   void OnOpen(wxCommandEvent &event);
+  void OnSave(wxCommandEvent &event);
   void OnButtonRUN(wxCommandEvent& event);    // event handler for push button
   void OnButtonRESET(wxCommandEvent& event);  // event handler for reset button
 

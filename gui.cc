@@ -297,21 +297,32 @@ MyFrame::MyFrame(wxWindow *parent,
     0,
     wxEXPAND | wxALL,
     10);
-
-
+    
+  int* x,y;
+  wxSize s;
   wxBoxSizer *bottomSizer = new wxBoxSizer(wxHORIZONTAL);
 
   wxBoxSizer *displaySizer = new wxBoxSizer(wxVERTICAL);
 
+	scrolledWindow = new wxScrolledWindow(this, -1, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxHSCROLL|wxVSCROLL);
+  displaySizer->Add(scrolledWindow, 1, wxEXPAND|wxALL, 10);
+  wxBoxSizer *swinSizer = new wxBoxSizer(wxVERTICAL);
+	scrolledWindow->SetAutoLayout(true);
+  scrolledWindow->SetMinSize(wxSize(500, 400));
+	scrolledWindow->SetScrollRate(20,20);
   canvas = new MyGLCanvas(
-    this,
-    wxID_ANY,
-    mmz,
-    nmz,
-    wxPoint(-1, -1),
-    wxSize(500, 400));
+    scrolledWindow, 
+    wxID_ANY, 
+    monitor_mod, 
+    names_mod, 
+    wxDefaultPosition, 
+    wxSize(600, 500));
+  // displaySizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
+  swinSizer->Add(canvas, 1, wxRIGHT|wxBOTTOM|wxEXPAND, 20);
+	scrolledWindow->SetSizer(swinSizer);
+  // scrolledWindow->GetVirtualSize(&x, &y);
+  // std::cout << x << "   "<< y << "\n";
 
-  displaySizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
   displaySizer->Add(
     new wxStaticText(this, wxID_ANY, "Log Activity"),
     0,
@@ -331,8 +342,8 @@ MyFrame::MyFrame(wxWindow *parent,
     wxALL,
     10);
 
-  bottomSizer->Add(displaySizer, 0, wxALIGN_LEFT);
-
+  bottomSizer->Add(displaySizer, 1, wxEXPAND);
+  
   //bottom-right config-op panel
   wxBoxSizer *bottomRightSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -528,12 +539,28 @@ void MyFrame::OnCheck0(wxCommandEvent &event)
   if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
   // todo: two unchecked boxes should not be allowed
   {
-    switchState1->SetValue(!(switchState1->GetValue()));
-    switchVec[currentSwitchIndex].objVal = 0;
-    logMessagePanel->AppendText(
-    getCurrentTime()+
-    switchVec[currentSwitchIndex].objName +
-    " is set to 0.\n");
+    bool ok;
+    dmz->setswitch(
+      switchVec[currentSwitchIndex].dev,
+      low,
+      ok
+    );
+    if(ok)
+    {
+      switchState1->SetValue(!(switchState1->GetValue()));
+      switchVec[currentSwitchIndex].objVal = 0;
+      logMessagePanel->AppendText(
+      getCurrentTime()+
+      switchVec[currentSwitchIndex].objName +
+      " is set to 0.\n");
+    }
+    else
+    {
+      logMessagePanel->AppendText(
+      getCurrentTime()+
+      switchVec[currentSwitchIndex].objName +
+      " is not set to 0.\n");
+    }
   }
 }
 
@@ -542,13 +569,29 @@ void MyFrame::OnCheck1(wxCommandEvent &event)
   if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
   // todo: two unchecked boxes should not be allowed
   {
-    switchState0->SetValue(!(switchState0->GetValue()));
-    switchVec[currentSwitchIndex].objVal = 1;
-    logMessagePanel->AppendText(
-    getCurrentTime()+
-    switchVec[currentSwitchIndex].objName +
-    " is set to 1.\n");
-  }
+    bool ok;
+    dmz->setswitch(
+      switchVec[currentSwitchIndex].dev,
+      high,
+      ok
+    );
+    if(ok)
+    {
+      switchState0->SetValue(!(switchState0->GetValue()));
+      switchVec[currentSwitchIndex].objVal = 1;
+      logMessagePanel->AppendText(
+      getCurrentTime()+
+      switchVec[currentSwitchIndex].objName +
+      " is set to 1.\n");
+    }
+    else
+    {
+      logMessagePanel->AppendText(
+      getCurrentTime()+
+      switchVec[currentSwitchIndex].objName +
+      " is not set to 1.\n");     
+    }
+  }  
 }
 
 void MyFrame::OnButtonSET(wxCommandEvent& event)
@@ -563,7 +606,10 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
   {
     currentSetIndex = updateCurrentChoice((monitorSet->GetStringSelection()).ToStdString(), &setVec);
     bool ok = true;
-    mmz->makemonitor(setVec[currentZapIndex].dev, setVec[currentZapIndex].output, ok);
+    mmz->makemonitor(setVec[currentSetIndex].dev, setVec[currentSetIndex].output, ok);
+    // std::cout << setVec[currentSetIndex].objName << "    "
+    // << setVec[currentSetIndex].dev << "    "
+    // << setVec[currentSetIndex].output << "\n";
     if(ok)
     {
       logMessagePanel->AppendText(
@@ -588,7 +634,7 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
       logMessagePanel->AppendText(
         getCurrentTime()+
         "Monitor "+
-        monitorZap->GetStringSelection() +
+        monitorSet->GetStringSelection() + 
         " is not set successfully.\n");
     }
   }
@@ -682,6 +728,7 @@ void MyFrame::loadFile(wxString s)
         getCurrentTime()+
         "File loaded from  "+
         s + "\n");
+      std::vector<MyChoiceObj> signalList;
 
       devlink currentDevice = netz->devicelist();
 	    name currentID;
@@ -703,9 +750,44 @@ void MyFrame::loadFile(wxString s)
             tempObj.objVal = 1;
           }
           switchVec.push_back(tempObj);
+          signalList.push_back(tempObj);
+        }
+        else
+        {
+          outplink currentOutput = currentDevice->olist;
+          if(currentOutput->id==-1)
+          {
+            MyChoiceObj tempObj;
+            tempObj.dev = currentID;
+            tempObj.output = -1;
+            tempObj.objName = devName;
+            tempObj.objVal = 0;
+            signalList.push_back(tempObj);
+          }
+          else
+          {
+            while(currentOutput != NULL)
+            {
+              MyChoiceObj tempObj;
+              tempObj.dev = currentID;
+              tempObj.output = currentOutput->id;
+              tempObj.objName = devName+"."+nmz->getname(currentOutput->id);
+              tempObj.objVal = 0;
+              signalList.push_back(tempObj);
+              currentOutput = currentOutput->next;
+            }
+          }
         }
         currentDevice = currentDevice->next;
       }
+      // for(int mm = 0; mm < signalList.size(); ++mm)
+      // {
+      //   std::cout << signalList[mm].objName << "\t"
+      //   << signalList[mm].dev << "\t"
+      //   << signalList[mm].output << "\t"
+      //   << "\n";
+      // }
+
       std::sort(switchVec.begin(), switchVec.end());
       for(std::vector<MyChoiceObj>::iterator it = switchVec.begin() ; it != switchVec.end(); ++it)
       {
@@ -726,7 +808,6 @@ void MyFrame::loadFile(wxString s)
         switchState0->SetValue(1);
       }
 
-
       int monitorCount = mmz->moncount();
       name dev, output;
       for(int i = 0; i < monitorCount; ++i)
@@ -744,18 +825,36 @@ void MyFrame::loadFile(wxString s)
         {
           monitorName = nmz->getname(dev) + "." + nmz->getname(output);
         }
-        tempObj.objName = monitorName;
-        tempObj.objVal = 1;
-        zapVec.push_back(tempObj);
+        for(int m = 0; m < signalList.size(); ++m)
+        {
+          if(monitorName == signalList[m].objName)
+          {
+            tempObj.objName = monitorName;
+            tempObj.objVal = 1;
+            zapVec.push_back(tempObj);
+            signalList.erase(signalList.begin()+m);
+          }
+        }
       }
-      std::cout << mmz->moncount();
       std::sort(zapVec.begin(), zapVec.end());
       for(std::vector<MyChoiceObj>::iterator it = zapVec.begin() ; it != zapVec.end(); ++it)
       {
         monitorZap->Append(it->objName);
       }
-      currentSetIndex = 0;
       currentZapIndex = 0;
+      
+      for(int n = 0; n < signalList.size(); ++n)
+      {
+        setVec.push_back(signalList[n]);
+      }
+      std::sort(setVec.begin(), setVec.end());
+      for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
+      {
+        monitorSet->Append(it->objName);
+      }
+      currentSetIndex = 0;
+      std::cout<< signalList.size() << "\n";
+
     }
   }
   else

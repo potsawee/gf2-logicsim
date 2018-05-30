@@ -15,12 +15,15 @@ void monitor::makemonitor (name dev, name outp, bool& ok)
   outplink o;
   ok = (mtab.used < maxmonitors);
   if (ok) {
+    // std::cout << "monitor no. ok\n";
     d = netz->finddevice (dev);
     ok = (d != NULL);
     if (ok) {
+      // std::cout << "device found\n";
       o = netz->findoutput (d, outp);
       ok = (o != NULL);
       if (ok) {
+        // std::cout << "device output found\n";
 	mtab.sigs[mtab.used].devid = dev;
 	mtab.sigs[mtab.used].op = o;
 	(mtab.used)++;

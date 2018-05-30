@@ -57,6 +57,7 @@ private:
 
     void error(int errn); // a function to throw error
     void semantic(int errn); // for semantic error dectection
+    bool is_name_reserved(name id); //check if name is reserved
 
  public:
     bool readin ();

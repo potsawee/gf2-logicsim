@@ -85,8 +85,7 @@ public:
 
 	void skipcolon();			//skip if curch is a ':'
 	void skip_dueto_error(symbol& s, name& id, int& num, bool print = true);
-	void print_line_error();
-
+	void print_line_error(int n);
 	// Functions for unit testing
 	void print_curch();
 	bool is_eofile();

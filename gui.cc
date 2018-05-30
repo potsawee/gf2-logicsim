@@ -220,6 +220,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_BUTTON(MY_BUTTON_RUN, MyFrame::OnButtonRUN)
   EVT_BUTTON(MY_BUTTON_RESET, MyFrame::OnButtonRESET)
   EVT_MENU(wxID_SAVE, MyFrame::OnSave)
+  EVT_MENU(wxID_OPEN, MyFrame::OnOpen)
   EVT_BUTTON(MY_BUTTON_CONTINUE, MyFrame::OnButtonCONTINUE)
   EVT_BUTTON(MY_BUTTON_LOAD, MyFrame::OnButtonLOAD)
   EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
@@ -446,8 +447,6 @@ void MyFrame::OnExit(wxCommandEvent &event)
  void MyFrame::OnOpen(wxCommandEvent &event)
    // Event handler for the about menu item
  {
-  wxDirDialog openBox(this, "Select a definition file (.gf2)", "", wxDD_DEFAULT_STYLE, wxDefaultPosition,  wxDefaultSize, wxDirDialogNameStr);
-  openBox.ShowModal();
     wxFileDialog openFileDialog(
       this, 
       _("Open a circuit definition file"), 

@@ -446,8 +446,8 @@ void MyFrame::OnExit(wxCommandEvent &event)
  void MyFrame::OnOpen(wxCommandEvent &event)
    // Event handler for the about menu item
  {
-  // wxDirDialog openBox(this, "Select a definition file (.gf2)", "", wxDD_DEFAULT_STYLE, wxDefaultPosition,  wxDefaultSize, wxDirDialogNameStr);
-  // openBox.ShowModal();
+  wxDirDialog openBox(this, "Select a definition file (.gf2)", "", wxDD_DEFAULT_STYLE, wxDefaultPosition,  wxDefaultSize, wxDirDialogNameStr);
+  openBox.ShowModal();
     wxFileDialog openFileDialog(
       this, 
       _("Open a circuit definition file"), 

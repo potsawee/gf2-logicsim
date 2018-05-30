@@ -303,7 +303,7 @@ MyFrame::MyFrame(wxWindow *parent,
 
   wxBoxSizer *displaySizer = new wxBoxSizer(wxVERTICAL);
 
-	scrolledWindow = new wxScrolledWindow(this, -1, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxHSCROLL|wxVSCROLL|wxALWAYS_SHOW_SB);
+	scrolledWindow = new wxScrolledWindow(this, -1, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxHSCROLL|wxVSCROLL);
   displaySizer->Add(scrolledWindow, 1, wxEXPAND|wxALL, 10);
   wxBoxSizer *swinSizer = new wxBoxSizer(wxVERTICAL);
 	scrolledWindow->SetAutoLayout(true);

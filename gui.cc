@@ -219,6 +219,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
   EVT_BUTTON(MY_BUTTON_RUN, MyFrame::OnButtonRUN)
   EVT_BUTTON(MY_BUTTON_RESET, MyFrame::OnButtonRESET)
+  EVT_BUTTON(MY_BUTTON_CONTINUE, MyFrame::OnButtonCONTINUE)
   EVT_BUTTON(MY_BUTTON_LOAD, MyFrame::OnButtonLOAD)
   EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
   
@@ -411,7 +412,7 @@ MyFrame::MyFrame(wxWindow *parent,
   spin = new wxSpinCtrl(opSizer->GetStaticBox(), MY_SPINCNTRL_ID, wxString("10"));
   opSizer->Add(spin, 0 , wxALL, 10);
   buttonSizer1->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_RUN, "Run"), 0, wxALL, 10);
-  buttonSizer1->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_PAUSE, "Pause/Resume"), 0, wxALL, 10);
+  buttonSizer1->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_CONTINUE, "Continue"), 0, wxALL, 10);
   buttonSizer2->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_STOP, "Stop"), 0, wxALL, 10);
   buttonSizer2->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_RESET, "Reset"), 0, wxALL, 10);
   opSizer->Add(buttonSizer1, 0 , wxALL, 10);
@@ -474,6 +475,23 @@ void MyFrame::OnButtonRESET(wxCommandEvent &event)
   zapVec.clear();
   canvas->Render("Reset button pressed.\n", 0);
 }
+
+void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
+{
+  int ncycles = spin->GetValue();
+  std::cout << "Some text" << ncycles << "\n";
+  if(cyclescompleted>0)
+  {
+    runnetwork(ncycles);
+    canvas->Render("Continue button pressed", cyclescompleted);
+    logMessagePanel->AppendText(getCurrentTime()+"Continue running.\n");
+  }
+  else
+  {
+    logMessagePanel->AppendText(getCurrentTime()+"Please run before continuing.\n");
+  }
+}
+
 
 void MyFrame::OnSpin(wxSpinEvent &event)
   // Event handler for the spin control

@@ -32,7 +32,7 @@ enum {
   MY_BUTTON_ZAP,            
 
   MY_BUTTON_RUN,            // todo: implement actual running
-  MY_BUTTON_PAUSE,          // todo: 
+  MY_BUTTON_CONTINUE,          // todo: 
   MY_BUTTON_STOP,           // todo: 
   MY_BUTTON_RESET,          // todo: implement actual reset
 }; // widget identifiers
@@ -101,6 +101,7 @@ class MyFrame: public wxFrame
   void OnAbout(wxCommandEvent& event);    // event handler for about menu item
   void OnButtonRUN(wxCommandEvent& event);    // event handler for push button
   void OnButtonRESET(wxCommandEvent& event);  // event handler for reset button
+  void OnButtonCONTINUE(wxCommandEvent& event);   // event handler for continue button
 
   // functions related to loading description file
   void OnButtonLOAD(wxCommandEvent& event);

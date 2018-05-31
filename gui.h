@@ -20,6 +20,7 @@ enum {
   MY_TEXTCTRL_LOG,        // for logging text box
   
   MY_BUTTON_LOAD,         // for loading connection definitation file
+  MY_BUTTON_BROWSE,
   MY_TEXTCTRL_FILEPATH,   // storing filepath to def file
 
   MY_CHECKBOX_0,            
@@ -98,7 +99,7 @@ class MyFrame: public wxFrame
 
   int cyclescompleted;                    // how many simulation cycles have been completed
   void runnetwork(int ncycles);           // function to run the logic network
-  void OnExit(wxCommandEvent& event);     // event handler for exit menu item
+  // void OnExit(wxCommandEvent& event);     // event handler for exit menu item
   void OnAbout(wxCommandEvent& event);    // event handler for about menu item
   void OnOpen(wxCommandEvent &event);
   void OnSave(wxCommandEvent &event);

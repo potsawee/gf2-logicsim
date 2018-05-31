@@ -298,7 +298,7 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
 
 
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
-  EVT_MENU(wxID_EXIT, MyFrame::OnExit)
+  EVT_MENU(wxID_EXIT, MyFrame::OnButtonQUIT)
   EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
   EVT_BUTTON(MY_BUTTON_RUN, MyFrame::OnButtonRUN)
   EVT_BUTTON(MY_BUTTON_QUIT, MyFrame::OnButtonQUIT)
@@ -307,6 +307,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_OPEN, MyFrame::OnOpen)
   EVT_BUTTON(MY_BUTTON_CONTINUE, MyFrame::OnButtonCONTINUE)
   EVT_BUTTON(MY_BUTTON_LOAD, MyFrame::OnButtonLOAD)
+  EVT_BUTTON(MY_BUTTON_BROWSE, MyFrame::OnOpen)
   EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
   
   // load files
@@ -522,11 +523,11 @@ MyFrame::MyFrame(wxWindow *parent,
   SetSizer(overallSizer);
 }
 
-void MyFrame::OnExit(wxCommandEvent &event)
-  // Event handler for the exit menu item
-{
-  Close(true);
-}
+// void MyFrame::OnExit(wxCommandEvent &event)
+//   // Event handler for the exit menu item
+// {
+//   Close(true);
+// }
 
  void MyFrame::OnOpen(wxCommandEvent &event)
    // Event handler for the about menu item

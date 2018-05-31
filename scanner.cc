@@ -220,8 +220,33 @@ void scanner::skipcolon()
 void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 {
 
-	if(print)
-		print_line_error();
+	if(print){
+		/* Find how many char from line beginning to current location */
+		int counter = 0;
+		char mychar;
+		streampos curposition = inf.tellg();
+		inf.get(mychar);
+		while(mychar!='\n'){
+			inf.get(mychar);
+			counter++;
+		}
+		inf.seekg(curposition);
+		//cout << "counter = " << counter << endl;
+		int position = lines[linenum].size() - counter;
+		/* --------------------------------------------------------- */
+		print_line_error(position);
+
+	}
+	if(curch == ','){
+		s = comma;
+		eofile = !(inf.get(curch));
+		return;
+	}
+	else if(curch == ';'){
+		s = semicol;
+		eofile = !(inf.get(curch));
+		return;
+	}
 	eofile = !(inf.get(curch));
 	if(curch != '\n'){
 		while(!(eofile || s == comma || s == semicol || curch == '\n')){
@@ -230,14 +255,14 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 	}
 
 }
-void scanner::print_line_error()
+void scanner::print_line_error(int n)
 {
 	cout << "In line " << (linenum+1) << ": " << lines[linenum] << endl;
-	// TODO: Need to find where to put '^'
-	cout << "\t\t^" << endl;
+	int x = int((linenum+1) / 10); // to account for line1 and line10, line100 etc.
+	cout << string(9 + x , ' ') << string(n, ' ') << "^" << endl;
 }
-// Functions for unit testing
 
+// Functions for unit testing
 void scanner::print_curch()
 {
 	cout << "curch: '" << curch << "'" << endl;

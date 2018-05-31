@@ -20,6 +20,7 @@ enum {
   MY_TEXTCTRL_LOG,        // for logging text box
   
   MY_BUTTON_LOAD,         // for loading connection definitation file
+  MY_BUTTON_BROWSE,
   MY_TEXTCTRL_FILEPATH,   // storing filepath to def file
 
   MY_CHECKBOX_0,            
@@ -32,9 +33,9 @@ enum {
   MY_BUTTON_ZAP,            
 
   MY_BUTTON_RUN,            // todo: implement actual running
-  MY_BUTTON_PAUSE,          // todo: 
+  MY_BUTTON_CONTINUE,          // todo: 
   MY_BUTTON_STOP,           // todo: 
-  MY_BUTTON_RESET,          // todo: implement actual reset
+  MY_BUTTON_QUIT,          // todo: implement actual reset
 }; // widget identifiers
 
 class MyChoiceObj
@@ -50,6 +51,7 @@ class MyChoiceObj
   std::string objName;
   name dev;
   name output;
+  devicekind kind;
 };
 
 class MyGLCanvas;
@@ -76,6 +78,8 @@ class MyFrame: public wxFrame
   scanner *smz;
   parser *pmz;
 
+  wxScrolledWindow* scrolledWindow;
+
   wxTextCtrl *logMessagePanel;
   wxTextCtrl *filePathBox;
   std::vector<MyChoiceObj> switchVec;
@@ -90,16 +94,23 @@ class MyFrame: public wxFrame
   int currentZapIndex;
   std::vector<MyChoiceObj> setVec;  
   std::vector<MyChoiceObj> zapVec;
+  bool IsStarted;
+  bool FileLoaded;
 
+  std::stringstream buffer;
   wxString filePath; //store location of path
 
   int cyclescompleted;                    // how many simulation cycles have been completed
   void runnetwork(int ncycles);           // function to run the logic network
-  void OnExit(wxCommandEvent& event);     // event handler for exit menu item
+  // void OnExit(wxCommandEvent& event);     // event handler for exit menu item
   void OnAbout(wxCommandEvent& event);    // event handler for about menu item
   void OnOpen(wxCommandEvent &event);
+  void OnHelp(wxCommandEvent &event);
+  // void OnSave(wxCommandEvent &event);
   void OnButtonRUN(wxCommandEvent& event);    // event handler for push button
-  void OnButtonRESET(wxCommandEvent& event);  // event handler for reset button
+  void OnButtonQUIT(wxCommandEvent& event);  // event handler for reset button
+  void OnButtonCONTINUE(wxCommandEvent& event);   // event handler for continue button
+  void OnButtonSTOP(wxCommandEvent& event);
 
   // functions related to loading description file
   void OnButtonLOAD(wxCommandEvent& event);
@@ -131,6 +142,35 @@ class MyGLCanvas: public wxGLCanvas
 	     const wxString& name = "MyGLCanvas", const wxPalette &palette=wxNullPalette); // constructor
   void Render(wxString example_text = "", int cycles = -1); // function to draw canvas contents
   void SetDefault(monitor *monitor_mod, names *names_mod);
+
+  int period;
+  int height;
+  float colourBox[10][3] = {
+    {0.0, 0.0, 0.0},  // black
+    {0.0, 0.0, 0.7},  // Dark Blue
+    {0.3, 0.3, 1.0},  // Light Blue
+    {0.0, 1.0, 1.0},  // Cyan
+    {0.0, 0.7, 0.0},  // Dark Green
+    {0.3, 1.0, 0.3},  // Light Green
+    {1.0, 0.0, 1.0},  // Magneta
+    {1.0, 0.0, 0.0},  // Red
+    {1.0, 0.5, 0.0},  // Orange
+    {0.5, 0.35, 0.05}   // Yellow
+  };
+
+  float colourBoxLight[10][3] = {
+    {0.7, 0.7, 0.7},  // black
+    {0.5, 0.5, 1.0},  // Dark Blue
+    {0.7, 0.7, 1.0},  // Light Blue
+    {0.7, 1.0, 1.0},  // Cyan
+    {0.5, 1.0, 0.5},  // Dark Green
+    {0.7, 1.0, 0.7},  // Light Green
+    {1.0, 0.7, 1.0},  // Magneta
+    {1.0, 0.5, 0.5},  // Red
+    {1.0, 0.7, 0.7},  // Orange
+    {0.7, 0.55, 0.3}   // Yellow
+  };
+
  private:
   wxGLContext *context;              // OpenGL rendering context
   bool init;                         // has the OpenGL context been initialised?

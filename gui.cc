@@ -11,6 +11,11 @@
 #include "wx_icon.xpm"
 #include <iostream>
 #include <algorithm>
+#include <cstdio>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <array>
 using namespace std;
 
 // MyGLCanvas ////////////////////////////////////////////////////////////////////////////////////
@@ -20,10 +25,10 @@ BEGIN_EVENT_TABLE(MyGLCanvas, wxGLCanvas)
   EVT_PAINT(MyGLCanvas::OnPaint)
   EVT_MOUSE_EVENTS(MyGLCanvas::OnMouse)
 END_EVENT_TABLE()
-
+  
 int wxglcanvas_attrib_list[5] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, 0};
 
-MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, names* names_mod, const wxPoint& pos,
+MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, names* names_mod, const wxPoint& pos, 
 		       const wxSize& size, long style, const wxString& name, const wxPalette& palette):
   wxGLCanvas(parent, id, wxglcanvas_attrib_list, pos, size, style, name, palette)
   // Constructor - initialises private variables
@@ -32,6 +37,8 @@ MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, na
   mmz = monitor_mod;
   nmz = names_mod;
   SetDefault(mmz, nmz);
+  period = 20;
+  height = 20;
 }
 
 void MyGLCanvas::Render(wxString example_text, int cycles)
@@ -53,71 +60,169 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
   }
   glClear(GL_COLOR_BUFFER_BIT);
 
-  if ((cyclesdisplayed >= 0) && (mmz->moncount() > 0)) { // draw the first monitor signal, get trace from monitor class
+  int xx, yy;
+  xx = GetParent()->GetScrollPos(wxHORIZONTAL);
+  yy = GetParent()->GetScrollPos(wxVERTICAL);
+  // std::cout << xx << "    " << yy << std::endl;
 
-
-
-			glEnable(GL_LINE_STIPPLE);
-			glLineStipple(2,0xAAAA); // dashed lines, factor 2
-			glColor3f(0.7,0.7,0.7);
-
-			glBegin(GL_LINE_STRIP);
-			glVertex2f(50, 10);
-			glVertex2f(500, 10);
-			glEnd();
-
-			glBegin(GL_LINE_STRIP);
-			glVertex2f(50, 30);
-			glVertex2f(500, 30);
-			glEnd();
-
-			glDisable(GL_LINE_STIPPLE);
-
-    glColor3f(1., 0.0, 0.0);
+  if ((cyclesdisplayed >= 0) && (mmz->moncount() > 0)) 
+  { // draw the first monitor signal, get trace from monitor class
     for(int j = 0; j < mmz->moncount(); ++j)
     {
-      glBegin(GL_LINE_STRIP);
-      for (i=0; i<cyclesdisplayed; i++)
+      int yLow = 500 - 50*j;
+      int yHigh = yLow + height;
+
+      // doted 0 and 1 lines
+      glEnable(GL_LINE_STIPPLE); 
+      glLineStipple(2,0xAAAA); // dashed lines, factor 2
+	    glColor3f(0.7,0.7,0.7);   
+      glBegin(GL_LINE_STRIP);			
+      glVertex2f(100, yLow);
+      glVertex2f(cyclesdisplayed*20+50, yLow);
+      glEnd();
+
+      glBegin(GL_LINE_STRIP);			
+      glVertex2f(100, yHigh);
+      glVertex2f(cyclesdisplayed*20+100, yHigh);
+      glEnd();
+      glDisable(GL_LINE_STIPPLE);
+      
+      // fill areas below high signals
+      for(i = 0; i < cyclesdisplayed; ++i)
       {
-        if (mmz->getsignaltrace(j, i, s))
+        if(mmz->getsignaltrace(j, i, s))
         {
-          if (s==low) y = 30.0*j+10.0;
-          if (s==high) y = 30.0*j+30.0;
-          glVertex2f(20*i+10.0, y);
-          glVertex2f(20*i+30.0, y);
+          if(s==high)
+          {
+            glColor3f(colourBoxLight[j][0], colourBoxLight[j][1], colourBoxLight[j][2]);
+            glBegin(GL_QUADS);
+                glVertex2f(period*i+100.0, yHigh);
+                glVertex2f(period*i+100.0, yLow);
+                glVertex2f(period*i+120.0, yLow);
+                glVertex2f(period*i+120.0, yHigh);
+            glEnd();            
+          }
+        }
+      }
+      // draw signal
+      glColor3f(colourBox[j][0], colourBox[j][1], colourBox[j][2]);
+      glLineWidth(2);
+      glBegin(GL_LINE_STRIP);
+      for (i=0; i<cyclesdisplayed; i++) 
+      {
+        if (mmz->getsignaltrace(j, i, s)) 
+        {
+          if (s==low) y = yLow;
+          if (s==high) y = yHigh;
+          glVertex2f(period*i+100.0, y); 
+          glVertex2f(period*i+120.0, y);
         }
       }
       glEnd();
+      glLineWidth(1);
+      // set cycle mark
+      for (i=0; i<cyclesdisplayed; i++) 
+      {
+				glBegin(GL_LINE_STRIP);
+				glColor3f(0.7, 0.7, 0.7); // set line colour to grey
+				glVertex2f(20*i+100.0, yLow); 
+				glVertex2f(20*i+100.0, yLow-5);
+				glEnd();
+			}
+
+			for (i=0; i <= cyclesdisplayed; i+=5) 
+      {	
+				stringstream ss;
+				ss << (i);
+				wxString numstr = ss.str();
+				
+				glColor3f(0.7, 0.7, 0.7); // set font colour to black
+				glRasterPos2f(period*i+100, yLow-10);
+				for (int ch = 0; ch < numstr.Len(); ch++) {
+					glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, numstr[ch]);
+				}
+			}
     }
+    
+    // white background for displaying signal labels
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_QUADS);
+        glVertex2f(20*xx+0.0, 550.0);
+        glVertex2f(20*xx+0.0, 50.0);
+        glVertex2f(20*xx+99.0, 50.0);
+        glVertex2f(20*xx+99.0, 550.0);
+    glEnd(); 
+
+
+      
+    glEnable(GL_LINE_STIPPLE); 
+    glLineStipple(2,0xAAAA);    
+	glColor3f(0.0, 0.0, 0.0);
+    glBegin(GL_LINE_STRIP);
+        glVertex2f(20*xx+100.0, 550.0);
+        glVertex2f(20*xx+100.0, 550-50*(mmz->moncount()));
+    glEnd(); 
+    glDisable(GL_LINE_STIPPLE);
+    
+    // signal labels
+	for (int j = 0; j < mmz->moncount(); j++) 
+    {
+      int yLow = 500 - 50*j;
+      int yHigh = yLow + height;
+      name dev, outp;
+			mmz->getmonname(j, dev, outp); 		// dev is now the id of the device
+			namestring sigName = nmz->getname(dev);
+      if (outp != -1)
+      {
+        sigName = sigName + "." + nmz->getname(outp);
+      }
+			glColor3f(0.0, 0.0, 0.0); 			// set text colour to black
+			glRasterPos2f(20*xx+20, yLow+10); 	// position is in (columns, rows) from bottom left corner
+			for (i = 0; i < sigName.length(); i++) 
+      {
+				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, sigName[i]);
+			}
+		glEnable(GL_LINE_STIPPLE); 
+		glLineStipple(2,0xAAAA);  
+		glBegin(GL_LINE_STRIP);
+			glVertex2f(20*xx+40, yLow);
+			glVertex2f(20*xx+100.0, yLow);
+		glEnd(); 
+		glDisable(GL_LINE_STIPPLE);
+		
+		glRasterPos2f(20*xx+90, yHigh+4);
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, '1');
+		
+		glRasterPos2f(20*xx+90, yLow+4);
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, '0');
+		
+    }
+
+    // mark the cycle limit
+    glBegin(GL_LINE_STRIP);	
+    glColor3f(0.7,0.7,0.7);		
+    glVertex2f(maxcycles*20+100, 50);
+    glVertex2f(maxcycles*20+100, 550);
+    glEnd();
+  } 
+  else 
+  { // draw an artificial trace
+
+    // glColor3f(0.0, 1.0, 0.0);
     // glBegin(GL_LINE_STRIP);
-    // for (i=0; i<cyclesdisplayed; i++) {
-    //   if (mmz->getsignaltrace(1, i, s)) {
-    //     if (s==low) y = 50.0;
-    //     if (s==high) y = 70.0;
-    //     glVertex2f(20*i+10.0, y);
-    //     glVertex2f(20*i+30.0, y);
-    //   }
+    // for (i=0; i<15; i++) {
+    //   if (i%3) y = 10.0;
+    //   else y = 30.0;
+    //   glVertex2f(20*i+10.0, y); 
+    //   glVertex2f(20*i+30.0, y);
     // }
     // glEnd();
-
-  } else { // draw an artificial trace
-
-    glColor3f(0.0, 1.0, 0.0);
-    glBegin(GL_LINE_STRIP);
-    for (i=0; i<15; i++) {
-      if (i%3) y = 10.0;
-      else y = 30.0;
-      glVertex2f(20*i+10.0, y);
-      glVertex2f(20*i+30.0, y);
-    }
-    glEnd();
-
   }
 
   // Example of how to use GLUT to draw text on the canvas
-  glColor3f(0.0, 0.0, 1.0);
-  glRasterPos2f(10, 100);
-  for (i = 0; i < example_text.Len(); i++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, example_text[i]);
+  // glColor3f(0.0, 0.0, 1.0);
+  // glRasterPos2f(20*xx, 300);
+  // for (i = 0; i < example_text.Len(); i++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, example_text[i]);
 
   // We've been drawing to the back buffer, flush the graphics pipeline and swap the back buffer to the front
   glFlush();
@@ -138,7 +243,7 @@ void MyGLCanvas::InitGL()
   glViewport(0, 0, (GLint) w, (GLint) h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0, w, 0, h, -1, 1);
+  glOrtho(0, w, 0, h, -1, 1); 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glTranslated(pan_x, pan_y, 0.0);
@@ -171,12 +276,12 @@ void MyGLCanvas::OnPaint(wxPaintEvent& event)
 void MyGLCanvas::OnSize(wxSizeEvent& event)
   // Event handler for when the canvas is resized
 {
-  init = false;; // this will force the viewport and projection matrices to be reconfigured on the next paint
+  init = false; // this will force the viewport and projection matrices to be reconfigured on the next paint
 }
 
 void MyGLCanvas::OnMouse(wxMouseEvent& event)
   // Event handler for mouse events inside the GL canvas
-{
+{/*
   wxString text;
   int w, h;;
   static int last_x, last_y;
@@ -209,20 +314,25 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
   }
 
   if (event.GetWheelRotation() || event.ButtonDown() || event.ButtonUp() || event.Dragging() || event.Leaving()) Render(text);
+*/
 }
 
 // MyFrame ///////////////////////////////////////////////////////////////////////////////////////
 
 
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
-  EVT_MENU(wxID_EXIT, MyFrame::OnExit)
+  EVT_MENU(wxID_EXIT, MyFrame::OnButtonQUIT)
   EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
-  EVT_MENU(wxID_OPEN, MyFrame::OnOpen)
   EVT_BUTTON(MY_BUTTON_RUN, MyFrame::OnButtonRUN)
-  EVT_BUTTON(MY_BUTTON_RESET, MyFrame::OnButtonRESET)
+  EVT_BUTTON(MY_BUTTON_QUIT, MyFrame::OnButtonQUIT)
+  EVT_BUTTON(MY_BUTTON_STOP, MyFrame::OnButtonSTOP)
+  // EVT_MENU(wxID_SAVE, MyFrame::OnSave)
+  EVT_MENU(wxID_OPEN, MyFrame::OnOpen)
+  EVT_BUTTON(MY_BUTTON_CONTINUE, MyFrame::OnButtonCONTINUE)
   EVT_BUTTON(MY_BUTTON_LOAD, MyFrame::OnButtonLOAD)
+  EVT_BUTTON(MY_BUTTON_BROWSE, MyFrame::OnOpen)
   EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
-
+  
   // load files
   EVT_TEXT(MY_TEXTCTRL_FILEPATH, MyFrame::OnPathChange)
   EVT_TEXT_ENTER(MY_TEXTCTRL_FILEPATH, MyFrame::OnPathEnter)
@@ -235,14 +345,14 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_BUTTON(MY_BUTTON_ZAP, MyFrame::OnButtonZAP)
 
 END_EVENT_TABLE()
-
-MyFrame::MyFrame(wxWindow *parent,
-  const wxString& title,
-  const wxPoint& pos,
+  
+MyFrame::MyFrame(wxWindow *parent, 
+  const wxString& title, 
+  const wxPoint& pos, 
   const wxSize& size,
-	names *names_mod,
-  devices *devices_mod,
-  monitor *monitor_mod,
+	names *names_mod, 
+  devices *devices_mod, 
+  monitor *monitor_mod, 
   network *network_mod,
   long style):
   wxFrame(parent, wxID_ANY, title, pos, size, style)
@@ -250,7 +360,8 @@ MyFrame::MyFrame(wxWindow *parent,
   // using sizers
 {
   SetIcon(wxIcon(wx_icon));
-
+  IsStarted = 0;
+  FileLoaded = 0;
   cyclescompleted = 0;
   nmz = names_mod;
   dmz = devices_mod;
@@ -266,73 +377,95 @@ MyFrame::MyFrame(wxWindow *parent,
   // About is under guitest menu on mac
   // exit is under guitest menu by default
   fileMenu->Append(wxID_ABOUT, "&About");
+  fileMenu->Append(wxID_HELP, "&Help");
   fileMenu->Append(wxID_EXIT, "&Quit");
 
   // The following behave normally
   // refer to wxStandardID
   fileMenu->Append(wxID_OPEN, "&Open");
-  fileMenu->Append(wxID_NEW, "&New");
-  fileMenu->Append(wxID_SAVE, "&Save");
+  // fileMenu->Append(wxID_NEW, "&New");
+  // fileMenu->Append(wxID_SAVE, "&Save");
 
-  wxMenu *editMenu = new wxMenu;
-  editMenu->Append(wxID_UNDO, "&Undo");
-  editMenu->Append(wxID_REDO, "&Redo");
-
+  // wxMenu *editMenu = new wxMenu;
+  // editMenu->Append(wxID_UNDO, "&Undo");
+  // editMenu->Append(wxID_REDO, "&Redo");
+  
   wxMenuBar *menuBar = new wxMenuBar;
   menuBar->Append(fileMenu, "&File");
-  menuBar->Append(editMenu, "&Edit");
+  // menuBar->Append(editMenu, "&Edit");
   SetMenuBar(menuBar);
 
   // main window
   wxBoxSizer *overallSizer = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer *filePathSizer = new wxBoxSizer(wxHORIZONTAL);
   filePathSizer->Add(
-    new wxButton(this, MY_BUTTON_LOAD, "Load"),
-    0,
-    wxALL,
+    new wxButton(this, MY_BUTTON_LOAD, "Load"), 
+    0, 
+    wxALL, 
     10);
-	filePathBox = new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(800, -1), wxTE_PROCESS_ENTER);
+
   filePathSizer->Add(
-    filePathBox,
-    0,
-    wxEXPAND | wxALL,
+    new wxButton(this, MY_BUTTON_BROWSE, "Browse"), 
+    0, 
+    wxALL, 
     10);
 
-
+	filePathBox = new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(1000, -1), wxTE_PROCESS_ENTER);
+  filePathSizer->Add(
+    filePathBox, 
+    0, 
+    wxEXPAND | wxALL, 
+    10);
+    
+  int* x,y;
+  wxSize s;
   wxBoxSizer *bottomSizer = new wxBoxSizer(wxHORIZONTAL);
 
   wxBoxSizer *displaySizer = new wxBoxSizer(wxVERTICAL);
 
+	scrolledWindow = new wxScrolledWindow(this, -1, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxHSCROLL|wxVSCROLL);
+  displaySizer->Add(scrolledWindow, 1, wxEXPAND|wxALL, 10);
+  wxBoxSizer *swinSizer = new wxBoxSizer(wxVERTICAL);
+	scrolledWindow->SetAutoLayout(true);
+  scrolledWindow->SetMinSize(wxSize(500, 400));
+	scrolledWindow->SetScrollbars(20, 20, 25, 30);
   canvas = new MyGLCanvas(
-    this,
-    wxID_ANY,
-    mmz,
-    nmz,
-    wxPoint(-1, -1),
-    wxSize(500, 400));
+    scrolledWindow, 
+    wxID_ANY, 
+    monitor_mod, 
+    names_mod, 
+    wxDefaultPosition, 
+    wxSize(500, 600));
+  // displaySizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
+  swinSizer->Add(canvas, 1, wxRIGHT|wxBOTTOM|wxEXPAND, 20);
+	scrolledWindow->SetSizer(swinSizer);
+  // scrolledWindow->GetVirtualSize(&x, &y);
+  // std::cout << x << "   "<< y << "\n";
 
-  displaySizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
   displaySizer->Add(
-    new wxStaticText(this, wxID_ANY, "Log Activity"),
-    0,
-    wxTOP|wxLEFT|wxRIGHT,
+    new wxStaticText(this, wxID_ANY, "Log Activity"), 
+    0, 
+    wxTOP|wxLEFT|wxRIGHT, 
     10);
 
-  logMessagePanel = new wxTextCtrl(this,
-      MY_TEXTCTRL_LOG,
-      "",
-      wxDefaultPosition,
-      wxSize(500, 100),
+  logMessagePanel = new wxTextCtrl(this, 
+      MY_TEXTCTRL_LOG, 
+      "", 
+      wxDefaultPosition, 
+      wxSize(500, 100), 
       wxTE_MULTILINE|wxTE_READONLY);
 
+  wxBoxSizer *textSizer = new wxBoxSizer(wxHORIZONTAL);
+  textSizer->Add(logMessagePanel, 1, wxEXPAND);
+
   displaySizer->Add(
-    logMessagePanel,
+    textSizer,
     0,
-    wxALL,
+    wxEXPAND|wxALL,
     10);
 
-  bottomSizer->Add(displaySizer, 0, wxALIGN_LEFT);
-
+  bottomSizer->Add(displaySizer, 1, wxEXPAND);
+  
   //bottom-right config-op panel
   wxBoxSizer *bottomRightSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -341,8 +474,8 @@ MyFrame::MyFrame(wxWindow *parent,
   // switch sizers
   wxStaticBoxSizer *switchSizer = new wxStaticBoxSizer(wxHORIZONTAL, configSizer->GetStaticBox(), "Switches");
   switchChoice = new wxChoice(
-    switchSizer->GetStaticBox(),
-    MY_CHOICE_LIST_SWITCHES,
+    switchSizer->GetStaticBox(), 
+    MY_CHOICE_LIST_SWITCHES, 
     wxDefaultPosition,
     wxDefaultSize,
     0,
@@ -363,10 +496,10 @@ MyFrame::MyFrame(wxWindow *parent,
   wxBoxSizer *monitorSetSizer = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer *monitorZapSizer = new wxBoxSizer(wxHORIZONTAL);
   monitorSet = new wxChoice(
-    monitorCtrlSizer->GetStaticBox(),
+    monitorCtrlSizer->GetStaticBox(), 
     MY_CHOICE_MONITOR_SET,
     wxDefaultPosition,
-    wxDefaultSize,
+    wxSize(100, -1),
     0,
     NULL,
     wxCB_SORT,
@@ -375,10 +508,10 @@ MyFrame::MyFrame(wxWindow *parent,
   monitorSetSizer->Add(monitorSet, 0, wxALL, 5);
   monitorSetSizer->Add(new wxButton(monitorCtrlSizer->GetStaticBox(), MY_BUTTON_SET, "Set"), 0, wxALL, 10);
   monitorZap = new wxChoice(
-    monitorCtrlSizer->GetStaticBox(),
+    monitorCtrlSizer->GetStaticBox(), 
     MY_CHOICE_MONITOR_ZAP,
     wxDefaultPosition,
-    wxDefaultSize,
+    wxSize(100, -1),
     0,
     NULL,
     wxCB_SORT,
@@ -399,89 +532,207 @@ MyFrame::MyFrame(wxWindow *parent,
   wxBoxSizer *buttonSizer2 = new wxBoxSizer(wxHORIZONTAL);
   opSizer->Add(new wxStaticText(opSizer->GetStaticBox(), wxID_ANY, "No. of Clock Cycles"), 0, wxTOP|wxLEFT|wxRIGHT, 10);
   spin = new wxSpinCtrl(opSizer->GetStaticBox(), MY_SPINCNTRL_ID, wxString("10"));
+  spin->SetRange(0, 50);
   opSizer->Add(spin, 0 , wxALL, 10);
   buttonSizer1->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_RUN, "Run"), 0, wxALL, 10);
-  buttonSizer1->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_PAUSE, "Pause/Resume"), 0, wxALL, 10);
+  buttonSizer1->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_CONTINUE, "Continue"), 0, wxALL, 10);
   buttonSizer2->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_STOP, "Stop"), 0, wxALL, 10);
-  buttonSizer2->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_RESET, "Reset"), 0, wxALL, 10);
+  buttonSizer2->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_QUIT, "Quit"), 0, wxALL, 10);
   opSizer->Add(buttonSizer1, 0 , wxALL, 10);
   opSizer->Add(buttonSizer2, 0 , wxALL, 10);
   // end of operation sizer
 
 
 
-  bottomRightSizer->Add(configSizer, 0, wxALIGN_LEFT);
-  bottomRightSizer->Add(opSizer, 0, wxALIGN_LEFT);
+  bottomRightSizer->Add(configSizer, 0, wxALL, 10);
+  bottomRightSizer->Add(opSizer, 0, wxALL, 10);
   bottomSizer->Add(bottomRightSizer, 0, wxALIGN_TOP);
-  // bottomSizer->Add(switchSizer, 0, wxALIGN_TOP);
-  // bottomSizer->Add(monitorCtrlSizer, 0, wxALIGN_TOP);
-  // bottomSizer->Add(button_sizer, 0, wxALIGN_TOP);
   overallSizer->Add(filePathSizer, 0, wxALIGN_LEFT);
   overallSizer->Add(bottomSizer, 0, wxALIGN_LEFT);
 
   // the top level window should not shrink below this size
-  SetSizeHints(800, 600);
+  SetSizeHints(800, 700);
+  SetMaxSize(wxSize(800, 700));
   SetSizer(overallSizer);
 }
 
-void MyFrame::OnExit(wxCommandEvent &event)
-  // Event handler for the exit menu item
-{
-  Close(true);
-}
+ void MyFrame::OnOpen(wxCommandEvent &event)
+   // Event handler for the about menu item
+ {
+    wxFileDialog openFileDialog(
+      this, 
+      _("Open a circuit definition file"), 
+      "", 
+      "",
+      "GF2 files (*.gf2)|*.gf2", 
+      wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+	if(openFileDialog.ShowModal() == wxID_CANCEL)
+		return;			// user changed idea..
+    // proceed loading the file chosen by the user
+  filePath = openFileDialog.GetPath();
+  filePathBox->SetValue(filePath);
+ }
+ /* --------------------- */
+
+// void MyFrame::OnSave(wxCommandEvent &event)
+// // Event Handler for 'Save'
+// {
+// 	//@potsawee I still have no idea what to implement here haha
+// }
+
 
 void MyFrame::OnAbout(wxCommandEvent &event)
   // Event handler for the about menu item
 {
-  wxMessageDialog about(this, "Example wxWidgets GUI\nAndrew Gee\nJune 2014", "About Logsim", wxICON_INFORMATION | wxOK);
+  wxMessageDialog about(
+    this, 
+    "Part IIA Project GF2\nLogic Simulator\nNaitian Zheng (nz253)\nPotsawee Manakul (pm574)\nShutong Feng (sf548)\nMay 2018", 
+    "About Logsim", 
+    wxICON_INFORMATION | wxOK);
   about.ShowModal();
 }
 
-// @Potsawee 29 May 2018 //
-void MyFrame::OnOpen(wxCommandEvent &event)
+void MyFrame::OnHelp(wxCommandEvent &event)
   // Event handler for the about menu item
 {
-    wxFileDialog openFileDialog(this, _("Open a circuit definition file"), "", "",
-               "GF2 files (*.gf2)|*.gf2", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
-	if(openFileDialog.ShowModal() == wxID_CANCEL)
-		return;			// user changed idea..
-    // proceed loading the file chosen by the user
-    filePath = openFileDialog.GetPath();
-    filePathBox->SetValue(filePath);
+  wxMessageDialog about(
+    this, 
+    "Please refer to the user manual.", 
+    "Help", 
+    wxICON_INFORMATION | wxOK);
+  about.ShowModal();
 }
-/* --------------------- */
 
 void MyFrame::OnButtonRUN(wxCommandEvent &event)
   // Event handler for the push button
 {
-  int n, ncycles;
-
-  cyclescompleted = 0;
-  dmz->initdevices ();
-  mmz->resetmonitor ();
-  runnetwork(spin->GetValue());
-  canvas->Render("Run button pressed", cyclescompleted);
-  logMessagePanel->AppendText(getCurrentTime()+"Start running.\n");
+  if(FileLoaded)
+  {
+    IsStarted = 1;
+    int n, ncycles;
+    canvas->SetSize(wxSize(500, 600));
+    cyclescompleted = 0;
+    dmz->initdevices ();
+    mmz->resetmonitor ();
+    ncycles = spin->GetValue();
+    // todo: change 20 to signal size, scale according to the number of monitors accordingly
+    if((ncycles+cyclescompleted)*20+250>500)
+    {
+    int x, y;
+    scrolledWindow->GetViewStart(&x, &y);
+      canvas->SetSize((ncycles+cyclescompleted)*20+250, 600);
+      scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+15, 20);
+      scrolledWindow->Scroll(x, y);
+    }
+    runnetwork(ncycles);
+    canvas->Render("Run button pressed", cyclescompleted);
+    logMessagePanel->AppendText(getCurrentTime()+"Start running.\n");
+  }
+  else
+  {
+    wxMessageDialog opwarning(this, 
+      _("Please load a file before running."), 
+      _("Warning"), wxOK|wxICON_INFORMATION);    
+    opwarning.ShowModal();
+  }
 }
 
-void MyFrame::OnButtonRESET(wxCommandEvent &event)
+void MyFrame::OnButtonQUIT(wxCommandEvent &event)
   // Event handler for the push button
 {
-  canvas->SetDefault(mmz, nmz);
-  switchChoice->Clear();
-  switchState0->SetValue(0);
-  switchState1->SetValue(0);
-  monitorSet->Clear();
-  monitorZap->Clear();
-  switchVec.clear();
-  setVec.clear();
-  zapVec.clear();
-  canvas->Render("Reset button pressed.\n", 0);
+  wxMessageDialog monitorwarning(this, 
+    _("Are you sure you want to quit the programme?"), 
+    _("Warning"), wxOK|wxCANCEL);
+  if(monitorwarning.ShowModal() == wxID_OK)
+  {
+    Close(true);
+  }
 }
+
+void MyFrame::OnButtonSTOP(wxCommandEvent &event)
+{
+  mmz->resetmonitor();
+  canvas->SetDefault(mmz, nmz);
+  // switchChoice->Clear();
+  // switchState0->SetValue(0);
+  // switchState1->SetValue(0);
+  // monitorSet->Clear();
+  // monitorZap->Clear();
+  // switchVec.clear();
+  // setVec.clear();
+  // zapVec.clear();
+  canvas->SetSize(wxSize(500, 600));
+  scrolledWindow->Scroll(0, 0);
+  scrolledWindow->SetScrollbars(20, 20, 25, 30);
+  IsStarted = 0;
+  // FileLoaded = 0;
+}
+
+void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
+{
+  if(FileLoaded)
+  {
+    if(IsStarted)
+    {
+      int ncycles = spin->GetValue();
+      if(cyclescompleted>0)
+      {
+        if(ncycles+cyclescompleted > maxcycles)
+        {
+          ncycles = maxcycles-cyclescompleted;
+          wxMessageDialog runwarning(this, 
+          _("Maximum number of cycles per run (50) is reached."), 
+          _("Warning"), wxOK|wxICON_INFORMATION);    
+          runwarning.ShowModal();  			
+        }
+        // todo: change 20 to signal size, scale according to the number of monitors accordingly
+        if((ncycles+cyclescompleted)*20+250>500)
+        {
+        int x, y;
+        scrolledWindow->GetViewStart(&x, &y);
+          canvas->SetSize((ncycles+cyclescompleted)*20+300, 600);
+          scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+15, 30);
+          scrolledWindow->Scroll(x, y);
+        }
+        runnetwork(ncycles);
+        canvas->Render("Continue button pressed", cyclescompleted);
+        logMessagePanel->AppendText(getCurrentTime()+"Continue running.\n");
+      }
+      else
+      {
+        logMessagePanel->AppendText(getCurrentTime()+"Please run before continuing.\n");
+      }
+    }
+    else
+    {
+      wxMessageDialog contwarning(this, 
+        _("Please run before continuing."), 
+        _("Warning"), wxOK|wxICON_INFORMATION);    
+      contwarning.ShowModal();        
+    }
+  }
+  else
+  {
+    wxMessageDialog opwarning(this, 
+      _("Please load a file before continuing."), 
+      _("Warning"), wxOK|wxICON_INFORMATION);    
+    opwarning.ShowModal();    
+  }
+}
+
 
 void MyFrame::OnSpin(wxSpinEvent &event)
   // Event handler for the spin control
 {
+  if(spin->GetValue()>maxcycles)
+  {
+    spin->SetValue(50);
+    wxMessageDialog spinwarning(this, 
+      _("The maximum number of cycles per run is 50"), 
+      _("Warning"), wxOK|wxICON_INFORMATION);    
+    spinwarning.ShowModal(); 
+  }
+  
   wxString text;
 
   text.Printf("New spinctrl value %d", event.GetPosition());
@@ -525,118 +776,211 @@ void MyFrame::OnChoiceSwitch(wxCommandEvent &event)
 
 void MyFrame::OnCheck0(wxCommandEvent &event)
 {
-  if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
-  // todo: two unchecked boxes should not be allowed
+  if(switchChoice->IsEmpty())
   {
-    switchState1->SetValue(!(switchState1->GetValue()));
-    switchVec[currentSwitchIndex].objVal = 0;
-    logMessagePanel->AppendText(
-    getCurrentTime()+
-    switchVec[currentSwitchIndex].objName +
-    " is set to 0.\n");
+    wxMessageDialog switchwarning(this, 
+      _("No switch is available.\nPlease load a file first."), 
+      _("Warning"), wxICON_INFORMATION | wxOK);
+    switchwarning.ShowModal();   
+  }
+  else
+  {
+    if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
+    // todo: two unchecked boxes should not be allowed
+    {
+      bool ok;
+      dmz->setswitch(
+        switchVec[currentSwitchIndex].dev,
+        low,
+        ok
+      );
+      if(ok)
+      {
+        switchState1->SetValue(!(switchState1->GetValue()));
+        switchVec[currentSwitchIndex].objVal = 0;
+        logMessagePanel->AppendText(
+        getCurrentTime()+
+        switchVec[currentSwitchIndex].objName +
+        " is set to 0.\n");
+      }
+      else
+      {
+        logMessagePanel->AppendText(
+        getCurrentTime()+
+        switchVec[currentSwitchIndex].objName +
+        " is not set to 0.\n");
+      }
+    }
   }
 }
 
 void MyFrame::OnCheck1(wxCommandEvent &event)
 {
-  if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
-  // todo: two unchecked boxes should not be allowed
+  if(switchChoice->IsEmpty())
   {
-    switchState0->SetValue(!(switchState0->GetValue()));
-    switchVec[currentSwitchIndex].objVal = 1;
-    logMessagePanel->AppendText(
-    getCurrentTime()+
-    switchVec[currentSwitchIndex].objName +
-    " is set to 1.\n");
+    wxMessageDialog switchwarning(this, 
+      _("No switch is available.\nPlease load a file first."), 
+      _("Warning"), wxICON_INFORMATION | wxOK);
+    switchwarning.ShowModal();   
+  }
+  else
+  {
+    if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
+    // todo: two unchecked boxes should not be allowed
+    {
+      bool ok;
+      dmz->setswitch(
+        switchVec[currentSwitchIndex].dev,
+        high,
+        ok
+      );
+      if(ok)
+      {
+        switchState0->SetValue(!(switchState0->GetValue()));
+        switchVec[currentSwitchIndex].objVal = 1;
+        logMessagePanel->AppendText(
+        getCurrentTime()+
+        switchVec[currentSwitchIndex].objName +
+        " is set to 1.\n");
+      }
+      else
+      {
+        logMessagePanel->AppendText(
+        getCurrentTime()+
+        switchVec[currentSwitchIndex].objName +
+        " is not set to 1.\n");     
+      }
+    }  
   }
 }
 
 void MyFrame::OnButtonSET(wxCommandEvent& event)
 {
-  if(monitorSet->IsEmpty())
+  if(IsStarted)
   {
-    logMessagePanel->AppendText(
-    getCurrentTime()+
-    "No monitor is available to be set.\n");
+    wxMessageDialog monitorwarning(this, 
+    _("Please do not alter monitor settings while running.\nPlease press stop button first."), 
+    _("Warning"), wxICON_INFORMATION | wxOK);
+    monitorwarning.ShowModal();
   }
   else
   {
-    currentSetIndex = updateCurrentChoice((monitorSet->GetStringSelection()).ToStdString(), &setVec);
-    bool ok = true;
-    mmz->makemonitor(setVec[currentZapIndex].dev, setVec[currentZapIndex].output, ok);
-    if(ok)
+    if(monitorSet->IsEmpty())
     {
+      wxMessageDialog monitorwarning(this, 
+        _("No monitor is available to be set.\nPlease load a file first."), 
+        _("Warning"), wxICON_INFORMATION | wxOK);
+        monitorwarning.ShowModal();
       logMessagePanel->AppendText(
-        getCurrentTime()+
-        "Monitor "+
-        monitorSet->GetStringSelection() +
-        " is set.\n");
-      monitorSet->Delete(currentSetIndex);
-      setVec[currentSetIndex].objVal = !setVec[currentSetIndex].objVal;
-      zapVec.push_back(setVec[currentSetIndex]);
-      std::sort(zapVec.begin(), zapVec.end());
-      setVec.erase(setVec.begin()+currentSetIndex);
-      monitorZap->Clear();
-      for(std::vector<MyChoiceObj>::iterator it = zapVec.begin() ; it != zapVec.end(); ++it)
-      {
-        monitorZap->Append(it->objName);
-      }
-      currentSetIndex = 0;
+      getCurrentTime()+
+      "No monitor is available to be set.\n");
     }
     else
     {
-      logMessagePanel->AppendText(
-        getCurrentTime()+
-        "Monitor "+
-        monitorZap->GetStringSelection() +
-        " is not set successfully.\n");
+      currentSetIndex = updateCurrentChoice((monitorSet->GetStringSelection()).ToStdString(), &setVec);
+      bool ok = true;
+      mmz->makemonitor(setVec[currentSetIndex].dev, setVec[currentSetIndex].output, ok);
+      // std::cout << setVec[currentSetIndex].objName << "    "
+      // << setVec[currentSetIndex].dev << "    "
+      // << setVec[currentSetIndex].output << "\n";
+      if(ok)
+      {
+        logMessagePanel->AppendText(
+          getCurrentTime()+
+          "Monitor "+
+          monitorSet->GetStringSelection() + 
+          " is set.\n");
+        monitorSet->Delete(currentSetIndex);
+        setVec[currentSetIndex].objVal = !setVec[currentSetIndex].objVal;
+        zapVec.push_back(setVec[currentSetIndex]);
+        std::sort(zapVec.begin(), zapVec.end());
+        setVec.erase(setVec.begin()+currentSetIndex);
+        monitorZap->Clear();
+        for(std::vector<MyChoiceObj>::iterator it = zapVec.begin() ; it != zapVec.end(); ++it)
+        {
+          monitorZap->Append(it->objName);
+        }
+        currentSetIndex = 0; 
+        monitorSet->SetSelection(0);
+        monitorZap->SetSelection(0);
+      }
+      else
+      {
+        logMessagePanel->AppendText(
+          getCurrentTime()+
+          "Monitor "+
+          monitorSet->GetStringSelection() + 
+          " is not set successfully.\n");
+          if(mmz->moncount()==10)
+          {
+            wxMessageDialog monitorwarning(this, 
+              _("Maximun number of monitors reached.\nPlease zap monitor point(s) before setting."), 
+              _("Warning"), wxICON_INFORMATION | wxOK);
+              monitorwarning.ShowModal();
+          }
+      }
     }
   }
 }
 
 void MyFrame::OnButtonZAP(wxCommandEvent& event)
 {
-  if(monitorZap->IsEmpty())
+  if(IsStarted)
   {
-    logMessagePanel->AppendText(
-    getCurrentTime()+
-    "No monitor is available to be zapped.\n");
+    wxMessageDialog monitorwarning(this, 
+    _("Please do not alter monitor settings while running.\nPlease press stop button first."), 
+    _("Warning"), wxICON_INFORMATION | wxOK);
+    monitorwarning.ShowModal();
   }
   else
   {
-    currentZapIndex = updateCurrentChoice((monitorZap->GetStringSelection()).ToStdString(), &zapVec);
-    bool ok = true;
-    mmz->remmonitor(zapVec[currentZapIndex].dev, zapVec[currentZapIndex].output, ok);
-    if(ok)
+    if(monitorZap->IsEmpty())
     {
+      wxMessageDialog monitorwarning(this, 
+        _("No monitor is available to be zapped.\nPlease load a file first."), 
+        _("Warning"), wxICON_INFORMATION | wxOK);
+        monitorwarning.ShowModal();
       logMessagePanel->AppendText(
-        getCurrentTime()+
-        "Monitor "+
-        monitorZap->GetStringSelection() +
-        " is zapped.\n");
-      monitorZap->Delete(currentZapIndex);
-      zapVec[currentZapIndex].objVal = !zapVec[currentZapIndex].objVal;
-      setVec.push_back(zapVec[currentZapIndex]);
-      std::sort(setVec.begin(), setVec.end());
-      zapVec.erase(zapVec.begin()+currentZapIndex);
-      monitorSet->Clear();
-      for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
-      {
-        monitorSet->Append(it->objName);
-      }
-      currentZapIndex = 0;
+      getCurrentTime()+
+      "No monitor is available to be zapped.\n");
     }
     else
     {
-      logMessagePanel->AppendText(
-        getCurrentTime()+
-        "Monitor "+
-        monitorZap->GetStringSelection() +
-        " is not zapped successfully.\n");
+      currentZapIndex = updateCurrentChoice((monitorZap->GetStringSelection()).ToStdString(), &zapVec);
+      bool ok = true;
+      mmz->remmonitor(zapVec[currentZapIndex].dev, zapVec[currentZapIndex].output, ok);
+      if(ok)
+      {
+        logMessagePanel->AppendText(
+          getCurrentTime()+
+          "Monitor "+
+          monitorZap->GetStringSelection() + 
+          " is zapped.\n");
+        monitorZap->Delete(currentZapIndex);
+        zapVec[currentZapIndex].objVal = !zapVec[currentZapIndex].objVal;
+        setVec.push_back(zapVec[currentZapIndex]);
+        std::sort(setVec.begin(), setVec.end());
+        zapVec.erase(zapVec.begin()+currentZapIndex);
+        monitorSet->Clear();
+        for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
+        {
+          monitorSet->Append(it->objName);
+        }
+        currentZapIndex = 0;
+		  monitorZap->SetSelection(0);
+		  monitorSet->SetSelection(0);
+      }
+      else
+      {
+        logMessagePanel->AppendText(
+          getCurrentTime()+
+          "Monitor "+
+          monitorZap->GetStringSelection() + 
+          " is not zapped successfully.\n");
+      }
+      
     }
-
   }
-
 }
 
 
@@ -659,6 +1003,7 @@ void MyFrame::loadFile(wxString s)
   setVec.clear();
   zapVec.clear();
   mmz->resetmonitor();
+  IsStarted = 0;
   // todo: more to be added upon 'reset'
 
   std::cout << "Reset/Reload\n";
@@ -666,105 +1011,193 @@ void MyFrame::loadFile(wxString s)
   ifstream f((filePath.ToStdString()).c_str());
   if(f.good())
   {
+    string extString = (filePath.ToStdString()).substr((filePath.ToStdString()).length() - 4, (filePath.ToStdString()).length());
+    if(extString == ".gf2")
+    {
     // nmz, netz, dmz, mmz reinitialised here to allow load/reset
     // todo: maybe not necessary to pass them as arguments?
-    smz = new scanner(nmz, filePath);
-    pmz = new parser(netz, dmz, mmz, smz, nmz);
-    if(!(pmz->readin()))
-    {// check if the definition file is valid
-      logMessagePanel->AppendText(
-        getCurrentTime()+
-        "Logic Definition File Error.\n");
-    }
-    else
-    {
-      logMessagePanel->AppendText(
-        getCurrentTime()+
-        "File loaded from  "+
-        s + "\n");
+      smz = new scanner(nmz, filePath);
+      pmz = new parser(netz, dmz, mmz, smz, nmz);
+      std::streambuf * old = std::cout.rdbuf(buffer.rdbuf());
+      if(!(pmz->readin()))
+      {// check if the definition file is valid
+        logMessagePanel->AppendText(
+          getCurrentTime()+
+          "Logic Definition File Error.\n");
+        
+        std::string text = buffer.str(); // text will now contain "Bla\n"
+        
+        wxMessageDialog errorwarning(this, 
+          _(text), 
+          _("Definition File Error"), wxICON_INFORMATION | wxOK);
 
-      devlink currentDevice = netz->devicelist();
-	    name currentID;
-      while(currentDevice!=NULL)
-      {
-        currentID = currentDevice->id;
-        namestring devName = nmz->getname(currentID);
-        if(currentDevice->kind == aswitch)
-        {
-          MyChoiceObj tempObj;
-          tempObj.dev = currentID;
-          tempObj.objName = devName;
-          if(currentDevice->swstate==low)
-          {
-            tempObj.objVal = 0;
-          }
-          else if(currentDevice->swstate==high)
-          {
-            tempObj.objVal = 1;
-          }
-          switchVec.push_back(tempObj);
-        }
-        currentDevice = currentDevice->next;
-      }
-      std::sort(switchVec.begin(), switchVec.end());
-      for(std::vector<MyChoiceObj>::iterator it = switchVec.begin() ; it != switchVec.end(); ++it)
-      {
-        switchChoice->Append(it->objName);
-      }
-      // current switch choice by default is
-      currentSwitchIndex = 0;
-      // set the value for the first switch
-      // todo: find a better way to initialise
-      if(switchVec.begin()->objVal)
-      {
-        switchState1->SetValue(1);
-        switchState0->SetValue(0);
-      }
+        errorwarning.ShowModal();
+          
+          // /* --- Open gedit to edit to file --- */
+          // string str = "gedit " + filePath.ToStdString();
+          // const char *command = str.c_str();
+          // system(command);
+          // /* ---------------------------------- */
+      }  
       else
       {
-        switchState1->SetValue(0);
-        switchState0->SetValue(1);
-      }
+        logMessagePanel->AppendText(
+          getCurrentTime()+
+          "File loaded from "+
+          s + " successfully.\n");
+          FileLoaded = 1;
+        std::vector<MyChoiceObj> signalList;
 
-
-      int monitorCount = mmz->moncount();
-      name dev, output;
-      for(int i = 0; i < monitorCount; ++i)
-      {
-        std::string monitorName;
-        mmz->getmonname(i, dev, output);
-        MyChoiceObj tempObj;
-        tempObj.dev = dev;
-        tempObj.output = output;
-        if(output == -1)
+        devlink currentDevice = netz->devicelist();
+        name currentID;
+        int maxClockCycle;
+        while(currentDevice!=NULL)
         {
-          monitorName = nmz->getname(dev);
+          currentID = currentDevice->id;
+          namestring devName = nmz->getname(currentID);
+          if(currentDevice->kind == aswitch)
+          {
+            MyChoiceObj tempObj;
+            tempObj.dev = currentID;
+            tempObj.objName = devName;
+            if(currentDevice->swstate==low)
+            {
+              tempObj.objVal = 0;
+            }
+            else if(currentDevice->swstate==high)
+            {
+              tempObj.objVal = 1;
+            }
+            tempObj.kind = currentDevice->kind;
+            switchVec.push_back(tempObj);
+            signalList.push_back(tempObj);
+          }
+          else
+          {
+            outplink currentOutput = currentDevice->olist;
+            if(currentOutput->id==-1)
+            {
+              MyChoiceObj tempObj;
+              tempObj.dev = currentID;
+              tempObj.output = -1;
+              tempObj.objName = devName;
+              tempObj.objVal = 0;
+              tempObj.kind = currentDevice->kind;
+              signalList.push_back(tempObj);
+            }
+            else
+            {
+              while(currentOutput != NULL)
+              {
+                MyChoiceObj tempObj;
+                tempObj.dev = currentID;
+                tempObj.output = currentOutput->id;
+                tempObj.objName = devName+"."+nmz->getname(currentOutput->id);
+                tempObj.objVal = 0;
+                tempObj.kind = currentDevice->kind;
+                signalList.push_back(tempObj);
+                currentOutput = currentOutput->next;
+              }
+            }
+          }
+          currentDevice = currentDevice->next;
+        }
+        // for(int mm = 0; mm < signalList.size(); ++mm)
+        // {
+        //   std::cout << signalList[mm].objName << "\t"
+        //   << signalList[mm].dev << "\t"
+        //   << signalList[mm].output << "\t"
+        //   << "\n";
+        // }
+
+        std::sort(switchVec.begin(), switchVec.end());
+        for(std::vector<MyChoiceObj>::iterator it = switchVec.begin() ; it != switchVec.end(); ++it)
+        {
+          switchChoice->Append(it->objName);
+        }
+        // current switch choice by default is 
+        currentSwitchIndex = 0;
+        // set the value for the first switch
+        // todo: find a better way to initialise
+        if(switchVec.begin()->objVal)
+        {
+          switchState1->SetValue(1);
+          switchState0->SetValue(0);
         }
         else
         {
-          monitorName = nmz->getname(dev) + "." + nmz->getname(output);
+          switchState1->SetValue(0);
+          switchState0->SetValue(1);
         }
-        tempObj.objName = monitorName;
-        tempObj.objVal = 1;
-        zapVec.push_back(tempObj);
+        switchChoice->SetSelection(0);
+        int monitorCount = mmz->moncount();
+        name dev, output;
+        for(int i = 0; i < monitorCount; ++i)
+        {
+          std::string monitorName;
+          mmz->getmonname(i, dev, output);
+          MyChoiceObj tempObj;
+          tempObj.dev = dev;
+          tempObj.output = output;
+          if(output == -1)
+          {
+            monitorName = nmz->getname(dev);
+          }
+          else
+          {
+            monitorName = nmz->getname(dev) + "." + nmz->getname(output);
+          }
+          for(int m = 0; m < signalList.size(); ++m)
+          {
+            if(monitorName == signalList[m].objName)
+            {
+              tempObj.objName = monitorName;
+              tempObj.objVal = 1;
+              zapVec.push_back(tempObj);
+              signalList.erase(signalList.begin()+m);
+            }
+          }
+        }
+        std::sort(zapVec.begin(), zapVec.end());
+        for(std::vector<MyChoiceObj>::iterator it = zapVec.begin() ; it != zapVec.end(); ++it)
+        {
+          monitorZap->Append(it->objName);
+        }
+        currentZapIndex = 0;
+        
+        for(int n = 0; n < signalList.size(); ++n)
+        {
+          setVec.push_back(signalList[n]);
+        }
+        std::sort(setVec.begin(), setVec.end());
+        for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
+        {
+          monitorSet->Append(it->objName);
+        }
+        currentSetIndex = 0;
+        monitorSet->SetSelection(0);
+        monitorZap->SetSelection(0);
       }
-      std::cout << mmz->moncount();
-      std::sort(zapVec.begin(), zapVec.end());
-      for(std::vector<MyChoiceObj>::iterator it = zapVec.begin() ; it != zapVec.end(); ++it)
-      {
-        monitorZap->Append(it->objName);
-      }
-      currentSetIndex = 0;
-      currentZapIndex = 0;
+    }
+    else
+    {
+      wxMessageDialog filewarning(this, 
+        _("Please load a valid file with .gf2 extension."), 
+        _("Warning"), wxICON_INFORMATION | wxOK);
+      filewarning.ShowModal();
     }
   }
   else
   {
+    wxMessageDialog filewarning(this, 
+      _("The file does not exist.\nPlease load a valid file."), 
+      _("Warning"), wxICON_INFORMATION | wxOK);
+      filewarning.ShowModal();
     logMessagePanel->AppendText(
       getCurrentTime()+
       "File does not exist.\n");
   }
-
+  
 }
 
 int MyFrame::updateCurrentChoice(std::string choiceName, std::vector<MyChoiceObj>* vec)

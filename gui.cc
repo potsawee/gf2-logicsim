@@ -385,7 +385,7 @@ MyFrame::MyFrame(wxWindow *parent,
     wxALL, 
     10);
 
-	filePathBox = new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(800, -1), wxTE_PROCESS_ENTER);
+	filePathBox = new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(10000, -1), wxTE_PROCESS_ENTER);
   filePathSizer->Add(
     filePathBox, 
     0, 
@@ -402,7 +402,7 @@ MyFrame::MyFrame(wxWindow *parent,
   displaySizer->Add(scrolledWindow, 1, wxEXPAND|wxALL, 10);
   wxBoxSizer *swinSizer = new wxBoxSizer(wxVERTICAL);
 	scrolledWindow->SetAutoLayout(true);
-  scrolledWindow->SetMinSize(wxSize(500, 400));
+  scrolledWindow->SetMinSize(wxSize(2000, 2000));
 	scrolledWindow->SetScrollRate(20,20);
   canvas = new MyGLCanvas(
     scrolledWindow, 
@@ -430,10 +430,13 @@ MyFrame::MyFrame(wxWindow *parent,
       wxSize(500, 100), 
       wxTE_MULTILINE|wxTE_READONLY);
 
+  wxBoxSizer *textSizer = new wxBoxSizer(wxHORIZONTAL);
+  textSizer->Add(logMessagePanel, 1, wxEXPAND);
+
   displaySizer->Add(
-    logMessagePanel,
+    textSizer,
     0,
-    wxALL,
+    wxEXPAND|wxALL,
     10);
 
   bottomSizer->Add(displaySizer, 1, wxEXPAND);
@@ -515,12 +518,9 @@ MyFrame::MyFrame(wxWindow *parent,
 
 
 
-  bottomRightSizer->Add(configSizer, 0, wxALIGN_LEFT);
-  bottomRightSizer->Add(opSizer, 0, wxALIGN_LEFT);
+  bottomRightSizer->Add(configSizer, 0, wxALL, 10);
+  bottomRightSizer->Add(opSizer, 0, wxALL, 10);
   bottomSizer->Add(bottomRightSizer, 0, wxALIGN_TOP);
-  // bottomSizer->Add(switchSizer, 0, wxALIGN_TOP);
-  // bottomSizer->Add(monitorCtrlSizer, 0, wxALIGN_TOP);
-  // bottomSizer->Add(button_sizer, 0, wxALIGN_TOP);
   overallSizer->Add(filePathSizer, 0, wxALIGN_LEFT);
   overallSizer->Add(bottomSizer, 0, wxALIGN_LEFT);
 

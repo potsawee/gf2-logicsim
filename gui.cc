@@ -1007,8 +1007,6 @@ void MyFrame::loadFile(wxString s)
   IsStarted = 0;
   // todo: more to be added upon 'reset'
 
-  std::cout << "Reset/Reload\n";
-
   ifstream f((filePath.ToStdString()).c_str());
   if(f.good())
   {
@@ -1027,7 +1025,6 @@ void MyFrame::loadFile(wxString s)
           "Logic Definition File Error.\n");
         
         std::string text = buffer.str(); // text will now contain "Bla\n"
-        
         wxMessageDialog errorwarning(this, 
           _(text), 
           _("Definition File Error"), wxICON_INFORMATION | wxOK);

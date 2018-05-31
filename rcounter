@@ -1,6 +1,6 @@
 DEVICES:
     SWITCH = sw1 (0),
-    CLOCK = ck (1),
+    CLOCK = ck (3),
     DTYPE = d1,
     DTYPE = d2,
     DTYPE = d3,

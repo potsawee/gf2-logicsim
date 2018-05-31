@@ -421,7 +421,7 @@ MyFrame::MyFrame(wxWindow *parent,
   wxBoxSizer *swinSizer = new wxBoxSizer(wxVERTICAL);
 	scrolledWindow->SetAutoLayout(true);
   scrolledWindow->SetMinSize(wxSize(500, 400));
-	scrolledWindow->SetScrollbars(20,20, 25, 30);
+	scrolledWindow->SetScrollbars(20, 20, 25, 30);
   canvas = new MyGLCanvas(
     scrolledWindow, 
     wxID_ANY, 
@@ -525,6 +525,7 @@ MyFrame::MyFrame(wxWindow *parent,
   wxBoxSizer *buttonSizer2 = new wxBoxSizer(wxHORIZONTAL);
   opSizer->Add(new wxStaticText(opSizer->GetStaticBox(), wxID_ANY, "No. of Clock Cycles"), 0, wxTOP|wxLEFT|wxRIGHT, 10);
   spin = new wxSpinCtrl(opSizer->GetStaticBox(), MY_SPINCNTRL_ID, wxString("10"));
+  spin->SetRange(0, 50);
   opSizer->Add(spin, 0 , wxALL, 10);
   buttonSizer1->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_RUN, "Run"), 0, wxALL, 10);
   buttonSizer1->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_CONTINUE, "Continue"), 0, wxALL, 10);
@@ -1027,6 +1028,7 @@ void MyFrame::loadFile(wxString s)
 
       devlink currentDevice = netz->devicelist();
 	    name currentID;
+	    int maxClockCycle;
       while(currentDevice!=NULL)
       {
         currentID = currentDevice->id;

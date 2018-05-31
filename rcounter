@@ -4,7 +4,7 @@ DEVICES:
     DTYPE = d1,
     DTYPE = d2,
     DTYPE = d3,
-    DTYPE = d4,
+    DTYPE = d4;
     DTYPE = d5;
 
 CONNECTIONS:

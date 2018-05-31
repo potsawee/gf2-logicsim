@@ -97,6 +97,7 @@ class MyFrame: public wxFrame
   bool IsStarted;
   bool FileLoaded;
 
+  std::stringstream buffer;
   wxString filePath; //store location of path
 
   int cyclescompleted;                    // how many simulation cycles have been completed

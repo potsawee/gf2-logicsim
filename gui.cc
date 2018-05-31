@@ -1015,30 +1015,23 @@ void MyFrame::loadFile(wxString s)
     // todo: maybe not necessary to pass them as arguments?
     smz = new scanner(nmz, filePath);
     pmz = new parser(netz, dmz, mmz, smz, nmz);
+    std::streambuf * old = std::cout.rdbuf(buffer.rdbuf());
     if(!(pmz->readin()))
     {// check if the definition file is valid
       logMessagePanel->AppendText(
         getCurrentTime()+
         "Logic Definition File Error.\n");
-        std::array<char, 128> buffer;
-        std::string result;
-        std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
-        if (!pipe) throw std::runtime_error("popen() failed!");
-        while (!feof(pipe.get())) 
-        {
-          if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
-            result += buffer.data();
-        }
-        wxMessageDialog errorwarning(this, 
-          _(result), 
-          _("Warning"), wxICON_INFORMATION | wxOK);
-          errorwarning.ShowModal();
+      std::string text = buffer.str(); // text will now contain "Bla\n"
+      wxMessageDialog errorwarning(this, 
+        _("Errors with the definition file:\n"+text), 
+        _("Warning"), wxICON_INFORMATION | wxOK);
+        errorwarning.ShowModal();
         
-        /* --- Open gedit to edit to file --- */
-        string str = "gedit " + filePath.ToStdString();
-	    	const char *command = str.c_str();
-		    system(command);
-	    	/* ---------------------------------- */
+        // /* --- Open gedit to edit to file --- */
+        // string str = "gedit " + filePath.ToStdString();
+	    	// const char *command = str.c_str();
+		    // system(command);
+	    	// /* ---------------------------------- */
     }  
     else
     {

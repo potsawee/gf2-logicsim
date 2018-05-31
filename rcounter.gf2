@@ -1,0 +1,32 @@
+DEVICES:
+    SWITCH = sw1 (0),
+    CLOCK = ck (1),
+    DTYPE = d1,
+    DTYPE = d2,
+    DTYPE = d3,
+    DTYPE = d4,
+    DTYPE = d5;
+
+CONNECTIONS:
+    sw1 => d1.SET,
+    sw1 => d1.CLEAR,
+    sw1 => d2.SET,
+    sw1 => d2.CLEAR,
+    sw1 => d3.SET,
+    sw1 => d3.CLEAR,
+    sw1 => d4.SET,
+    sw1 => d4.CLEAR,
+    sw1 => d5.SET,
+    sw1 => d5.CLEAR,
+    ck  => d1.CLK,
+    d1.Q    => d2.CLK,
+    d2.Q    => d3.CLK,
+    d3.Q    => d4.CLK,
+    d4.Q    => d5.CLK,
+    d1.QBAR => d1.DATA,
+    d2.QBAR => d2.DATA,
+    d3.QBAR => d3.DATA,
+    d4.QBAR => d4.DATA,
+    d5.QBAR => d5.DATA;
+MONITORS:
+    d3.Q, d4.Q;

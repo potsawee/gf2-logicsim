@@ -379,6 +379,12 @@ MyFrame::MyFrame(wxWindow *parent,
     wxALL, 
     10);
 
+  filePathSizer->Add(
+    new wxButton(this, MY_BUTTON_BROWSE, "Browse"), 
+    0, 
+    wxALL, 
+    10);
+
 	filePathBox = new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(800, -1), wxTE_PROCESS_ENTER);
   filePathSizer->Add(
     filePathBox, 

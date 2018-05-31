@@ -11,6 +11,11 @@
 #include "wx_icon.xpm"
 #include <iostream>
 #include <algorithm>
+#include <cstdio>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <array>
 using namespace std;
 
 // MyGLCanvas ////////////////////////////////////////////////////////////////////////////////////
@@ -551,12 +556,6 @@ MyFrame::MyFrame(wxWindow *parent,
   SetSizer(overallSizer);
 }
 
-// void MyFrame::OnExit(wxCommandEvent &event)
-//   // Event handler for the exit menu item
-// {
-//   Close(true);
-// }
-
  void MyFrame::OnOpen(wxCommandEvent &event)
    // Event handler for the about menu item
  {
@@ -968,8 +967,8 @@ void MyFrame::OnButtonZAP(wxCommandEvent& event)
           monitorSet->Append(it->objName);
         }
         currentZapIndex = 0;
-		monitorZap->SetSelection(0);
-		monitorSet->SetSelection(0);
+		  monitorZap->SetSelection(0);
+		  monitorSet->SetSelection(0);
       }
       else
       {
@@ -1021,8 +1020,20 @@ void MyFrame::loadFile(wxString s)
       logMessagePanel->AppendText(
         getCurrentTime()+
         "Logic Definition File Error.\n");
-
-                
+        std::array<char, 128> buffer;
+        std::string result;
+        std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+        if (!pipe) throw std::runtime_error("popen() failed!");
+        while (!feof(pipe.get())) 
+        {
+          if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
+            result += buffer.data();
+        }
+        wxMessageDialog errorwarning(this, 
+          _(result), 
+          _("Warning"), wxICON_INFORMATION | wxOK);
+          errorwarning.ShowModal();
+        
         /* --- Open gedit to edit to file --- */
         string str = "gedit " + filePath.ToStdString();
 	    	const char *command = str.c_str();

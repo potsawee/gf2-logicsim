@@ -64,7 +64,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
   { // draw the first monitor signal, get trace from monitor class
     for(int j = 0; j < mmz->moncount(); ++j)
     {
-      int yLow = 550 - 50*j;
+      int yLow = 500 - 50*j;
       int yHigh = yLow + height;
 
       // doted 0 and 1 lines
@@ -159,7 +159,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
     // signal labels
 		for (int j = 0; j < mmz->moncount(); j++) 
     {
-      int yLow = 300 - 50*j;
+      int yLow = 500 - 50*j;
       int yHigh = yLow + height;
       name dev, outp;
 			mmz->getmonname(j, dev, outp); 		// dev is now the id of the device
@@ -403,7 +403,7 @@ MyFrame::MyFrame(wxWindow *parent,
   displaySizer->Add(scrolledWindow, 1, wxEXPAND|wxALL, 10);
   wxBoxSizer *swinSizer = new wxBoxSizer(wxVERTICAL);
 	scrolledWindow->SetAutoLayout(true);
-  scrolledWindow->SetMinSize(wxSize(2000, 2000));
+  scrolledWindow->SetMinSize(wxSize(500, 400));
 	scrolledWindow->SetScrollRate(20,20);
   canvas = new MyGLCanvas(
     scrolledWindow, 
@@ -526,8 +526,8 @@ MyFrame::MyFrame(wxWindow *parent,
   overallSizer->Add(bottomSizer, 0, wxALIGN_LEFT);
 
   // the top level window should not shrink below this size
-  SetSizeHints(800, 800);
-  SetMaxSize(wxSize(1000, 1000));
+  SetSizeHints(800, 700);
+  SetMaxSize(wxSize(800, 700));
   SetSizer(overallSizer);
 }
 
@@ -597,12 +597,12 @@ void MyFrame::OnButtonRUN(wxCommandEvent &event)
     mmz->resetmonitor ();
     ncycles = spin->GetValue();
     // todo: change 20 to signal size, scale according to the number of monitors accordingly
-    if((ncycles+cyclescompleted)*20+50>500)
+    if((ncycles+cyclescompleted)*20+250>500)
     {
     int x, y;
     scrolledWindow->GetViewStart(&x, &y);
-      canvas->SetSize((ncycles+cyclescompleted)*20+50, 600);
-      scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+5, 20);
+      canvas->SetSize((ncycles+cyclescompleted)*20+250, 600);
+      scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+15, 20);
       scrolledWindow->Scroll(x, y);
     }
     runnetwork(ncycles);
@@ -655,12 +655,13 @@ void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
     if(cyclescompleted>0)
     {
       // todo: change 20 to signal size, scale according to the number of monitors accordingly
-      if((ncycles+cyclescompleted)*20+150>500)
+      if((ncycles+cyclescompleted)*20+250>500)
       {
       int x, y;
       scrolledWindow->GetViewStart(&x, &y);
-        canvas->SetSize((ncycles+cyclescompleted)*20+150, 600);
-        scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+5, 30);
+      std::cout << "canvas resized\n";
+        canvas->SetSize((ncycles+cyclescompleted)*20+300, 600);
+        scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+15, 30);
         scrolledWindow->Scroll(x, y);
       }
       runnetwork(ncycles);
@@ -862,6 +863,8 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
           monitorZap->Append(it->objName);
         }
         currentSetIndex = 0; 
+        monitorSet->SetSelection(0);
+        monitorZap->SetSelection(0);
       }
       else
       {
@@ -926,6 +929,8 @@ void MyFrame::OnButtonZAP(wxCommandEvent& event)
           monitorSet->Append(it->objName);
         }
         currentZapIndex = 0;
+		monitorZap->SetSelection(0);
+		monitorSet->SetSelection(0);
       }
       else
       {
@@ -1074,7 +1079,7 @@ void MyFrame::loadFile(wxString s)
         switchState1->SetValue(0);
         switchState0->SetValue(1);
       }
-
+	  switchChoice->SetSelection(0);
       int monitorCount = mmz->moncount();
       name dev, output;
       for(int i = 0; i < monitorCount; ++i)
@@ -1120,8 +1125,8 @@ void MyFrame::loadFile(wxString s)
         monitorSet->Append(it->objName);
       }
       currentSetIndex = 0;
-      std::cout<< signalList.size() << "\n";
-
+      monitorSet->SetSelection(0);
+      monitorZap->SetSelection(0);
     }
   }
   else

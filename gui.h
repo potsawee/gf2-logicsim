@@ -95,6 +95,8 @@ class MyFrame: public wxFrame
   std::vector<MyChoiceObj> setVec;  
   std::vector<MyChoiceObj> zapVec;
   bool IsStarted;
+  bool FileLoaded;
+
   wxString filePath; //store location of path
 
   int cyclescompleted;                    // how many simulation cycles have been completed

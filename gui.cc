@@ -570,25 +570,35 @@ void MyFrame::OnAbout(wxCommandEvent &event)
 void MyFrame::OnButtonRUN(wxCommandEvent &event)
   // Event handler for the push button
 {
-  IsStarted = 1;
-  int n, ncycles;
-  canvas->SetSize(wxSize(500, 600));
-  cyclescompleted = 0;
-  dmz->initdevices ();
-  mmz->resetmonitor ();
-  ncycles = spin->GetValue();
-  // todo: change 20 to signal size, scale according to the number of monitors accordingly
-  if((ncycles+cyclescompleted)*20+50>500)
+  if(FileLoaded)
   {
-	int x, y;
-	scrolledWindow->GetViewStart(&x, &y);
-    canvas->SetSize((ncycles+cyclescompleted)*20+50, 600);
-    scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+5, 20);
-    scrolledWindow->Scroll(x, y);
+    IsStarted = 1;
+    int n, ncycles;
+    canvas->SetSize(wxSize(500, 600));
+    cyclescompleted = 0;
+    dmz->initdevices ();
+    mmz->resetmonitor ();
+    ncycles = spin->GetValue();
+    // todo: change 20 to signal size, scale according to the number of monitors accordingly
+    if((ncycles+cyclescompleted)*20+50>500)
+    {
+    int x, y;
+    scrolledWindow->GetViewStart(&x, &y);
+      canvas->SetSize((ncycles+cyclescompleted)*20+50, 600);
+      scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+5, 20);
+      scrolledWindow->Scroll(x, y);
+    }
+    runnetwork(ncycles);
+    canvas->Render("Run button pressed", cyclescompleted);
+    logMessagePanel->AppendText(getCurrentTime()+"Start running.\n");
   }
-  runnetwork(ncycles);
-  canvas->Render("Run button pressed", cyclescompleted);
-  logMessagePanel->AppendText(getCurrentTime()+"Start running.\n");
+  else
+  {
+    wxMessageDialog opwarning(this, 
+      _("Please load a file before running."), 
+      _("Warning"), wxOK|wxICON_INFORMATION);    
+    opwarning.ShowModal();
+  }
 }
 
 void MyFrame::OnButtonQUIT(wxCommandEvent &event)
@@ -605,7 +615,9 @@ void MyFrame::OnButtonQUIT(wxCommandEvent &event)
 
 void MyFrame::OnButtonSTOP(wxCommandEvent &event)
 {
+  mmz->resetmonitor();
   canvas->SetDefault(mmz, nmz);
+  filePathBox->Clear();
   switchChoice->Clear();
   switchState0->SetValue(0);
   switchState1->SetValue(0);
@@ -616,30 +628,41 @@ void MyFrame::OnButtonSTOP(wxCommandEvent &event)
   zapVec.clear();
   canvas->SetSize(wxSize(500, 600));
   IsStarted = 0;
+  FileLoaded = 0;
 }
 
 void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
 {
-  int ncycles = spin->GetValue();
-  std::cout << "Some text" << ncycles << "\n";
-  if(cyclescompleted>0)
+  if(FileLoaded)
   {
-    // todo: change 20 to signal size, scale according to the number of monitors accordingly
-    if((ncycles+cyclescompleted)*20+50>500)
+    int ncycles = spin->GetValue();
+    std::cout << "Some text" << ncycles << "\n";
+    if(cyclescompleted>0)
     {
-	  int x, y;
-	  scrolledWindow->GetViewStart(&x, &y);
-      canvas->SetSize((ncycles+cyclescompleted)*20+50, 600);
-      scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+5, 30);
-      scrolledWindow->Scroll(x, y);
+      // todo: change 20 to signal size, scale according to the number of monitors accordingly
+      if((ncycles+cyclescompleted)*20+50>500)
+      {
+      int x, y;
+      scrolledWindow->GetViewStart(&x, &y);
+        canvas->SetSize((ncycles+cyclescompleted)*20+50, 600);
+        scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+5, 30);
+        scrolledWindow->Scroll(x, y);
+      }
+      runnetwork(ncycles);
+      canvas->Render("Continue button pressed", cyclescompleted);
+      logMessagePanel->AppendText(getCurrentTime()+"Continue running.\n");
     }
-    runnetwork(ncycles);
-    canvas->Render("Continue button pressed", cyclescompleted);
-    logMessagePanel->AppendText(getCurrentTime()+"Continue running.\n");
+    else
+    {
+      logMessagePanel->AppendText(getCurrentTime()+"Please run before continuing.\n");
+    }
   }
   else
   {
-    logMessagePanel->AppendText(getCurrentTime()+"Please run before continuing.\n");
+    wxMessageDialog opwarning(this, 
+      _("Please load a file before running."), 
+      _("Warning"), wxOK|wxICON_INFORMATION);    
+    opwarning.ShowModal();    
   }
 }
 
@@ -647,6 +670,15 @@ void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
 void MyFrame::OnSpin(wxSpinEvent &event)
   // Event handler for the spin control
 {
+  if(spin->GetValue()>maxcycles)
+  {
+    spin->SetValue(50);
+    wxMessageDialog spinwarning(this, 
+      _("The maximum number of cycles per run is 50"), 
+      _("Warning"), wxOK|wxICON_INFORMATION);    
+    spinwarning.ShowModal(); 
+  }
+  
   wxString text;
 
   text.Printf("New spinctrl value %d", event.GetPosition());
@@ -690,62 +722,82 @@ void MyFrame::OnChoiceSwitch(wxCommandEvent &event)
 
 void MyFrame::OnCheck0(wxCommandEvent &event)
 {
-  if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
-  // todo: two unchecked boxes should not be allowed
+  if(switchChoice->IsEmpty())
   {
-    bool ok;
-    dmz->setswitch(
-      switchVec[currentSwitchIndex].dev,
-      low,
-      ok
-    );
-    if(ok)
+    wxMessageDialog switchwarning(this, 
+      _("No switch is available.\nPlease load a file first."), 
+      _("Warning"), wxICON_INFORMATION | wxOK);
+    switchwarning.ShowModal();   
+  }
+  else
+  {
+    if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
+    // todo: two unchecked boxes should not be allowed
     {
-      switchState1->SetValue(!(switchState1->GetValue()));
-      switchVec[currentSwitchIndex].objVal = 0;
-      logMessagePanel->AppendText(
-      getCurrentTime()+
-      switchVec[currentSwitchIndex].objName +
-      " is set to 0.\n");
-    }
-    else
-    {
-      logMessagePanel->AppendText(
-      getCurrentTime()+
-      switchVec[currentSwitchIndex].objName +
-      " is not set to 0.\n");
+      bool ok;
+      dmz->setswitch(
+        switchVec[currentSwitchIndex].dev,
+        low,
+        ok
+      );
+      if(ok)
+      {
+        switchState1->SetValue(!(switchState1->GetValue()));
+        switchVec[currentSwitchIndex].objVal = 0;
+        logMessagePanel->AppendText(
+        getCurrentTime()+
+        switchVec[currentSwitchIndex].objName +
+        " is set to 0.\n");
+      }
+      else
+      {
+        logMessagePanel->AppendText(
+        getCurrentTime()+
+        switchVec[currentSwitchIndex].objName +
+        " is not set to 0.\n");
+      }
     }
   }
 }
 
 void MyFrame::OnCheck1(wxCommandEvent &event)
 {
-  if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
-  // todo: two unchecked boxes should not be allowed
+  if(switchChoice->IsEmpty())
   {
-    bool ok;
-    dmz->setswitch(
-      switchVec[currentSwitchIndex].dev,
-      high,
-      ok
-    );
-    if(ok)
+    wxMessageDialog switchwarning(this, 
+      _("No switch is available.\nPlease load a file first."), 
+      _("Warning"), wxICON_INFORMATION | wxOK);
+    switchwarning.ShowModal();   
+  }
+  else
+  {
+    if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
+    // todo: two unchecked boxes should not be allowed
     {
-      switchState0->SetValue(!(switchState0->GetValue()));
-      switchVec[currentSwitchIndex].objVal = 1;
-      logMessagePanel->AppendText(
-      getCurrentTime()+
-      switchVec[currentSwitchIndex].objName +
-      " is set to 1.\n");
-    }
-    else
-    {
-      logMessagePanel->AppendText(
-      getCurrentTime()+
-      switchVec[currentSwitchIndex].objName +
-      " is not set to 1.\n");     
-    }
-  }  
+      bool ok;
+      dmz->setswitch(
+        switchVec[currentSwitchIndex].dev,
+        high,
+        ok
+      );
+      if(ok)
+      {
+        switchState0->SetValue(!(switchState0->GetValue()));
+        switchVec[currentSwitchIndex].objVal = 1;
+        logMessagePanel->AppendText(
+        getCurrentTime()+
+        switchVec[currentSwitchIndex].objName +
+        " is set to 1.\n");
+      }
+      else
+      {
+        logMessagePanel->AppendText(
+        getCurrentTime()+
+        switchVec[currentSwitchIndex].objName +
+        " is not set to 1.\n");     
+      }
+    }  
+  }
 }
 
 void MyFrame::OnButtonSET(wxCommandEvent& event)
@@ -761,6 +813,10 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
   {
     if(monitorSet->IsEmpty())
     {
+      wxMessageDialog monitorwarning(this, 
+        _("No monitor is available to be set.\nPlease load a file first."), 
+        _("Warning"), wxICON_INFORMATION | wxOK);
+        monitorwarning.ShowModal();
       logMessagePanel->AppendText(
       getCurrentTime()+
       "No monitor is available to be set.\n");
@@ -799,6 +855,13 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
           "Monitor "+
           monitorSet->GetStringSelection() + 
           " is not set successfully.\n");
+          if(mmz->moncount()==10)
+          {
+            wxMessageDialog monitorwarning(this, 
+              _("Maximun number of monitors reached.\nPlease zap monitor point(s) before setting."), 
+              _("Warning"), wxICON_INFORMATION | wxOK);
+              monitorwarning.ShowModal();
+          }
       }
     }
   }
@@ -817,6 +880,10 @@ void MyFrame::OnButtonZAP(wxCommandEvent& event)
   {
     if(monitorZap->IsEmpty())
     {
+      wxMessageDialog monitorwarning(this, 
+        _("No monitor is available to be zapped.\nPlease load a file first."), 
+        _("Warning"), wxICON_INFORMATION | wxOK);
+        monitorwarning.ShowModal();
       logMessagePanel->AppendText(
       getCurrentTime()+
       "No monitor is available to be zapped.\n");
@@ -907,8 +974,9 @@ void MyFrame::loadFile(wxString s)
     {
       logMessagePanel->AppendText(
         getCurrentTime()+
-        "File loaded from  "+
-        s + "\n");
+        "File loaded from "+
+        s + " successfully.\n");
+        FileLoaded = 1;
       std::vector<MyChoiceObj> signalList;
 
       devlink currentDevice = netz->devicelist();
@@ -1043,6 +1111,10 @@ void MyFrame::loadFile(wxString s)
   }
   else
   {
+    wxMessageDialog monitorwarning(this, 
+      _("The file does not exist.\nPlease load a valid file."), 
+      _("Warning"), wxICON_INFORMATION | wxOK);
+      monitorwarning.ShowModal();
     logMessagePanel->AppendText(
       getCurrentTime()+
       "File does not exist.\n");

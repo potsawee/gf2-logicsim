@@ -64,7 +64,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
   { // draw the first monitor signal, get trace from monitor class
     for(int j = 0; j < mmz->moncount(); ++j)
     {
-      int yLow = 300 - 50*j;
+      int yLow = 550 - 50*j;
       int yHigh = yLow + height;
 
       // doted 0 and 1 lines
@@ -198,9 +198,9 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
   }
 
   // Example of how to use GLUT to draw text on the canvas
-  glColor3f(0.0, 0.0, 1.0);
-  glRasterPos2f(20*xx, 300);
-  for (i = 0; i < example_text.Len(); i++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, example_text[i]);
+  // glColor3f(0.0, 0.0, 1.0);
+  // glRasterPos2f(20*xx, 300);
+  // for (i = 0; i < example_text.Len(); i++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, example_text[i]);
 
   // We've been drawing to the back buffer, flush the graphics pipeline and swap the back buffer to the front
   glFlush();
@@ -303,7 +303,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_BUTTON(MY_BUTTON_RUN, MyFrame::OnButtonRUN)
   EVT_BUTTON(MY_BUTTON_QUIT, MyFrame::OnButtonQUIT)
   EVT_BUTTON(MY_BUTTON_STOP, MyFrame::OnButtonSTOP)
-  EVT_MENU(wxID_SAVE, MyFrame::OnSave)
+  // EVT_MENU(wxID_SAVE, MyFrame::OnSave)
   EVT_MENU(wxID_OPEN, MyFrame::OnOpen)
   EVT_BUTTON(MY_BUTTON_CONTINUE, MyFrame::OnButtonCONTINUE)
   EVT_BUTTON(MY_BUTTON_LOAD, MyFrame::OnButtonLOAD)
@@ -527,7 +527,7 @@ MyFrame::MyFrame(wxWindow *parent,
 
   // the top level window should not shrink below this size
   SetSizeHints(800, 800);
-  SetMaxSize(1000, 1000);
+  SetMaxSize(wxSize(1000, 1000));
   SetSizer(overallSizer);
 }
 
@@ -555,11 +555,11 @@ MyFrame::MyFrame(wxWindow *parent,
  }
  /* --------------------- */
 
-void MyFrame::OnSave(wxCommandEvent &event)
-// Event Handler for 'Save'
-{
-	//@potsawee I still have no idea what to implement here haha
-}
+// void MyFrame::OnSave(wxCommandEvent &event)
+// // Event Handler for 'Save'
+// {
+// 	//@potsawee I still have no idea what to implement here haha
+// }
 
 
 void MyFrame::OnAbout(wxCommandEvent &event)
@@ -567,12 +567,7 @@ void MyFrame::OnAbout(wxCommandEvent &event)
 {
   wxMessageDialog about(
     this, 
-    "Part IIA Project - GF2\n
-    Logic Simulator\n
-    Naitian Zheng (nz253)\n
-    Potsawee Manakul (pm574)\n
-    Shutong Feng (sf548)\n
-    May 2018", 
+    "Part IIA Project GF2\nLogic Simulator\nNaitian Zheng (nz253)\nPotsawee Manakul (pm574)\nShutong Feng (sf548)\nMay 2018", 
     "About Logsim", 
     wxICON_INFORMATION | wxOK);
   about.ShowModal();
@@ -660,11 +655,11 @@ void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
     if(cyclescompleted>0)
     {
       // todo: change 20 to signal size, scale according to the number of monitors accordingly
-      if((ncycles+cyclescompleted)*20+50>500)
+      if((ncycles+cyclescompleted)*20+150>500)
       {
       int x, y;
       scrolledWindow->GetViewStart(&x, &y);
-        canvas->SetSize((ncycles+cyclescompleted)*20+50, 600);
+        canvas->SetSize((ncycles+cyclescompleted)*20+150, 600);
         scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+5, 30);
         scrolledWindow->Scroll(x, y);
       }

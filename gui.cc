@@ -1027,15 +1027,11 @@ void MyFrame::loadFile(wxString s)
         
         std::string text = buffer.str(); // text will now contain "Bla\n"
         
-        // wxDialog errorwarning(
-        //   NULL,
-        //   wxID_ANY,
-        //   "Definition File Error" 
-        //   _(text), 
-        //   _("Warning"), wxICON_INFORMATION | wxOK);
+        wxMessageDialog errorwarning(this, 
+          _(text), 
+          _("Definition File Error"), wxICON_INFORMATION | wxOK);
 
-
-        // errorwarning.ShowModal();
+        errorwarning.ShowModal();
           
           // /* --- Open gedit to edit to file --- */
           // string str = "gedit " + filePath.ToStdString();

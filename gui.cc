@@ -355,7 +355,8 @@ MyFrame::MyFrame(wxWindow *parent,
   // using sizers
 {
   SetIcon(wxIcon(wx_icon));
-
+  IsStarted = 0;
+  FileLoaded = 0;
   cyclescompleted = 0;
   nmz = names_mod;
   dmz = devices_mod;
@@ -672,39 +673,49 @@ void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
 {
   if(FileLoaded)
   {
-    int ncycles = spin->GetValue();
-    if(cyclescompleted>0)
+    if(IsStarted)
     {
-		if(ncycles+cyclescompleted > maxcycles)
-		{
-			ncycles = maxcycles-cyclescompleted;
-			wxMessageDialog runwarning(this, 
-			_("Maximum number of cycles per run (50) is reached."), 
-			_("Warning"), wxOK|wxICON_INFORMATION);    
-			runwarning.ShowModal();  			
-		}
-      // todo: change 20 to signal size, scale according to the number of monitors accordingly
-      if((ncycles+cyclescompleted)*20+250>500)
+      int ncycles = spin->GetValue();
+      if(cyclescompleted>0)
       {
-      int x, y;
-      scrolledWindow->GetViewStart(&x, &y);
-        canvas->SetSize((ncycles+cyclescompleted)*20+300, 600);
-        scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+15, 30);
-        scrolledWindow->Scroll(x, y);
+        if(ncycles+cyclescompleted > maxcycles)
+        {
+          ncycles = maxcycles-cyclescompleted;
+          wxMessageDialog runwarning(this, 
+          _("Maximum number of cycles per run (50) is reached."), 
+          _("Warning"), wxOK|wxICON_INFORMATION);    
+          runwarning.ShowModal();  			
+        }
+        // todo: change 20 to signal size, scale according to the number of monitors accordingly
+        if((ncycles+cyclescompleted)*20+250>500)
+        {
+        int x, y;
+        scrolledWindow->GetViewStart(&x, &y);
+          canvas->SetSize((ncycles+cyclescompleted)*20+300, 600);
+          scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+15, 30);
+          scrolledWindow->Scroll(x, y);
+        }
+        runnetwork(ncycles);
+        canvas->Render("Continue button pressed", cyclescompleted);
+        logMessagePanel->AppendText(getCurrentTime()+"Continue running.\n");
       }
-      runnetwork(ncycles);
-      canvas->Render("Continue button pressed", cyclescompleted);
-      logMessagePanel->AppendText(getCurrentTime()+"Continue running.\n");
+      else
+      {
+        logMessagePanel->AppendText(getCurrentTime()+"Please run before continuing.\n");
+      }
     }
     else
     {
-      logMessagePanel->AppendText(getCurrentTime()+"Please run before continuing.\n");
+      wxMessageDialog contwarning(this, 
+        _("Please run before continuing."), 
+        _("Warning"), wxOK|wxICON_INFORMATION);    
+      contwarning.ShowModal();        
     }
   }
   else
   {
     wxMessageDialog opwarning(this, 
-      _("Please load a file before running."), 
+      _("Please load a file before continuing."), 
       _("Warning"), wxOK|wxICON_INFORMATION);    
     opwarning.ShowModal();    
   }

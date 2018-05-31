@@ -104,6 +104,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
           }
         }
       }
+        
       // draw signal
       glColor3f(colourBox[j][0], colourBox[j][1], colourBox[j][2]);
       glLineWidth(2);
@@ -120,6 +121,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
       }
       glEnd();
       glLineWidth(1);
+        
       // set cycle mark
       for (i=0; i<cyclesdisplayed; i++) 
       {
@@ -151,9 +153,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
         glVertex2f(20*xx+0.0, 50.0);
         glVertex2f(20*xx+99.0, 50.0);
         glVertex2f(20*xx+99.0, 550.0);
-    glEnd(); 
-
-
+    glEnd();
       
     glEnable(GL_LINE_STIPPLE); 
     glLineStipple(2,0xAAAA);    
@@ -543,8 +543,6 @@ MyFrame::MyFrame(wxWindow *parent,
   opSizer->Add(buttonSizer2, 0 , wxALL, 10);
   // end of operation sizer
 
-
-
   bottomRightSizer->Add(configSizer, 0, wxALL, 10);
   bottomRightSizer->Add(opSizer, 0, wxALL, 10);
   bottomSizer->Add(bottomRightSizer, 0, wxALIGN_TOP);
@@ -654,14 +652,6 @@ void MyFrame::OnButtonSTOP(wxCommandEvent &event)
 {
   mmz->resetmonitor();
   canvas->SetDefault(mmz, nmz);
-  // switchChoice->Clear();
-  // switchState0->SetValue(0);
-  // switchState1->SetValue(0);
-  // monitorSet->Clear();
-  // monitorZap->Clear();
-  // switchVec.clear();
-  // setVec.clear();
-  // zapVec.clear();
   canvas->SetSize(wxSize(500, 600));
   scrolledWindow->Scroll(0, 0);
   scrolledWindow->SetScrollbars(20, 20, 25, 30);
@@ -1100,13 +1090,6 @@ void MyFrame::loadFile(wxString s)
           }
           currentDevice = currentDevice->next;
         }
-        // for(int mm = 0; mm < signalList.size(); ++mm)
-        // {
-        //   std::cout << signalList[mm].objName << "\t"
-        //   << signalList[mm].dev << "\t"
-        //   << signalList[mm].output << "\t"
-        //   << "\n";
-        // }
 
         std::sort(switchVec.begin(), switchVec.end());
         for(std::vector<MyChoiceObj>::iterator it = switchVec.begin() ; it != switchVec.end(); ++it)

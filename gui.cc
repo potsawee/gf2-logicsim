@@ -81,14 +81,6 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
       glVertex2f(cyclesdisplayed*20+100, yHigh);
       glEnd();
       glDisable(GL_LINE_STIPPLE);
-
-      // marking 0 and 1
-      glColor3f(0.7,0.7,0.7);
-			glRasterPos2f(100, yHigh+4);
-			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, '1');
-			
-			glRasterPos2f(100, yLow+4);
-			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, '0');
       
       // fill areas below high signals
       for(i = 0; i < cyclesdisplayed; ++i)
@@ -133,7 +125,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 				glEnd();
 			}
 
-			for (i=5; i <= cyclesdisplayed; i+=5) 
+			for (i=0; i <= cyclesdisplayed; i+=5) 
       {	
 				stringstream ss;
 				ss << (i);
@@ -152,12 +144,23 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
     glBegin(GL_QUADS);
         glVertex2f(20*xx+0.0, 550.0);
         glVertex2f(20*xx+0.0, 50.0);
-        glVertex2f(20*xx+80.0, 50.0);
-        glVertex2f(20*xx+80.0, 550.0);
+        glVertex2f(20*xx+99.0, 50.0);
+        glVertex2f(20*xx+99.0, 550.0);
     glEnd(); 
 
+
+      
+    glEnable(GL_LINE_STIPPLE); 
+    glLineStipple(2,0xAAAA);    
+	glColor3f(0.0, 0.0, 0.0);
+    glBegin(GL_LINE_STRIP);
+        glVertex2f(20*xx+100.0, 550.0);
+        glVertex2f(20*xx+100.0, 550-50*(mmz->moncount()));
+    glEnd(); 
+    glDisable(GL_LINE_STIPPLE);
+    
     // signal labels
-		for (int j = 0; j < mmz->moncount(); j++) 
+	for (int j = 0; j < mmz->moncount(); j++) 
     {
       int yLow = 500 - 50*j;
       int yHigh = yLow + height;
@@ -169,11 +172,25 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
         sigName = sigName + "." + nmz->getname(outp);
       }
 			glColor3f(0.0, 0.0, 0.0); 			// set text colour to black
-			glRasterPos2f(20*xx+30, yLow+10); 	// position is in (columns, rows) from bottom left corner
+			glRasterPos2f(20*xx+20, yLow+10); 	// position is in (columns, rows) from bottom left corner
 			for (i = 0; i < sigName.length(); i++) 
       {
 				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, sigName[i]);
 			}
+		glEnable(GL_LINE_STIPPLE); 
+		glLineStipple(2,0xAAAA);  
+		glBegin(GL_LINE_STRIP);
+			glVertex2f(20*xx+40, yLow);
+			glVertex2f(20*xx+100.0, yLow);
+		glEnd(); 
+		glDisable(GL_LINE_STIPPLE);
+		
+		glRasterPos2f(20*xx+90, yHigh+4);
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, '1');
+		
+		glRasterPos2f(20*xx+90, yLow+4);
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, '0');
+		
     }
 
     // mark the cycle limit
@@ -386,7 +403,7 @@ MyFrame::MyFrame(wxWindow *parent,
     wxALL, 
     10);
 
-	filePathBox = new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(10000, -1), wxTE_PROCESS_ENTER);
+	filePathBox = new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(1000, -1), wxTE_PROCESS_ENTER);
   filePathSizer->Add(
     filePathBox, 
     0, 
@@ -404,7 +421,7 @@ MyFrame::MyFrame(wxWindow *parent,
   wxBoxSizer *swinSizer = new wxBoxSizer(wxVERTICAL);
 	scrolledWindow->SetAutoLayout(true);
   scrolledWindow->SetMinSize(wxSize(500, 400));
-	scrolledWindow->SetScrollRate(20,20);
+	scrolledWindow->SetScrollbars(20,20, 25, 30);
   canvas = new MyGLCanvas(
     scrolledWindow, 
     wxID_ANY, 
@@ -643,6 +660,8 @@ void MyFrame::OnButtonSTOP(wxCommandEvent &event)
   // setVec.clear();
   // zapVec.clear();
   canvas->SetSize(wxSize(500, 600));
+  scrolledWindow->Scroll(0, 0);
+  scrolledWindow->SetScrollbars(20, 20, 25, 30);
   IsStarted = 0;
   // FileLoaded = 0;
 }
@@ -654,12 +673,19 @@ void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
     int ncycles = spin->GetValue();
     if(cyclescompleted>0)
     {
+		if(ncycles+cyclescompleted > maxcycles)
+		{
+			ncycles = maxcycles-cyclescompleted;
+			wxMessageDialog runwarning(this, 
+			_("Maximum number of cycles per run (50) is reached."), 
+			_("Warning"), wxOK|wxICON_INFORMATION);    
+			runwarning.ShowModal();  			
+		}
       // todo: change 20 to signal size, scale according to the number of monitors accordingly
       if((ncycles+cyclescompleted)*20+250>500)
       {
       int x, y;
       scrolledWindow->GetViewStart(&x, &y);
-      std::cout << "canvas resized\n";
         canvas->SetSize((ncycles+cyclescompleted)*20+300, 600);
         scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+15, 30);
         scrolledWindow->Scroll(x, y);

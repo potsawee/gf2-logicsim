@@ -276,7 +276,7 @@ void MyGLCanvas::OnSize(wxSizeEvent& event)
 
 void MyGLCanvas::OnMouse(wxMouseEvent& event)
   // Event handler for mouse events inside the GL canvas
-{
+{/*
   wxString text;
   int w, h;;
   static int last_x, last_y;
@@ -309,6 +309,7 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
   }
 
   if (event.GetWheelRotation() || event.ButtonDown() || event.ButtonUp() || event.Dragging() || event.Leaving()) Render(text);
+*/
 }
 
 // MyFrame ///////////////////////////////////////////////////////////////////////////////////////

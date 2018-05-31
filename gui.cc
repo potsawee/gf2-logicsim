@@ -301,7 +301,8 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_EXIT, MyFrame::OnExit)
   EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
   EVT_BUTTON(MY_BUTTON_RUN, MyFrame::OnButtonRUN)
-  EVT_BUTTON(MY_BUTTON_RESET, MyFrame::OnButtonRESET)
+  EVT_BUTTON(MY_BUTTON_QUIT, MyFrame::OnButtonQUIT)
+  EVT_BUTTON(MY_BUTTON_STOP, MyFrame::OnButtonSTOP)
   EVT_MENU(wxID_SAVE, MyFrame::OnSave)
   EVT_MENU(wxID_OPEN, MyFrame::OnOpen)
   EVT_BUTTON(MY_BUTTON_CONTINUE, MyFrame::OnButtonCONTINUE)
@@ -402,7 +403,7 @@ MyFrame::MyFrame(wxWindow *parent,
     monitor_mod, 
     names_mod, 
     wxDefaultPosition, 
-    wxSize(500, 200));
+    wxSize(500, 600));
   // displaySizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
   swinSizer->Add(canvas, 1, wxRIGHT|wxBOTTOM|wxEXPAND, 20);
 	scrolledWindow->SetSizer(swinSizer);
@@ -500,7 +501,7 @@ MyFrame::MyFrame(wxWindow *parent,
   buttonSizer1->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_RUN, "Run"), 0, wxALL, 10);
   buttonSizer1->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_CONTINUE, "Continue"), 0, wxALL, 10);
   buttonSizer2->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_STOP, "Stop"), 0, wxALL, 10);
-  buttonSizer2->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_RESET, "Reset"), 0, wxALL, 10);
+  buttonSizer2->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_QUIT, "Quit"), 0, wxALL, 10);
   opSizer->Add(buttonSizer1, 0 , wxALL, 10);
   opSizer->Add(buttonSizer2, 0 , wxALL, 10);
   // end of operation sizer
@@ -562,8 +563,9 @@ void MyFrame::OnAbout(wxCommandEvent &event)
 void MyFrame::OnButtonRUN(wxCommandEvent &event)
   // Event handler for the push button
 {
+  IsStarted = 1;
   int n, ncycles;
-
+  canvas->SetSize(wxSize(500, 600));
   cyclescompleted = 0;
   dmz->initdevices ();
   mmz->resetmonitor ();
@@ -582,8 +584,19 @@ void MyFrame::OnButtonRUN(wxCommandEvent &event)
   logMessagePanel->AppendText(getCurrentTime()+"Start running.\n");
 }
 
-void MyFrame::OnButtonRESET(wxCommandEvent &event)
+void MyFrame::OnButtonQUIT(wxCommandEvent &event)
   // Event handler for the push button
+{
+  wxMessageDialog monitorwarning(this, 
+    _("Are you sure you want to quit the programme?"), 
+    _("Warning"), wxOK|wxCANCEL);
+  if(monitorwarning.ShowModal() == wxID_OK)
+  {
+    Close(true);
+  }
+}
+
+void MyFrame::OnButtonSTOP(wxCommandEvent &event)
 {
   canvas->SetDefault(mmz, nmz);
   switchChoice->Clear();
@@ -594,7 +607,8 @@ void MyFrame::OnButtonRESET(wxCommandEvent &event)
   switchVec.clear();
   setVec.clear();
   zapVec.clear();
-  canvas->Render("Reset button pressed.\n", 0);
+  canvas->SetSize(wxSize(500, 600));
+  IsStarted = 0;
 }
 
 void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
@@ -729,93 +743,112 @@ void MyFrame::OnCheck1(wxCommandEvent &event)
 
 void MyFrame::OnButtonSET(wxCommandEvent& event)
 {
-  if(monitorSet->IsEmpty())
+  if(IsStarted)
   {
-    logMessagePanel->AppendText(
-    getCurrentTime()+
-    "No monitor is available to be set.\n");
+    wxMessageDialog monitorwarning(this, 
+    _("Please do not alter monitor settings while running.\nPlease press stop button first."), 
+    _("Warning"), wxICON_INFORMATION | wxOK);
+    monitorwarning.ShowModal();
   }
   else
   {
-    currentSetIndex = updateCurrentChoice((monitorSet->GetStringSelection()).ToStdString(), &setVec);
-    bool ok = true;
-    mmz->makemonitor(setVec[currentSetIndex].dev, setVec[currentSetIndex].output, ok);
-    // std::cout << setVec[currentSetIndex].objName << "    "
-    // << setVec[currentSetIndex].dev << "    "
-    // << setVec[currentSetIndex].output << "\n";
-    if(ok)
+    if(monitorSet->IsEmpty())
     {
       logMessagePanel->AppendText(
-        getCurrentTime()+
-        "Monitor "+
-        monitorSet->GetStringSelection() + 
-        " is set.\n");
-      monitorSet->Delete(currentSetIndex);
-      setVec[currentSetIndex].objVal = !setVec[currentSetIndex].objVal;
-      zapVec.push_back(setVec[currentSetIndex]);
-      std::sort(zapVec.begin(), zapVec.end());
-      setVec.erase(setVec.begin()+currentSetIndex);
-      monitorZap->Clear();
-      for(std::vector<MyChoiceObj>::iterator it = zapVec.begin() ; it != zapVec.end(); ++it)
-      {
-        monitorZap->Append(it->objName);
-      }
-      currentSetIndex = 0; 
+      getCurrentTime()+
+      "No monitor is available to be set.\n");
     }
     else
     {
-      logMessagePanel->AppendText(
-        getCurrentTime()+
-        "Monitor "+
-        monitorSet->GetStringSelection() + 
-        " is not set successfully.\n");
+      currentSetIndex = updateCurrentChoice((monitorSet->GetStringSelection()).ToStdString(), &setVec);
+      bool ok = true;
+      mmz->makemonitor(setVec[currentSetIndex].dev, setVec[currentSetIndex].output, ok);
+      // std::cout << setVec[currentSetIndex].objName << "    "
+      // << setVec[currentSetIndex].dev << "    "
+      // << setVec[currentSetIndex].output << "\n";
+      if(ok)
+      {
+        logMessagePanel->AppendText(
+          getCurrentTime()+
+          "Monitor "+
+          monitorSet->GetStringSelection() + 
+          " is set.\n");
+        monitorSet->Delete(currentSetIndex);
+        setVec[currentSetIndex].objVal = !setVec[currentSetIndex].objVal;
+        zapVec.push_back(setVec[currentSetIndex]);
+        std::sort(zapVec.begin(), zapVec.end());
+        setVec.erase(setVec.begin()+currentSetIndex);
+        monitorZap->Clear();
+        for(std::vector<MyChoiceObj>::iterator it = zapVec.begin() ; it != zapVec.end(); ++it)
+        {
+          monitorZap->Append(it->objName);
+        }
+        currentSetIndex = 0; 
+      }
+      else
+      {
+        logMessagePanel->AppendText(
+          getCurrentTime()+
+          "Monitor "+
+          monitorSet->GetStringSelection() + 
+          " is not set successfully.\n");
+      }
     }
   }
 }
 
 void MyFrame::OnButtonZAP(wxCommandEvent& event)
 {
-  if(monitorZap->IsEmpty())
+  if(IsStarted)
   {
-    logMessagePanel->AppendText(
-    getCurrentTime()+
-    "No monitor is available to be zapped.\n");
+    wxMessageDialog monitorwarning(this, 
+    _("Please do not alter monitor settings while running.\nPlease press stop button first."), 
+    _("Warning"), wxICON_INFORMATION | wxOK);
+    monitorwarning.ShowModal();
   }
   else
   {
-    currentZapIndex = updateCurrentChoice((monitorZap->GetStringSelection()).ToStdString(), &zapVec);
-    bool ok = true;
-    mmz->remmonitor(zapVec[currentZapIndex].dev, zapVec[currentZapIndex].output, ok);
-    if(ok)
+    if(monitorZap->IsEmpty())
     {
       logMessagePanel->AppendText(
-        getCurrentTime()+
-        "Monitor "+
-        monitorZap->GetStringSelection() + 
-        " is zapped.\n");
-      monitorZap->Delete(currentZapIndex);
-      zapVec[currentZapIndex].objVal = !zapVec[currentZapIndex].objVal;
-      setVec.push_back(zapVec[currentZapIndex]);
-      std::sort(setVec.begin(), setVec.end());
-      zapVec.erase(zapVec.begin()+currentZapIndex);
-      monitorSet->Clear();
-      for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
-      {
-        monitorSet->Append(it->objName);
-      }
-      currentZapIndex = 0;
+      getCurrentTime()+
+      "No monitor is available to be zapped.\n");
     }
     else
     {
-      logMessagePanel->AppendText(
-        getCurrentTime()+
-        "Monitor "+
-        monitorZap->GetStringSelection() + 
-        " is not zapped successfully.\n");
+      currentZapIndex = updateCurrentChoice((monitorZap->GetStringSelection()).ToStdString(), &zapVec);
+      bool ok = true;
+      mmz->remmonitor(zapVec[currentZapIndex].dev, zapVec[currentZapIndex].output, ok);
+      if(ok)
+      {
+        logMessagePanel->AppendText(
+          getCurrentTime()+
+          "Monitor "+
+          monitorZap->GetStringSelection() + 
+          " is zapped.\n");
+        monitorZap->Delete(currentZapIndex);
+        zapVec[currentZapIndex].objVal = !zapVec[currentZapIndex].objVal;
+        setVec.push_back(zapVec[currentZapIndex]);
+        std::sort(setVec.begin(), setVec.end());
+        zapVec.erase(zapVec.begin()+currentZapIndex);
+        monitorSet->Clear();
+        for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
+        {
+          monitorSet->Append(it->objName);
+        }
+        currentZapIndex = 0;
+      }
+      else
+      {
+        logMessagePanel->AppendText(
+          getCurrentTime()+
+          "Monitor "+
+          monitorZap->GetStringSelection() + 
+          " is not zapped successfully.\n");
+      }
+      
     }
-    
   }
-
 }
 
 
@@ -838,6 +871,7 @@ void MyFrame::loadFile(wxString s)
   setVec.clear();
   zapVec.clear();
   mmz->resetmonitor();
+  IsStarted = 0;
   // todo: more to be added upon 'reset'
 
   std::cout << "Reset/Reload\n";

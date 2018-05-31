@@ -34,7 +34,7 @@ enum {
   MY_BUTTON_RUN,            // todo: implement actual running
   MY_BUTTON_CONTINUE,          // todo: 
   MY_BUTTON_STOP,           // todo: 
-  MY_BUTTON_RESET,          // todo: implement actual reset
+  MY_BUTTON_QUIT,          // todo: implement actual reset
 }; // widget identifiers
 
 class MyChoiceObj
@@ -93,7 +93,7 @@ class MyFrame: public wxFrame
   int currentZapIndex;
   std::vector<MyChoiceObj> setVec;  
   std::vector<MyChoiceObj> zapVec;
-
+  bool IsStarted;
   wxString filePath; //store location of path
 
   int cyclescompleted;                    // how many simulation cycles have been completed
@@ -103,8 +103,9 @@ class MyFrame: public wxFrame
   void OnOpen(wxCommandEvent &event);
   void OnSave(wxCommandEvent &event);
   void OnButtonRUN(wxCommandEvent& event);    // event handler for push button
-  void OnButtonRESET(wxCommandEvent& event);  // event handler for reset button
+  void OnButtonQUIT(wxCommandEvent& event);  // event handler for reset button
   void OnButtonCONTINUE(wxCommandEvent& event);   // event handler for continue button
+  void OnButtonSTOP(wxCommandEvent& event);
 
   // functions related to loading description file
   void OnButtonLOAD(wxCommandEvent& event);

@@ -561,7 +561,7 @@ MyFrame::MyFrame(wxWindow *parent,
    // Event handler for the about menu item
  {
     wxFileDialog openFileDialog(
-      this, 
+      NULL, 
       _("Open a circuit definition file"), 
       "", 
       "",

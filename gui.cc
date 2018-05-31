@@ -353,21 +353,22 @@ MyFrame::MyFrame(wxWindow *parent,
   // About is under guitest menu on mac
   // exit is under guitest menu by default
   fileMenu->Append(wxID_ABOUT, "&About");
+  fileMenu->Append(wxID_HELP, "&Help");
   fileMenu->Append(wxID_EXIT, "&Quit");
 
   // The following behave normally
   // refer to wxStandardID
   fileMenu->Append(wxID_OPEN, "&Open");
-  fileMenu->Append(wxID_NEW, "&New");
-  fileMenu->Append(wxID_SAVE, "&Save");
+  // fileMenu->Append(wxID_NEW, "&New");
+  // fileMenu->Append(wxID_SAVE, "&Save");
 
-  wxMenu *editMenu = new wxMenu;
-  editMenu->Append(wxID_UNDO, "&Undo");
-  editMenu->Append(wxID_REDO, "&Redo");
+  // wxMenu *editMenu = new wxMenu;
+  // editMenu->Append(wxID_UNDO, "&Undo");
+  // editMenu->Append(wxID_REDO, "&Redo");
   
   wxMenuBar *menuBar = new wxMenuBar;
   menuBar->Append(fileMenu, "&File");
-  menuBar->Append(editMenu, "&Edit");
+  // menuBar->Append(editMenu, "&Edit");
   SetMenuBar(menuBar);
 
   // main window
@@ -474,7 +475,7 @@ MyFrame::MyFrame(wxWindow *parent,
     monitorCtrlSizer->GetStaticBox(), 
     MY_CHOICE_MONITOR_SET,
     wxDefaultPosition,
-    wxDefaultSize,
+    wxSize(100, -1),
     0,
     NULL,
     wxCB_SORT,
@@ -486,7 +487,7 @@ MyFrame::MyFrame(wxWindow *parent,
     monitorCtrlSizer->GetStaticBox(), 
     MY_CHOICE_MONITOR_ZAP,
     wxDefaultPosition,
-    wxDefaultSize,
+    wxSize(100, -1),
     0,
     NULL,
     wxCB_SORT,
@@ -525,7 +526,8 @@ MyFrame::MyFrame(wxWindow *parent,
   overallSizer->Add(bottomSizer, 0, wxALIGN_LEFT);
 
   // the top level window should not shrink below this size
-  SetSizeHints(800, 600);
+  SetSizeHints(800, 800);
+  SetMaxSize(1000, 1000);
   SetSizer(overallSizer);
 }
 
@@ -563,7 +565,27 @@ void MyFrame::OnSave(wxCommandEvent &event)
 void MyFrame::OnAbout(wxCommandEvent &event)
   // Event handler for the about menu item
 {
-  wxMessageDialog about(this, "Example wxWidgets GUI\nAndrew Gee\nJune 2014", "About Logsim", wxICON_INFORMATION | wxOK);
+  wxMessageDialog about(
+    this, 
+    "Part IIA Project - GF2\n
+    Logic Simulator\n
+    Naitian Zheng (nz253)\n
+    Potsawee Manakul (pm574)\n
+    Shutong Feng (sf548)\n
+    May 2018", 
+    "About Logsim", 
+    wxICON_INFORMATION | wxOK);
+  about.ShowModal();
+}
+
+void MyFrame::OnHelp(wxCommandEvent &event)
+  // Event handler for the about menu item
+{
+  wxMessageDialog about(
+    this, 
+    "Please refer to the user manual.", 
+    "Help", 
+    wxICON_INFORMATION | wxOK);
   about.ShowModal();
 }
 
@@ -617,18 +639,17 @@ void MyFrame::OnButtonSTOP(wxCommandEvent &event)
 {
   mmz->resetmonitor();
   canvas->SetDefault(mmz, nmz);
-  filePathBox->Clear();
-  switchChoice->Clear();
-  switchState0->SetValue(0);
-  switchState1->SetValue(0);
-  monitorSet->Clear();
-  monitorZap->Clear();
-  switchVec.clear();
-  setVec.clear();
-  zapVec.clear();
+  // switchChoice->Clear();
+  // switchState0->SetValue(0);
+  // switchState1->SetValue(0);
+  // monitorSet->Clear();
+  // monitorZap->Clear();
+  // switchVec.clear();
+  // setVec.clear();
+  // zapVec.clear();
   canvas->SetSize(wxSize(500, 600));
   IsStarted = 0;
-  FileLoaded = 0;
+  // FileLoaded = 0;
 }
 
 void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
@@ -636,7 +657,6 @@ void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
   if(FileLoaded)
   {
     int ncycles = spin->GetValue();
-    std::cout << "Some text" << ncycles << "\n";
     if(cyclescompleted>0)
     {
       // todo: change 20 to signal size, scale according to the number of monitors accordingly

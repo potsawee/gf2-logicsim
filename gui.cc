@@ -376,13 +376,13 @@ MyFrame::MyFrame(wxWindow *parent,
   wxMenu *fileMenu = new wxMenu;
   // About is under guitest menu on mac
   // exit is under guitest menu by default
-  fileMenu->Append(wxID_ABOUT, "&About");
+  fileMenu->Append(wxID_OPEN, "&Open");
   fileMenu->Append(wxID_HELP, "&Help");
+  fileMenu->Append(wxID_ABOUT, "&About");
   fileMenu->Append(wxID_EXIT, "&Quit");
 
   // The following behave normally
   // refer to wxStandardID
-  fileMenu->Append(wxID_OPEN, "&Open");
   // fileMenu->Append(wxID_NEW, "&New");
   // fileMenu->Append(wxID_SAVE, "&Save");
 

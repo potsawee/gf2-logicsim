@@ -13,34 +13,43 @@ bool parser::readin (void)
 	smz->getsymbol(cursym, curid, curnum);
 
 	/* Syntax error detection */
-	if(cursym == devsym){ // "DEVICES:"
-		smz->skipcolon();
-		devicelist();
+	try{
+		if(cursym == devsym){ // "DEVICES:"
+			smz->skipcolon();
+			devicelist();
+		}
+		else{
+			error(51);
+			smz->skipcolon();
+			devicelist();
+		}
+		smz->getsymbol(cursym, curid, curnum);
+		if(cursym == consym){ // "CONNECTIONS:"
+			smz->skipcolon();
+			connectionlist();
+		}
+		else{
+			error(52);
+			smz->skipcolon();
+			connectionlist();
+		}
+		smz->getsymbol(cursym, curid, curnum);
+		if(cursym == monsym){ // "MONITORS:"
+			smz->skipcolon();
+			monitorlist();
+		}
+		else{
+			error(53);
+			smz->skipcolon();
+			monitorlist();
+		}
 	}
-	else{
-		error(51);
-		smz->skipcolon();
-		devicelist();
-	}
-	smz->getsymbol(cursym, curid, curnum);
-	if(cursym == consym){ // "CONNECTIONS:"
-		smz->skipcolon();
-		connectionlist();
-	}
-	else{
-		error(52);
-		smz->skipcolon();
-		connectionlist();
-	}
-	smz->getsymbol(cursym, curid, curnum);
-	if(cursym == monsym){ // "MONITORS:"
-		smz->skipcolon();
-		monitorlist();
-	}
-	else{
-		error(53);
-		smz->skipcolon();
-		monitorlist();
+	catch(...){
+		/* if there are still other cases of errors not really detected
+		detect the rest here and terminate the program
+		this stops the program to detect further error down the file
+		but it shoud be safer than uncaught error */
+		cout << "Unexpected error occured.. terminate program safely." << endl;
 	}
 	while(cursym != eofsym){
 		smz->getsymbol(cursym, curid, curnum);
@@ -436,6 +445,17 @@ void parser::signalin(name& dev, name& port)
 		else { // CLOCK or SWITCH
 			error(19);
 		}
+
+		/* --------- Semantic error #6 --------- */
+		// This input port is already connected
+		inplink ilink = netz->findinput(dlink, port);
+		outplink conn = ilink->connect;
+		if(conn != NULL)
+		{
+			semantic(6); // throw an error
+		}
+		/* ------------------------------------- */
+
 	}
 	else { // if the first symbol when signame() is called is NOT name => error
 		error(20);
@@ -597,6 +617,8 @@ void parser::semantic(int errn)
 		case 4: cout << "Portnumber does not exist" << endl;
 				break;
 		case 5: cout << "Invalid device (not defined)" << endl;
+				throw semanticerror; break;
+		case 6: cout << "This input port is already connected" << endl;
 				throw semanticerror; break;
 
 	}

@@ -10,6 +10,8 @@
 
 using namespace std;
 
+// error to be throw by error() and semantic()
+// if time allows, could distingiush them further
 typedef enum {nameerror, devicedeferror, signalerror, semanticerror
 } errortype;
 
@@ -22,14 +24,13 @@ private:
     scanner* smz; // internal pointer to the scanner
     names*   nmz;
 
-    /* put other stuff that the class uses internally here */
     symbol cursym;
     name curid;
     int curnum;
     int errorcount;
-    /* also declare internal functions                     */
 
     /* Private routines */
+    /* 1. Devices */
     void devicelist();
     void device();
     void clockdev();
@@ -40,7 +41,11 @@ private:
     void ordev();
     void nordev();
     void xordev();
+    void dev_name_num(devicekind dkind);   // to reduce repetition of the above devices
+    name name1();         // use name1 to avoid same name as name (int)
 
+
+    /* 2. Connections */
     void connectionlist();
     void connection();
     void signalout(name& dev, name& port);
@@ -49,12 +54,12 @@ private:
     void dtypein(name& port);
     void gatein(name& port);
 
+    /* 3. Monitors */
     void monitorlist();
     void monitor1();      // use monitor1 to avoid same name as monitor
 
-    name name1();         // use name1 to avoid same name as name (int)
-    void dev_name_num(devicekind dkind);
 
+    /* 4. Error Handling */
     void error(int errn); // a function to throw error
     void semantic(int errn); // for semantic error dectection
     bool is_name_reserved(name id); //check if name is reserved

@@ -4,15 +4,14 @@
 using namespace std;
 
 /* The parser for the circuit definition files */
-
 bool parser::readin (void)
 {
-	/* over to you */
 	// return true if definition file parsed OK
 
 	smz->getsymbol(cursym, curid, curnum);
 
 	/* Syntax error detection */
+	/* Semantic error detection */
 	try{
 		if(cursym == devsym){ // "DEVICES:"
 			smz->skipcolon();
@@ -80,7 +79,6 @@ parser::parser (network* network_mod, devices* devices_mod,
 }
 
 /* 1. Devices */
-/* 1. Devices */
 void parser::devicelist()
 {
 	// cout << "DEVICELIST" << endl;
@@ -114,7 +112,7 @@ void parser::device() // scan up to ',' or ';'
 			case orgate: 	ordev(); 		break;
 			case norgate: 	nordev(); 		break;
 			case xorgate: 	xordev(); 		break;
-			default: wrongkind = true;	break;
+			default: wrongkind = true;		break;
 		}
 	}
 	catch(errortype err){
@@ -297,7 +295,6 @@ name parser::name1()
 	}
 	return -1; // it won't reach this just make warning disappear [error(8) throw error]
 }
-
 bool parser::is_name_reserved(name id)
 {
 	// To deal with semantic error #2
@@ -312,7 +309,6 @@ bool parser::is_name_reserved(name id)
 
 	return false;
 }
-
 
 /* 2. Connections */
 void parser::connectionlist()
@@ -505,7 +501,6 @@ void parser::gatein(name& port)
 	error(17);
 }
 
-
 /* 3. Monitors */
 void parser::monitorlist()
 {
@@ -539,7 +534,6 @@ void parser::monitor1()
 	}
 }
 
-
 /* 4. Error Handling */
 void parser::error(int errn)
 {
@@ -565,8 +559,6 @@ void parser::error(int errn)
 				throw devicedeferror; break;
 		case 8: cout << "name error. hint: name must start with a letter or '_'" << endl;
 				throw nameerror; break;
-		case 9: cout << "unexpected expression after ;" << endl; break;
-
 		case 12: cout << "the maximum number of inputs is 16" << endl;
 				throw devicedeferror; break;
 
@@ -589,6 +581,7 @@ void parser::error(int errn)
 		case 32: cout << "connection error. hint: 'output => input'" << endl; break;
 		case 33: cout << "monitor error. hint: check the signal" << endl; break;
 
+		// Special cases use number above 50
 		case 51: smz->print_line_error(8);
 				cout << "***ERROR 51: 'DEVICES:'' keyword expected" << endl; break;
 		case 52: smz->print_line_error(8);
@@ -605,6 +598,7 @@ void parser::semantic(int errn)
 	else
 		smz->skip_dueto_error(cursym, curid, curnum);
 
+	// Semantic error will be shown above 100
 	cout << "***ERROR 10" << errn << ": " ;
 	switch (errn)
 	{

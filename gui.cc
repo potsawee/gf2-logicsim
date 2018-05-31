@@ -1011,174 +1011,192 @@ void MyFrame::loadFile(wxString s)
   ifstream f((filePath.ToStdString()).c_str());
   if(f.good())
   {
+    string extString = (filePath.ToStdString()).substr((filePath.ToStdString()).length() - 4, (filePath.ToStdString()).length());
+    if(extString == ".gf2")
+    {
     // nmz, netz, dmz, mmz reinitialised here to allow load/reset
     // todo: maybe not necessary to pass them as arguments?
-    smz = new scanner(nmz, filePath);
-    pmz = new parser(netz, dmz, mmz, smz, nmz);
-    std::streambuf * old = std::cout.rdbuf(buffer.rdbuf());
-    if(!(pmz->readin()))
-    {// check if the definition file is valid
-      logMessagePanel->AppendText(
-        getCurrentTime()+
-        "Logic Definition File Error.\n");
-      std::string text = buffer.str(); // text will now contain "Bla\n"
-      wxMessageDialog errorwarning(this, 
-        _("Errors with the definition file:\n"+text), 
-        _("Warning"), wxICON_INFORMATION | wxOK);
-        errorwarning.ShowModal();
+      smz = new scanner(nmz, filePath);
+      pmz = new parser(netz, dmz, mmz, smz, nmz);
+      std::streambuf * old = std::cout.rdbuf(buffer.rdbuf());
+      if(!(pmz->readin()))
+      {// check if the definition file is valid
+        logMessagePanel->AppendText(
+          getCurrentTime()+
+          "Logic Definition File Error.\n");
         
-        // /* --- Open gedit to edit to file --- */
-        // string str = "gedit " + filePath.ToStdString();
-	    	// const char *command = str.c_str();
-		    // system(command);
-	    	// /* ---------------------------------- */
-    }  
-    else
-    {
-      logMessagePanel->AppendText(
-        getCurrentTime()+
-        "File loaded from "+
-        s + " successfully.\n");
-        FileLoaded = 1;
-      std::vector<MyChoiceObj> signalList;
+        std::string text = buffer.str(); // text will now contain "Bla\n"
+        
+        // wxDialog errorwarning(
+        //   NULL,
+        //   wxID_ANY,
+        //   "Definition File Error" 
+        //   _(text), 
+        //   _("Warning"), wxICON_INFORMATION | wxOK);
 
-      devlink currentDevice = netz->devicelist();
-	    name currentID;
-	    int maxClockCycle;
-      while(currentDevice!=NULL)
+
+        // errorwarning.ShowModal();
+          
+          // /* --- Open gedit to edit to file --- */
+          // string str = "gedit " + filePath.ToStdString();
+          // const char *command = str.c_str();
+          // system(command);
+          // /* ---------------------------------- */
+      }  
+      else
       {
-        currentID = currentDevice->id;
-        namestring devName = nmz->getname(currentID);
-        if(currentDevice->kind == aswitch)
+        logMessagePanel->AppendText(
+          getCurrentTime()+
+          "File loaded from "+
+          s + " successfully.\n");
+          FileLoaded = 1;
+        std::vector<MyChoiceObj> signalList;
+
+        devlink currentDevice = netz->devicelist();
+        name currentID;
+        int maxClockCycle;
+        while(currentDevice!=NULL)
         {
-          MyChoiceObj tempObj;
-          tempObj.dev = currentID;
-          tempObj.objName = devName;
-          if(currentDevice->swstate==low)
-          {
-            tempObj.objVal = 0;
-          }
-          else if(currentDevice->swstate==high)
-          {
-            tempObj.objVal = 1;
-          }
-          tempObj.kind = currentDevice->kind;
-          switchVec.push_back(tempObj);
-          signalList.push_back(tempObj);
-        }
-        else
-        {
-          outplink currentOutput = currentDevice->olist;
-          if(currentOutput->id==-1)
+          currentID = currentDevice->id;
+          namestring devName = nmz->getname(currentID);
+          if(currentDevice->kind == aswitch)
           {
             MyChoiceObj tempObj;
             tempObj.dev = currentID;
-            tempObj.output = -1;
             tempObj.objName = devName;
-            tempObj.objVal = 0;
+            if(currentDevice->swstate==low)
+            {
+              tempObj.objVal = 0;
+            }
+            else if(currentDevice->swstate==high)
+            {
+              tempObj.objVal = 1;
+            }
             tempObj.kind = currentDevice->kind;
+            switchVec.push_back(tempObj);
             signalList.push_back(tempObj);
           }
           else
           {
-            while(currentOutput != NULL)
+            outplink currentOutput = currentDevice->olist;
+            if(currentOutput->id==-1)
             {
               MyChoiceObj tempObj;
               tempObj.dev = currentID;
-              tempObj.output = currentOutput->id;
-              tempObj.objName = devName+"."+nmz->getname(currentOutput->id);
+              tempObj.output = -1;
+              tempObj.objName = devName;
               tempObj.objVal = 0;
               tempObj.kind = currentDevice->kind;
               signalList.push_back(tempObj);
-              currentOutput = currentOutput->next;
+            }
+            else
+            {
+              while(currentOutput != NULL)
+              {
+                MyChoiceObj tempObj;
+                tempObj.dev = currentID;
+                tempObj.output = currentOutput->id;
+                tempObj.objName = devName+"."+nmz->getname(currentOutput->id);
+                tempObj.objVal = 0;
+                tempObj.kind = currentDevice->kind;
+                signalList.push_back(tempObj);
+                currentOutput = currentOutput->next;
+              }
             }
           }
+          currentDevice = currentDevice->next;
         }
-        currentDevice = currentDevice->next;
-      }
-      // for(int mm = 0; mm < signalList.size(); ++mm)
-      // {
-      //   std::cout << signalList[mm].objName << "\t"
-      //   << signalList[mm].dev << "\t"
-      //   << signalList[mm].output << "\t"
-      //   << "\n";
-      // }
+        // for(int mm = 0; mm < signalList.size(); ++mm)
+        // {
+        //   std::cout << signalList[mm].objName << "\t"
+        //   << signalList[mm].dev << "\t"
+        //   << signalList[mm].output << "\t"
+        //   << "\n";
+        // }
 
-      std::sort(switchVec.begin(), switchVec.end());
-      for(std::vector<MyChoiceObj>::iterator it = switchVec.begin() ; it != switchVec.end(); ++it)
-      {
-        switchChoice->Append(it->objName);
-      }
-      // current switch choice by default is 
-      currentSwitchIndex = 0;
-      // set the value for the first switch
-      // todo: find a better way to initialise
-      if(switchVec.begin()->objVal)
-      {
-        switchState1->SetValue(1);
-        switchState0->SetValue(0);
-      }
-      else
-      {
-        switchState1->SetValue(0);
-        switchState0->SetValue(1);
-      }
-	  switchChoice->SetSelection(0);
-      int monitorCount = mmz->moncount();
-      name dev, output;
-      for(int i = 0; i < monitorCount; ++i)
-      {
-        std::string monitorName;
-        mmz->getmonname(i, dev, output);
-        MyChoiceObj tempObj;
-        tempObj.dev = dev;
-        tempObj.output = output;
-        if(output == -1)
+        std::sort(switchVec.begin(), switchVec.end());
+        for(std::vector<MyChoiceObj>::iterator it = switchVec.begin() ; it != switchVec.end(); ++it)
         {
-          monitorName = nmz->getname(dev);
+          switchChoice->Append(it->objName);
+        }
+        // current switch choice by default is 
+        currentSwitchIndex = 0;
+        // set the value for the first switch
+        // todo: find a better way to initialise
+        if(switchVec.begin()->objVal)
+        {
+          switchState1->SetValue(1);
+          switchState0->SetValue(0);
         }
         else
         {
-          monitorName = nmz->getname(dev) + "." + nmz->getname(output);
+          switchState1->SetValue(0);
+          switchState0->SetValue(1);
         }
-        for(int m = 0; m < signalList.size(); ++m)
+        switchChoice->SetSelection(0);
+        int monitorCount = mmz->moncount();
+        name dev, output;
+        for(int i = 0; i < monitorCount; ++i)
         {
-          if(monitorName == signalList[m].objName)
+          std::string monitorName;
+          mmz->getmonname(i, dev, output);
+          MyChoiceObj tempObj;
+          tempObj.dev = dev;
+          tempObj.output = output;
+          if(output == -1)
           {
-            tempObj.objName = monitorName;
-            tempObj.objVal = 1;
-            zapVec.push_back(tempObj);
-            signalList.erase(signalList.begin()+m);
+            monitorName = nmz->getname(dev);
+          }
+          else
+          {
+            monitorName = nmz->getname(dev) + "." + nmz->getname(output);
+          }
+          for(int m = 0; m < signalList.size(); ++m)
+          {
+            if(monitorName == signalList[m].objName)
+            {
+              tempObj.objName = monitorName;
+              tempObj.objVal = 1;
+              zapVec.push_back(tempObj);
+              signalList.erase(signalList.begin()+m);
+            }
           }
         }
+        std::sort(zapVec.begin(), zapVec.end());
+        for(std::vector<MyChoiceObj>::iterator it = zapVec.begin() ; it != zapVec.end(); ++it)
+        {
+          monitorZap->Append(it->objName);
+        }
+        currentZapIndex = 0;
+        
+        for(int n = 0; n < signalList.size(); ++n)
+        {
+          setVec.push_back(signalList[n]);
+        }
+        std::sort(setVec.begin(), setVec.end());
+        for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
+        {
+          monitorSet->Append(it->objName);
+        }
+        currentSetIndex = 0;
+        monitorSet->SetSelection(0);
+        monitorZap->SetSelection(0);
       }
-      std::sort(zapVec.begin(), zapVec.end());
-      for(std::vector<MyChoiceObj>::iterator it = zapVec.begin() ; it != zapVec.end(); ++it)
-      {
-        monitorZap->Append(it->objName);
-      }
-      currentZapIndex = 0;
-      
-      for(int n = 0; n < signalList.size(); ++n)
-      {
-        setVec.push_back(signalList[n]);
-      }
-      std::sort(setVec.begin(), setVec.end());
-      for(std::vector<MyChoiceObj>::iterator it = setVec.begin() ; it != setVec.end(); ++it)
-      {
-        monitorSet->Append(it->objName);
-      }
-      currentSetIndex = 0;
-      monitorSet->SetSelection(0);
-      monitorZap->SetSelection(0);
+    }
+    else
+    {
+      wxMessageDialog filewarning(this, 
+        _("Please load a valid file with .gf2 extension."), 
+        _("Warning"), wxICON_INFORMATION | wxOK);
+      filewarning.ShowModal();
     }
   }
   else
   {
-    wxMessageDialog monitorwarning(this, 
+    wxMessageDialog filewarning(this, 
       _("The file does not exist.\nPlease load a valid file."), 
       _("Warning"), wxICON_INFORMATION | wxOK);
-      monitorwarning.ShowModal();
+      filewarning.ShowModal();
     logMessagePanel->AppendText(
       getCurrentTime()+
       "File does not exist.\n");

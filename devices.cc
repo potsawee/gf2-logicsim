@@ -23,7 +23,7 @@ void devices::outsig (asignal s)
 
 /***********************************************************************
  *
- * Used to print out device details and signal values 
+ * Used to print out device details and signal values
  * for debugging in executedevices.
  *
  */
@@ -58,8 +58,8 @@ void devices::showdevice (devlink d)
 
 /***********************************************************************
  *
- * Sets the state of the named switch. 'ok' returns false if switch  
- * not found.                                                        
+ * Sets the state of the named switch. 'ok' returns false if switch
+ * not found.
  *
  */
 void devices::setswitch (name sid, asignal level, bool& ok)
@@ -108,10 +108,23 @@ void devices::makeclock (name id, int frequency)
   d->counter = 0;
 }
 
+//TODO: makerccircuit (DONE)
+
+/* ----------- Maintenance ----------- */
+void devices::makerccircuit (name id, int timeconst)
+{
+    devkind d;
+    netz->adddevice (rccircuit, id, d);
+    netz->addoutput (d, blankname); // just one output, no name required
+    
+	d->fall = timeconst; 
+	d->counter = 0;
+}
+/* ----------------------------------- */
 
 /***********************************************************************
  *
- * Used to make new AND, NAND, OR, NOR , XOR and NOT gates. 
+ * Used to make new AND, NAND, OR, NOR and XOR gates.
  * Called by makedevice.
  *
  */
@@ -138,6 +151,7 @@ void devices::makegate (devicekind dkind, name did, int ninputs, bool& ok)
   }
 }
 
+//TODO: makenotgate new function or add to above?? (DONE)
 
 /***********************************************************************
  *
@@ -160,27 +174,12 @@ void devices::makedtype (name id)
   d->memory = low;
 }
 
-/************************************************************************
- *
- * Used to make new R-C circuit devices. n= number of cycles
- * Called by makedevice.
- *
- */
-void devices::makerc(name id, int n, bool& ok)
-{
-    devlink d;
-    netz->adddevice (rc, id, d);
-    netz->addoutput (d, blankname);
-    
-    d->fall = n;
-    d->counter = 0;
-    
-}
+
 /***********************************************************************
  *
- * Adds a device to the network of the specified kind and name.  The  
- * variant is used with such things as gates where it specifies the   
- * number of inputs. 'ok' returns true if operation succeeds.         
+ * Adds a device to the network of the specified kind and name.  The
+ * variant is used with such things as gates where it specifies the
+ * number of inputs. 'ok' returns true if operation succeeds.
  *
  */
 void devices::makedevice (devicekind dkind, name did, int variant, bool& ok)
@@ -202,14 +201,19 @@ void devices::makedevice (devicekind dkind, name did, int variant, bool& ok)
     case xorgate:
       makegate (dkind, did, 2, ok);
       break;
-//    case notgate:
-//	  makegate (dkind, did, 1, ok);
+    case xorgate:
+      makegate (dkind, did, 1, ok);
+      break;
     case dtype:
       makedtype(did);
       break;
+    case rccircuit:
+      makerccircuit (did, variant);
+	break;
   }
 }
 
+//TODO: add not and RC to makedevice (DONE)
 
 /***********************************************************************
  *
@@ -261,7 +265,7 @@ void devices::execswitch (devlink d)
 
 /***********************************************************************
  *
- * Used to simulate the operation of AND, OR, NAND and NOR gates.
+ * Used to simulate the operation of AND, OR, NAND, NOR and NOT gates.
  * Called by executedevices.
  * Meaning of arguments: gate output is 'y' iff all inputs are 'x'
  *
@@ -296,6 +300,8 @@ void devices::execxorgate(devlink d)
     newoutp = high;
   signalupdate (newoutp, d->olist->sig);
 }
+
+//TODO: exec_notgate OR add this to execgate? (DONE)
 
 
 /***********************************************************************
@@ -347,13 +353,21 @@ void devices::execclock(devlink d)
   }
 }
 
+//TODO: exec_rccircuits (DONE) 
+void devices::execrccircuit (devlink d)
+{
+    if (d->olist->sig == falling){
+        signalupdate (low, d->olist->sig);
+    }
+    
+}
 
 /***********************************************************************
  *
  * Increment the counters in the clock devices and initiate changes
  * in their outputs when the end of their period is reached.
  * Called by executedevices.
- *
+ *													
  */
 void devices::updateclocks (void)
 {
@@ -370,8 +384,24 @@ void devices::updateclocks (void)
       (d->counter)++;
     }
   }
-}
 
+
+//TODO: update_rccircuits (DONE)
+void devices::updaterccircuit (void)
+{
+	devlink d;
+	for (d = netz->devicelist (); d != NULL; d = d->next) {
+        if (d->kind == rccircuit) {
+            if (d->counter == d->fall) {
+                d->olist->sig = falling;
+                (d->counter)++;
+            }else if(d->counter < d->fall ){
+				d->olist->sig = high;
+                (d->counter)++;
+            }
+        }
+	}	
+}
 
 /***********************************************************************
  *
@@ -390,15 +420,16 @@ void devices::initdevices (void)
     if (d->kind == dtype)
       if (rand()%2) d->memory = low;
       else d->memory = high;
+    //TODO: Add RC
   }
 }
 
 
 /***********************************************************************
  *
- * Executes all devices in the network to simulate one complete clock 
- * cycle. 'ok' is returned false if network fails to stabilise (i.e.  
- * it is oscillating).                                            
+ * Executes all devices in the network to simulate one complete clock
+ * cycle. 'ok' is returned false if network fails to stabilise (i.e.
+ * it is oscillating).
  *
  */
 void devices::executedevices (bool& ok)
@@ -424,7 +455,10 @@ void devices::executedevices (bool& ok)
         case andgate:  execgate (d, high, high); break;
         case nandgate: execgate (d, high, low);  break;
         case xorgate:  execxorgate (d);          break;
-        case dtype:    execdtype (d);            break;     
+        case notgate:  execgate (d, low, high);  break;
+        case dtype:    execdtype (d);            break;
+        case rccircuit:execrccircuit (d);		 break;
+        //TODO: Add RC and not gate (DONE)
       }
       if (debugging)
 	showdevice (d);
@@ -438,7 +472,7 @@ void devices::executedevices (bool& ok)
 
 /***********************************************************************
  *
- * Prints out the given device kind. 
+ * Prints out the given device kind.
  * Used by showdevice.
  *
  */
@@ -450,8 +484,8 @@ void devices::writedevice (devicekind k)
 
 /***********************************************************************
  *
- * Returns the kind of device corresponding to the given name.   
- * 'baddevice' is returned if the name is not a legal device.    
+ * Returns the kind of device corresponding to the given name.
+ * 'baddevice' is returned if the name is not a legal device.
  *
  */
 devicekind devices::devkind (name id)
@@ -476,10 +510,10 @@ void devices::debug (bool on)
 
 
 /***********************************************************************
- * 
+ *
  * Constructor for the devices class.
  * Registers the names of all the possible devices.
- * 
+ *
  */
 devices::devices (names* names_mod, network* net_mod)
 {
@@ -494,6 +528,8 @@ devices::devices (names* names_mod, network* net_mod)
   dtab[norgate]   =  nmz->lookup("NOR");
   dtab[xorgate]   =  nmz->lookup("XOR");
   dtab[dtype]     =  nmz->lookup("DTYPE");
+  dtab[notgate]   =  nmz->lookup("NOTGATE");
+  dtab[rccircuit]
   dtab[baddevice] =  blankname;
   debugging = false;
   datapin = nmz->lookup("DATA");

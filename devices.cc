@@ -111,7 +111,7 @@ void devices::makeclock (name id, int frequency)
 
 /***********************************************************************
  *
- * Used to make new AND, NAND, OR, NOR and XOR gates. 
+ * Used to make new AND, NAND, OR, NOR , XOR and NOT gates. 
  * Called by makedevice.
  *
  */
@@ -160,7 +160,22 @@ void devices::makedtype (name id)
   d->memory = low;
 }
 
-
+/************************************************************************
+ *
+ * Used to make new R-C circuit devices. n= number of cycles
+ * Called by makedevice.
+ *
+ */
+void devices::makerc(name id, int n, bool& ok)
+{
+    devlink d;
+    netz->adddevice (rc, id, d);
+    netz->addoutput (d, blankname);
+    
+    d->fall = n;
+    d->counter = 0;
+    
+}
 /***********************************************************************
  *
  * Adds a device to the network of the specified kind and name.  The  
@@ -187,6 +202,8 @@ void devices::makedevice (devicekind dkind, name did, int variant, bool& ok)
     case xorgate:
       makegate (dkind, did, 2, ok);
       break;
+//    case notgate:
+//	  makegate (dkind, did, 1, ok);
     case dtype:
       makedtype(did);
       break;

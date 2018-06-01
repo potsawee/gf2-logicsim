@@ -16,7 +16,7 @@ scanner::scanner(names* nmz, const char* defname) // nmz is a pointer to names c
 		cout<< "Error: Failed to open file" << endl;
 		exit(1);
 	}
-	cout << "File opened successfully" << endl;
+	// cout << "File opened successfully" << endl;
 
 	/* append lines for report lines containing errors */
 	string str;

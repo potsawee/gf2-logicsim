@@ -17,27 +17,27 @@
 enum { 
   // todo: delete unnecessary ones. add event handlers
   MY_SPINCNTRL_ID = wxID_HIGHEST + 1,
-  MY_TEXTCTRL_LOG,        // for logging text box
-  
-  MY_BUTTON_LOAD,         // for loading connection definitation file
-  MY_BUTTON_BROWSE,
-  MY_TEXTCTRL_FILEPATH,   // storing filepath to def file
+  MY_TEXTCTRL_LOG,              // for logging text box
+  MY_BUTTON_LOAD,               // for loading connection definitation file
+  MY_BUTTON_BROWSE,             // for browsing .gf2 files
+  MY_TEXTCTRL_FILEPATH,         // storing filepath to def file
 
-  MY_CHECKBOX_0,            
-  MY_CHECKBOX_1,            
-  MY_CHOICE_LIST_SWITCHES,  
+  MY_CHECKBOX_0,                // check box for switch signal 0
+  MY_CHECKBOX_1,                // check box for switch signal 1
+  MY_CHOICE_LIST_SWITCHES,      // choice list for switches
 
-  MY_CHOICE_MONITOR_SET,     
-  MY_CHOICE_MONITOR_ZAP,    
-  MY_BUTTON_SET,            
-  MY_BUTTON_ZAP,            
+  MY_CHOICE_MONITOR_SET,        // choice list for signals available for monitoring
+  MY_CHOICE_MONITOR_ZAP,        // choice list for existing monitors
+  MY_BUTTON_SET,                // for setting monitor at certain output
+  MY_BUTTON_ZAP,                // for removing one monitor
 
-  MY_BUTTON_RUN,            // todo: implement actual running
-  MY_BUTTON_CONTINUE,          // todo: 
-  MY_BUTTON_STOP,           // todo: 
-  MY_BUTTON_QUIT,          // todo: implement actual reset
+  MY_BUTTON_RUN,                // for running the simulation
+  MY_BUTTON_CONTINUE,           // for continuing simulation
+  MY_BUTTON_STOP,               // for stopping the simulation
+  MY_BUTTON_QUIT,               // for exiting the software
 }; // widget identifiers
 
+// gui-recognised objects, used for interfacing with backend classess
 class MyChoiceObj
 {
  public:
@@ -69,63 +69,62 @@ class MyFrame: public wxFrame
   network *network_mod = NULL,
 	long style = wxDEFAULT_FRAME_STYLE); // constructor
  private:
-  MyGLCanvas *canvas;                     // OpenGL drawing area widget to draw traces
-  wxSpinCtrl *spin;                       // control widget to select the number of cycles
-  names *nmz;                             // pointer to names class
-  devices *dmz;                           // pointer to devices class
-  monitor *mmz;                           // pointer to monitor class
-  network *netz;
-  scanner *smz;
-  parser *pmz;
+  MyGLCanvas *canvas;   // OpenGL drawing area widget to draw traces
+  wxSpinCtrl *spin;     // control widget to select the number of cycles
+  names *nmz;           // pointer to names class
+  devices *dmz;         // pointer to devices class
+  monitor *mmz;         // pointer to monitor class
+  network *netz;        // pointer to network class
+  scanner *smz;         // pointer to scanner class
+  parser *pmz;          // pointer to parser class
 
-  wxScrolledWindow* scrolledWindow;
+  wxScrolledWindow* scrolledWindow;     // pointer to the scrolled window, used for displaying signals
 
-  wxTextCtrl *logMessagePanel;
-  wxTextCtrl *filePathBox;
-  std::vector<MyChoiceObj> switchVec;
-  int currentSwitchIndex;
-  wxChoice *switchChoice;
-  wxCheckBox *switchState0;
-  wxCheckBox *switchState1;
+  wxTextCtrl *logMessagePanel;          // pointer to the text box for displaying logging message
+  wxTextCtrl *filePathBox;              // pointer to the text box for entering logic definition file path
+  std::vector<MyChoiceObj> switchVec;   // store a vector of switches
+  int currentSwitchIndex;               // the index of the selected switch in the switch choice list
+  wxChoice *switchChoice;               // pointer to the switch choice list
+  wxCheckBox *switchState0;             // pointer to the switch state check box 0
+  wxCheckBox *switchState1;             // pointer to the switch state check box 0
 
-  wxChoice *monitorSet;
-  wxChoice *monitorZap;
-  int currentSetIndex;
-  int currentZapIndex;
-  std::vector<MyChoiceObj> setVec;  
-  std::vector<MyChoiceObj> zapVec;
-  bool IsStarted;
-  bool FileLoaded;
+  wxChoice *monitorSet;                 // pointer to monitor set choice list
+  wxChoice *monitorZap;                 // pointer to monitor zap choice list
+  int currentSetIndex;                  // the index of the selected signal in the choice list
+  int currentZapIndex;                  // the index of the selected monitor in the choice list
+  std::vector<MyChoiceObj> setVec;      // store a vector of signals that can be monitored
+  std::vector<MyChoiceObj> zapVec;      // store a vector of existing monitors
+  bool IsStarted;                       // true if the simulation has started
+  bool FileLoaded;                      // true if a .gf2 file is loaded
 
-  std::stringstream buffer;
-  wxString filePath; //store location of path
+  std::stringstream buffer;             // buffer to store command line error messages for display
+  wxString filePath;                    // store location of path
 
-  int cyclescompleted;                    // how many simulation cycles have been completed
-  void runnetwork(int ncycles);           // function to run the logic network
-  // void OnExit(wxCommandEvent& event);     // event handler for exit menu item
-  void OnAbout(wxCommandEvent& event);    // event handler for about menu item
-  void OnOpen(wxCommandEvent &event);
-  void OnHelp(wxCommandEvent &event);
+  int cyclescompleted;                      // how many simulation cycles have been completed
+  void runnetwork(int ncycles);             // function to run the logic network
+  void OnAbout(wxCommandEvent& event);      // event handler for about menu item
+  void OnOpen(wxCommandEvent &event);       // event handler for open menu item
+  void OnHelp(wxCommandEvent &event);       // event handler for help menu item
   // void OnSave(wxCommandEvent &event);
-  void OnButtonRUN(wxCommandEvent& event);    // event handler for push button
-  void OnButtonQUIT(wxCommandEvent& event);  // event handler for reset button
-  void OnButtonCONTINUE(wxCommandEvent& event);   // event handler for continue button
+  void OnButtonRUN(wxCommandEvent& event);      // event handler for push button
+  void OnButtonQUIT(wxCommandEvent& event);     // event handler for reset button
+  void OnButtonCONTINUE(wxCommandEvent& event); // event handler for continue button
   void OnButtonSTOP(wxCommandEvent& event);
 
   // functions related to loading description file
-  void OnButtonLOAD(wxCommandEvent& event);
-  void OnPathEnter(wxCommandEvent& event);
-  void OnPathChange(wxCommandEvent& event);
+  void OnButtonLOAD(wxCommandEvent& event);     // event handler for load button
+  void OnPathEnter(wxCommandEvent& event);      // event handler for for enter key hit
+  void OnPathChange(wxCommandEvent& event);     // event handler for file path changes in the text box
   void loadFile(wxString s);
 
   // functions related to switch checkboxes
-  void OnCheck0(wxCommandEvent& event);
-  void OnCheck1(wxCommandEvent& event); 
-  void OnChoiceSwitch(wxCommandEvent& event);
+  void OnCheck0(wxCommandEvent& event);         // event handler for switch status check box 0
+  void OnCheck1(wxCommandEvent& event);         // event handler for switch status check box 1
+  void OnChoiceSwitch(wxCommandEvent& event);   // event handler for switch is selected in the list
 
   // functions related to monitor set/zap
-  void OnButtonSET(wxCommandEvent& event);
-  void OnButtonZAP(wxCommandEvent& event);
+  void OnButtonSET(wxCommandEvent& event);      // event handler for set button
+  void OnButtonZAP(wxCommandEvent& event);      // event handler for zap button
 
   void OnSpin(wxSpinEvent& event);        // event handler for spin control
   void OnText(wxCommandEvent& event);     // event handler for text entry field
@@ -143,8 +142,8 @@ class MyGLCanvas: public wxGLCanvas
   void Render(wxString example_text = "", int cycles = -1); // function to draw canvas contents
   void SetDefault(monitor *monitor_mod, names *names_mod);
 
-  int period;
-  int height;
+  int period;       // period of each cycle
+  int height;       // difference between signal 0/1
   float colourBox[10][3] = {
     {0.0, 0.0, 0.0},  // black
     {0.0, 0.0, 0.7},  // Dark Blue
@@ -155,9 +154,10 @@ class MyGLCanvas: public wxGLCanvas
     {1.0, 0.0, 1.0},  // Magneta
     {1.0, 0.0, 0.0},  // Red
     {1.0, 0.5, 0.0},  // Orange
-    {0.5, 0.35, 0.05}   // Yellow
+    {0.5, 0.35, 0.05} // brown
   };
 
+  // lighter version of colours above
   float colourBoxLight[10][3] = {
     {0.7, 0.7, 0.7},  // black
     {0.5, 0.5, 1.0},  // Dark Blue

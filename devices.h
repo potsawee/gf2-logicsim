@@ -6,9 +6,9 @@
 
 class devices{
   names* nmz;      // the version of the names module we use.
-  network* netz;   // the version of the network module we use.  
-  
-  typedef name devicetable[baddevice + 1]; 
+  network* netz;   // the version of the network module we use.
+
+  typedef name devicetable[baddevice + 1];
   devicetable dtab;
   bool        steadystate;
   name        clkpin, datapin, setpin;
@@ -18,6 +18,7 @@ class devices{
   void showdevice (devlink d);
   void makeswitch (name id, int setting, bool& ok);
   void makeclock (name id, int frequency);
+  void makerccircuit (name id, int timeconst);
   void makegate (devicekind dkind, name did, int ninputs, bool& ok);
   void makedtype (name id);
   void signalupdate (asignal target, asignal& sig);
@@ -35,15 +36,15 @@ public:
     /* Adds a device to the network of the specified kind and name.  The   */
     /* variant is used with such things as gates where it specifies the    */
     /* number of inputs. 'ok' returns true if operation succeeds.          */
- 
+
   void setswitch (name sid, asignal level, bool& ok);
     /* Sets the state of the named switch. 'ok' returns false if switch    */
     /* not found.                                                          */
- 
+
   void executedevices (bool& ok);
     /* Executes all devices in the network to simulate one complete clock  */
     /* cycle. 'ok' is returned false if network fails to stabilise (i.e.   */
-    /* it is oscillating). */                                             
+    /* it is oscillating). */
 
   void initdevices (void);
     /* Randomizes states of clocks and flip-flops.                         */
@@ -51,13 +52,13 @@ public:
   devicekind devkind (name id);
     /* Returns the kind of device corresponding to the given name.         */
     /* 'baddevice' is returned if the name is not a legal device.          */
- 
+
   void writedevice (devicekind k);
     /* Prints out the given device kind.                                   */
- 
+
   void debug (bool on);
     /* Used to set debugging switch.                                       */
- 
+
   devices (names* names_mod, network* net_mod);
     /* Called to initialise module.                                        */
 };

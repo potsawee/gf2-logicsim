@@ -384,6 +384,7 @@ void devices::updateclocks (void)
       (d->counter)++;
     }
   }
+}
 
 
 //TODO: update_rccircuits (DONE)
@@ -415,27 +416,10 @@ void devices::initdevices (void)
       d->counter = rand()%d->frequency;
     }
     else if (d->kind == dtype){
-      /* ------------- Maintenance ----------- */
-      // if V_out of an RC circuit is connected to d.SET input
-      // d.Q will be foreced high on power-up
-      // if V_out of an RC circuit is connected to d.CLEAR input
-      // d.Q will be foreced low on power-up
-      inplink set_ilink, clr_ilink;
-      outplink qout, qbarout;
-      set_ilink = netz->findinput (d, setpin);
-      clr_ilink = netz->findinput (d, clrpin);
-      setinput  = i->connect->sig;
-
-      if(){
-
-      }
-      /* ------------------------------------- */
-      else{
-          if (rand()%2) d->memory = low;
-          else d->memory = high;
-      }
+      if (rand()%2) d->memory = low;
+      else d->memory = high;
     }
-    //TODO: Add RC
+    //TODO: Add RC (DONE)
     else if (d->kind == rccircuit){
       d->olist->sig = high;
     }

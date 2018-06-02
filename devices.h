@@ -28,7 +28,9 @@ class devices{
   void execxorgate(devlink d);
   void execdtype (devlink d);
   void execclock(devlink d);
+  void execrccircuit (devlink d);
   void updateclocks (void);
+  void updaterccircuit (void);
   void outsig (asignal s);
 
 public:

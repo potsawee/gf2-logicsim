@@ -41,6 +41,8 @@ private:
     void ordev();
     void nordev();
     void xordev();
+    void notdev();
+    void rcdev();
     void dev_name_num(devicekind dkind);   // to reduce repetition of the above devices
     name name1();         // use name1 to avoid same name as name (int)
 

@@ -530,8 +530,8 @@ devices::devices (names* names_mod, network* net_mod)
   dtab[norgate]   =  nmz->lookup("NOR");
   dtab[xorgate]   =  nmz->lookup("XOR");
   dtab[dtype]     =  nmz->lookup("DTYPE");
-  dtab[notgate]   =  nmz->lookup("NOTGATE");
-  dtab[rccircuit] =  nmz->lookup("RCCIRCUIT");
+  dtab[notgate]   =  nmz->lookup("NOT");
+  dtab[rccircuit] =  nmz->lookup("RC");
   dtab[baddevice] =  blankname;
   debugging = false;
   datapin = nmz->lookup("DATA");

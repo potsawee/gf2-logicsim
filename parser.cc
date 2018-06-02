@@ -112,6 +112,8 @@ void parser::device() // scan up to ',' or ';'
 			case orgate: 	ordev(); 		break;
 			case norgate: 	nordev(); 		break;
 			case xorgate: 	xordev(); 		break;
+			case notgate:	notdev();		break;
+			case rccircuit:	rcdev();		break;
 			default: wrongkind = true;		break;
 		}
 	}
@@ -208,6 +210,11 @@ void parser::clockdev()
 	devicekind dkind = aclock;
 	dev_name_num(dkind);
 }
+void parser::rcdev()
+{
+	devicekind dkind = rccircuit;
+	dev_name_num(dkind);
+}
 void parser::anddev()
 {
 	devicekind dkind = andgate;
@@ -228,6 +235,24 @@ void parser::nordev()
 	devicekind dkind = norgate;
 	dev_name_num(dkind);
 }
+void parser::notdev()
+{
+	devicekind dkind = notgate;
+	name did; // device id
+	int variant = 0;
+	bool ok;
+	smz->getsymbol(cursym, curid, curnum);
+	if (cursym == equals){
+		did = name1();
+	}
+	else{
+		error(7);
+	}
+	dmz->makedevice(dkind, did, variant, ok);
+	if(!ok){
+		error(31);
+	}
+}
 void parser::dev_name_num(devicekind dkind)
 {
 	name did; // device id
@@ -241,7 +266,7 @@ void parser::dev_name_num(devicekind dkind)
 			smz->getsymbol(cursym, curid, curnum);
 			if(cursym == numsym){
 
-				if(dkind != aclock && curnum > 16){
+				if(dkind != aclock && dkind != rccircuit && curnum > 16){
 					error(12);
 				}
 
@@ -303,6 +328,7 @@ bool parser::is_name_reserved(name id)
 		return true;
 	if(namestr == "SWITCH" || namestr == "CLOCK" || namestr == "AND" || namestr == "NAND" ||
 	namestr == "OR" || namestr == "NOR" || namestr == "XOR" || namestr == "DTYPE" ||
+	namestr == "RC" || namestr == "NOT" ||
 	namestr == "DATA" || namestr == "CLK" || namestr == "SET" || namestr == "CLEAR" ||
 	namestr == "Q" || namestr == "QBAR")
 		return true;

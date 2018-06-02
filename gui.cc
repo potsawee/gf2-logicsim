@@ -279,7 +279,7 @@ void MyGLCanvas::OnSize(wxSizeEvent& event)
 
 void MyGLCanvas::OnMouse(wxMouseEvent& event)
   // Event handler for mouse events inside the GL canvas
-{/*
+{
   wxString text;
   int w, h;;
   static int last_x, last_y;
@@ -312,7 +312,7 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
   }
 
   if (event.GetWheelRotation() || event.ButtonDown() || event.ButtonUp() || event.Dragging() || event.Leaving()) Render(text);
-*/
+
 }
 
 // MyFrame ///////////////////////////////////////////////////////////////////////////////////////
@@ -975,9 +975,6 @@ void MyFrame::OnButtonZAP(wxCommandEvent& event)
 
 void MyFrame::loadFile(wxString s)
 {
-  // todo: check file path validity
-  // todo: seems duplicated with reset button, delete one maybe
-  // (reset button only sets the canvas
   nmz = new names();
   netz = new network(nmz);
   dmz = new devices(nmz, netz);
@@ -993,8 +990,9 @@ void MyFrame::loadFile(wxString s)
   zapVec.clear();
   mmz->resetmonitor();
   IsStarted = 0;
-  // todo: more to be added upon 'reset'
-  std::cout << filePath.ToStdString();
+  logMessagePanel->Clear();
+  filePathBox->Clear();
+  filePathBox->AppendText(s);
   ifstream f((filePath.ToStdString()).c_str());
   if(f.good())
   {
@@ -1027,6 +1025,7 @@ void MyFrame::loadFile(wxString s)
       }  
       else
       {
+          std::cout << "3. file loaded, " << filePath.ToStdString() << "\n";
         logMessagePanel->AppendText(
           getCurrentTime()+
           "File loaded from "+

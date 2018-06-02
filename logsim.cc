@@ -33,11 +33,12 @@ bool MyApp::OnInit()
     wxDefaultPosition,  
     wxSize(800, 600), 
     nmz, dmz, mmz, netz);
-  if (argc == 2) 
-  { // check we have one command line argument
-    frame->loadFile(wxString(argv[1]).mb_str());
-  }
   frame->Show(true);
+  if(argc==2)
+  {
+    frame->filePath = wxString(argv[1]);
+    frame->loadFile(wxString(argv[1]));
+  }
   return(true); // enter the GUI event loop
 #else
   if (argc != 2) { // check we have one command line argument

@@ -68,6 +68,7 @@ class MyFrame: public wxFrame
   monitor *monitor_mod = NULL, 
   network *network_mod = NULL,
 	long style = wxDEFAULT_FRAME_STYLE); // constructor
+  wxString filePath;                    // store location of path
   void loadFile(wxString s);
 
  private:
@@ -100,7 +101,6 @@ class MyFrame: public wxFrame
   bool FileLoaded;                      // true if a .gf2 file is loaded
 
   std::stringstream buffer;             // buffer to store command line error messages for display
-  wxString filePath;                    // store location of path
 
   int cyclescompleted;                      // how many simulation cycles have been completed
   void runnetwork(int ncycles);             // function to run the logic network

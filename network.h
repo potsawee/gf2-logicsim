@@ -29,8 +29,8 @@ struct devicerec {
   devicekind kind;
   /* the next elements are only used by some of the device kinds */
   asignal swstate;      // used when kind == aswitch
-  int frequency;        // used when kind == aclock
-  int counter;          // used when kind == aclock
+  int frequency;        // used when kind == aclock, rccircuit \\ this is actually 'period'
+  int counter;          // used when kind == aclock, rccircuit
   asignal memory;       // used when kind == dtype
 };
 typedef devicerec* devlink;
@@ -41,27 +41,27 @@ class network {
  public:
   devlink devicelist (void);
     /* Returns list of devices                                             */
- 
+
   devlink finddevice (name id);
    /* Returns link to device with specified name. Returns NULL if not       */
    /* found.                                                               */
- 
+
   inplink findinput (devlink dev, name id);
     /* Returns link to input of device pointed to by dev with specified    */
     /* name.  Returns NULL if not found.                                    */
- 
+
   outplink findoutput (devlink dev, name id);
     /* Returns link to output of device pointed to by dev with specified   */
     /* name.  Returns NULL if not found.                                    */
- 
+
   void adddevice (devicekind dkind, name did, devlink& dev);
     /* Adds a device to the device list with given name and returns a link */
     /* to it via 'dev'.                                                    */
- 
+
   void addinput (devlink dev, name iid);
     /* Adds an input to the device pointed to by 'dev' with the specified  */
     /* name.                                                               */
- 
+
   void addoutput (devlink dev, name oid);
     /* Adds an output to the device pointed to by 'dev' with the specified */
     /* name.                                                               */
@@ -70,10 +70,10 @@ class network {
     /* Makes a connection between the 'inp' input of device 'idev' and the */
     /* 'outp' output of device 'odev'. 'ok' is set true if operation       */
     /* succeeds.                                                           */
- 
+
   void checknetwork (bool& ok);
     /* Checks that all inputs are connected to an output.                  */
- 
+
   network (names* names_mod);
   /* Called on system initialisation.                                      */
 

@@ -68,6 +68,8 @@ class MyFrame: public wxFrame
   monitor *monitor_mod = NULL, 
   network *network_mod = NULL,
 	long style = wxDEFAULT_FRAME_STYLE); // constructor
+  void loadFile(wxString s);
+
  private:
   MyGLCanvas *canvas;   // OpenGL drawing area widget to draw traces
   wxSpinCtrl *spin;     // control widget to select the number of cycles
@@ -115,7 +117,6 @@ class MyFrame: public wxFrame
   void OnButtonLOAD(wxCommandEvent& event);     // event handler for load button
   void OnPathEnter(wxCommandEvent& event);      // event handler for for enter key hit
   void OnPathChange(wxCommandEvent& event);     // event handler for file path changes in the text box
-  void loadFile(wxString s);
 
   // functions related to switch checkboxes
   void OnCheck0(wxCommandEvent& event);         // event handler for switch status check box 0

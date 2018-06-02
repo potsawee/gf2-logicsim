@@ -229,8 +229,6 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
   SwapBuffers();
 }
 
-
-
 void MyGLCanvas::InitGL()
   // Function to initialise the GL context
 {
@@ -996,7 +994,7 @@ void MyFrame::loadFile(wxString s)
   mmz->resetmonitor();
   IsStarted = 0;
   // todo: more to be added upon 'reset'
-
+  std::cout << filePath.ToStdString();
   ifstream f((filePath.ToStdString()).c_str());
   if(f.good())
   {

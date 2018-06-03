@@ -259,6 +259,11 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 
 void scanner::print_line_error(int n)
 {
+	if(eofile){
+		cout << "In line " << lines.size()+1 << ": " << endl;
+		return;
+	}
+
 	cout << "In line " << (linenum+1) << ": " << lines[linenum] << endl;
 	int x = int((linenum+1) / 10); // to account for line1 and line10, line100 etc.
 	cout << string(9 + x , ' ') << string(n, ' ') << "^" << endl;

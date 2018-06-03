@@ -227,7 +227,8 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 		streampos curposition = inf.tellg();
 		inf.get(mychar);
 		while(mychar!='\n'){
-			inf.get(mychar);
+			if(!inf.get(mychar)) //if eofile
+				break;
 			counter++;
 		}
 		inf.seekg(curposition);
@@ -255,6 +256,7 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 	}
 
 }
+
 void scanner::print_line_error(int n)
 {
 	cout << "In line " << (linenum+1) << ": " << lines[linenum] << endl;

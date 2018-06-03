@@ -50,8 +50,9 @@ bool parser::readin (void)
 		but it shoud be safer than uncaught error */
 		cout << "Unexpected error occured.. terminate program safely." << endl;
 	}
-	while(cursym != eofsym){
-		smz->getsymbol(cursym, curid, curnum);
+	smz->getsymbol(cursym, curid, curnum);
+	if(cursym != eofsym){
+		error(41);
 	}
 	if(errorcount == 0){
 		// cout << "0 error dectected" << endl;
@@ -607,6 +608,8 @@ void parser::error(int errn)
 		case 32: cout << "connection error. hint: 'output => input'" << endl; break;
 		case 33: cout << "monitor error. hint: check the signal" << endl; break;
 
+		case 41: cout << "Nothing is expected after the last ;" << endl; break;
+
 		// Special cases use number above 50
 		case 51: smz->print_line_error(8);
 				cout << "***ERROR 51: 'DEVICES:'' keyword expected" << endl; break;
@@ -614,6 +617,7 @@ void parser::error(int errn)
 				cout << "***ERROR 52: 'CONNECTIONS:'' keyword expected" << endl; break;
 		case 53: smz->print_line_error(8);
 				cout << "***ERROR 53: 'MONITORS:'' keyword expected" << endl; break;
+
 	}
 }
 void parser::semantic(int errn)

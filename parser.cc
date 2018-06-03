@@ -84,11 +84,23 @@ void parser::devicelist()
 {
 	// cout << "DEVICELIST" << endl;
 	device();
-	while(cursym == comma){
-		device();
+	while(1){
+		while(cursym == comma){
+			device();
+		}
+		if(cursym == semicol) // good
+			break;
+		else if(cursym == consym){
+			error(1);
+		}
+		else if(cursym == eofsym)
+			error(43);
+		else{
+			smz->getsymbol(cursym, curid, curnum);
+			error(42);
+		}
 	}
-	if (cursym != semicol)
-		error(1);
+
 }
 void parser::device() // scan up to ',' or ';'
 {
@@ -345,11 +357,21 @@ void parser::connectionlist()
 {
 	// cout << "CONNECTIONLIST" << endl;
 	connection();
-	while(cursym == comma){ // while loop breaks when cursym == semicol
-		connection();
+	while(1){
+		while(cursym == comma){ // while loop breaks when cursym == semicol
+			connection();
+		}
+		if (cursym == semicol)
+			break;
+		else if(cursym == monsym)
+			error(1);
+		else if(cursym == eofsym)
+			error(43);
+		else{
+			smz->getsymbol(cursym, curid, curnum);
+			error(42);
+		}
 	}
-	if (cursym != semicol)
-		error(1);
 
 	/* --------- Semantic error #3 --------- */
 	// 3. every input should be connected to a (valid) output
@@ -611,7 +633,8 @@ void parser::error(int errn)
 		case 33: cout << "monitor error. hint: check the signal" << endl; break;
 
 		case 41: cout << "Nothing is expected after the last ;" << endl; break;
-
+		case 42: cout << "a comma is expected before this expression" << endl; break;
+		case 43: cout << "the definition file is not complete" << endl; break;
 		// Special cases use number above 50
 		case 51: smz->print_line_error(8);
 				cout << "***ERROR 51: 'DEVICES:'' keyword expected" << endl; break;

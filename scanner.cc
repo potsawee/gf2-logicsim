@@ -248,7 +248,7 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 		eofile = !(inf.get(curch));
 		return;
 	}
-	eofile = !(inf.get(curch));
+	//eofile = !(inf.get(curch));
 	if(curch != '\n'){
 		while(!(eofile || s == comma || s == semicol || curch == '\n')){
 			getsymbol(s, id, num);

@@ -267,7 +267,7 @@ void parser::dev_name_num(devicekind dkind)
 			smz->getsymbol(cursym, curid, curnum);
 			if(cursym == numsym){
 
-				if(dkind != aclock && dkind != rccircuit && curnum > 16){
+				if(dkind != aclock && dkind != rccircuit && (curnum > 16 || curnum <=0)){
 					error(12);
 				}
 
@@ -315,6 +315,9 @@ name parser::name1()
 
 		name deviceid = curid;
 		return deviceid;
+	}
+	else if (cursym == devsym || cursym == consym || cursym == monsym){
+		semantic(2);
 	}
 	else {
 		error(8);
@@ -586,9 +589,8 @@ void parser::error(int errn)
 				throw devicedeferror; break;
 		case 8: cout << "name error. hint: name must start with a letter or '_'" << endl;
 				throw nameerror; break;
-		case 12: cout << "the maximum number of inputs is 16" << endl;
+		case 12: cout << "the maximum number of inputs is 16 and minimum is 1" << endl;
 				throw devicedeferror; break;
-
 		case 14: cout << "Q or QBAR is expected for dtype output" << endl;
 				throw signalerror; break;
 		case 15: cout << "DATA, CLK, SET, CLEAR is expected for dtype input" << endl;

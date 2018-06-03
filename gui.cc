@@ -367,6 +367,11 @@ MyFrame::MyFrame(wxWindow *parent,
   mmz = monitor_mod;
   netz = network_mod;
 
+  // put wxLANGUAGE_CHINESE_SIMPLIFIED as an argument in Init() to set manually
+  locale.Init();
+  wxLocale::AddCatalogLookupPathPrefix(wxT("."));
+  locale.AddCatalog(wxT("gui"));
+
   if (nmz == NULL || dmz == NULL || mmz == NULL|| netz == NULL) {
     cout << "Cannot operate GUI without names, devices, monitor, or network classes" << endl;
     exit(1);
@@ -375,10 +380,10 @@ MyFrame::MyFrame(wxWindow *parent,
   wxMenu *fileMenu = new wxMenu;
   // About is under guitest menu on mac
   // exit is under guitest menu by default
-  fileMenu->Append(wxID_OPEN, "&Open");
-  fileMenu->Append(wxID_HELP, "&Help");
-  fileMenu->Append(wxID_ABOUT, "&About");
-  fileMenu->Append(wxID_EXIT, "&Quit");
+  fileMenu->Append(wxID_OPEN, _("&Open"));
+  fileMenu->Append(wxID_HELP, _("&Help"));
+  fileMenu->Append(wxID_ABOUT, _("&About"));
+  fileMenu->Append(wxID_EXIT, _("&Quit"));
 
   // The following behave normally
   // refer to wxStandardID
@@ -390,7 +395,7 @@ MyFrame::MyFrame(wxWindow *parent,
   // editMenu->Append(wxID_REDO, "&Redo");
   
   wxMenuBar *menuBar = new wxMenuBar;
-  menuBar->Append(fileMenu, "&File");
+  menuBar->Append(fileMenu, _("&File"));
   // menuBar->Append(editMenu, "&Edit");
   SetMenuBar(menuBar);
 
@@ -398,13 +403,13 @@ MyFrame::MyFrame(wxWindow *parent,
   wxBoxSizer *overallSizer = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer *filePathSizer = new wxBoxSizer(wxHORIZONTAL);
   filePathSizer->Add(
-    new wxButton(this, MY_BUTTON_LOAD, "Load"), 
+    new wxButton(this, MY_BUTTON_LOAD, _("Load")), 
     0, 
     wxALL, 
     10);
 
   filePathSizer->Add(
-    new wxButton(this, MY_BUTTON_BROWSE, "Browse"), 
+    new wxButton(this, MY_BUTTON_BROWSE, _("Browse")), 
     0, 
     wxALL, 
     10);
@@ -442,7 +447,7 @@ MyFrame::MyFrame(wxWindow *parent,
   // std::cout << x << "   "<< y << "\n";
 
   displaySizer->Add(
-    new wxStaticText(this, wxID_ANY, "Log Activity"), 
+    new wxStaticText(this, wxID_ANY, _("Log Activity")), 
     0, 
     wxTOP|wxLEFT|wxRIGHT, 
     10);
@@ -469,9 +474,9 @@ MyFrame::MyFrame(wxWindow *parent,
   wxBoxSizer *bottomRightSizer = new wxBoxSizer(wxVERTICAL);
 
   // configuration sizer
-  wxStaticBoxSizer *configSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Configuration");
+  wxStaticBoxSizer *configSizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Configuration"));
   // switch sizers
-  wxStaticBoxSizer *switchSizer = new wxStaticBoxSizer(wxHORIZONTAL, configSizer->GetStaticBox(), "Switches");
+  wxStaticBoxSizer *switchSizer = new wxStaticBoxSizer(wxHORIZONTAL, configSizer->GetStaticBox(), _("Switches"));
   switchChoice = new wxChoice(
     switchSizer->GetStaticBox(), 
     MY_CHOICE_LIST_SWITCHES, 
@@ -483,7 +488,7 @@ MyFrame::MyFrame(wxWindow *parent,
     wxDefaultValidator,
     "Switches");
   switchSizer->Add(switchChoice, 0, wxALL, 5);
-  wxStaticBoxSizer *switchStateSizer = new wxStaticBoxSizer(wxHORIZONTAL, switchSizer->GetStaticBox(), "Switch State");
+  wxStaticBoxSizer *switchStateSizer = new wxStaticBoxSizer(wxHORIZONTAL, switchSizer->GetStaticBox(), _("Switch State"));
   switchState0 = new wxCheckBox(switchStateSizer->GetStaticBox(), MY_CHECKBOX_0, "0");
   switchState1 = new wxCheckBox(switchStateSizer->GetStaticBox(), MY_CHECKBOX_1, "1");
   switchStateSizer->Add(switchState0, 0, wxALL, 5);
@@ -491,7 +496,7 @@ MyFrame::MyFrame(wxWindow *parent,
   switchSizer->Add(switchStateSizer, 0, wxALIGN_TOP);
 
   // monitor sizers
-  wxStaticBoxSizer *monitorCtrlSizer = new wxStaticBoxSizer(wxVERTICAL, configSizer->GetStaticBox(), "Monitors");
+  wxStaticBoxSizer *monitorCtrlSizer = new wxStaticBoxSizer(wxVERTICAL, configSizer->GetStaticBox(), _("Monitors"));
   wxBoxSizer *monitorSetSizer = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer *monitorZapSizer = new wxBoxSizer(wxHORIZONTAL);
   monitorSet = new wxChoice(
@@ -505,7 +510,7 @@ MyFrame::MyFrame(wxWindow *parent,
     wxDefaultValidator,
     "Set Monitors");
   monitorSetSizer->Add(monitorSet, 0, wxALL, 5);
-  monitorSetSizer->Add(new wxButton(monitorCtrlSizer->GetStaticBox(), MY_BUTTON_SET, "Set"), 0, wxALL, 10);
+  monitorSetSizer->Add(new wxButton(monitorCtrlSizer->GetStaticBox(), MY_BUTTON_SET, _("Set")), 0, wxALL, 10);
   monitorZap = new wxChoice(
     monitorCtrlSizer->GetStaticBox(), 
     MY_CHOICE_MONITOR_ZAP,
@@ -517,7 +522,7 @@ MyFrame::MyFrame(wxWindow *parent,
     wxDefaultValidator,
     "Zap Monitors");
   monitorZapSizer->Add(monitorZap, 0, wxALL, 5);
-  monitorZapSizer->Add(new wxButton(monitorCtrlSizer->GetStaticBox(), MY_BUTTON_ZAP, "Zap"), 0, wxALL, 10);
+  monitorZapSizer->Add(new wxButton(monitorCtrlSizer->GetStaticBox(), MY_BUTTON_ZAP, _("Zap")), 0, wxALL, 10);
   monitorCtrlSizer->Add(monitorSetSizer, 0, wxALIGN_LEFT);
   monitorCtrlSizer->Add(monitorZapSizer, 0, wxALIGN_LEFT);
 
@@ -526,17 +531,17 @@ MyFrame::MyFrame(wxWindow *parent,
   // end of configuration sizer
 
   // opration sizer
-  wxStaticBoxSizer *opSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Operations");
+  wxStaticBoxSizer *opSizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Operations"));
   wxBoxSizer *buttonSizer1 = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer *buttonSizer2 = new wxBoxSizer(wxHORIZONTAL);
-  opSizer->Add(new wxStaticText(opSizer->GetStaticBox(), wxID_ANY, "No. of Clock Cycles"), 0, wxTOP|wxLEFT|wxRIGHT, 10);
+  opSizer->Add(new wxStaticText(opSizer->GetStaticBox(), wxID_ANY, _("No. of Clock Cycles")), 0, wxTOP|wxLEFT|wxRIGHT, 10);
   spin = new wxSpinCtrl(opSizer->GetStaticBox(), MY_SPINCNTRL_ID, wxString("10"));
   spin->SetRange(0, 50);
   opSizer->Add(spin, 0 , wxALL, 10);
-  buttonSizer1->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_RUN, "Run"), 0, wxALL, 10);
-  buttonSizer1->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_CONTINUE, "Continue"), 0, wxALL, 10);
-  buttonSizer2->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_STOP, "Stop"), 0, wxALL, 10);
-  buttonSizer2->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_QUIT, "Quit"), 0, wxALL, 10);
+  buttonSizer1->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_RUN, _("Run")), 0, wxALL, 10);
+  buttonSizer1->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_CONTINUE, _("Continue")), 0, wxALL, 10);
+  buttonSizer2->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_STOP, _("Stop")), 0, wxALL, 10);
+  buttonSizer2->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_QUIT, _("Quit")), 0, wxALL, 10);
   opSizer->Add(buttonSizer1, 0 , wxALL, 10);
   opSizer->Add(buttonSizer2, 0 , wxALL, 10);
   // end of operation sizer
@@ -561,7 +566,7 @@ MyFrame::MyFrame(wxWindow *parent,
       _("Open a circuit definition file"), 
       "", 
       "",
-      "GF2 files (*.gf2)|*.gf2", 
+      _("GF2 files (*.gf2)|*.gf2"), 
       wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 	if(openFileDialog.ShowModal() == wxID_CANCEL)
 		return;			// user changed idea..
@@ -583,8 +588,8 @@ void MyFrame::OnAbout(wxCommandEvent &event)
 {
   wxMessageDialog about(
     this, 
-    "Part IIA Project GF2\nLogic Simulator\nNaitian Zheng (nz253)\nPotsawee Manakul (pm574)\nShutong Feng (sf548)\nMay 2018", 
-    "About Logsim", 
+    _("Part IIA Project GF2\nLogic Simulator\nNaitian Zheng (nz253)\nPotsawee Manakul (pm574)\nShutong Feng (sf548)\nMay 2018"), 
+    _("About Logsim"), 
     wxICON_INFORMATION | wxOK);
   about.ShowModal();
 }
@@ -594,8 +599,8 @@ void MyFrame::OnHelp(wxCommandEvent &event)
 {
   wxMessageDialog about(
     this, 
-    "Please refer to the user manual.", 
-    "Help", 
+    _("Please refer to the user manual."), 
+    _("Help"), 
     wxICON_INFORMATION | wxOK);
   about.ShowModal();
 }
@@ -623,7 +628,7 @@ void MyFrame::OnButtonRUN(wxCommandEvent &event)
     }
     runnetwork(ncycles);
     canvas->Render("Run button pressed", cyclescompleted);
-    logMessagePanel->AppendText(getCurrentTime()+"Start running.\n");
+    logMessagePanel->AppendText(getCurrentTime()+_("Start running.\n"));
   }
   else
   {
@@ -685,11 +690,11 @@ void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
         }
         runnetwork(ncycles);
         canvas->Render("Continue button pressed", cyclescompleted);
-        logMessagePanel->AppendText(getCurrentTime()+"Continue running.\n");
+        logMessagePanel->AppendText(getCurrentTime()+_("Continue running.\n"));
       }
       else
       {
-        logMessagePanel->AppendText(getCurrentTime()+"Please run before continuing.\n");
+        logMessagePanel->AppendText(getCurrentTime()+_("Please run before continuing.\n"));
       }
     }
     else
@@ -790,14 +795,14 @@ void MyFrame::OnCheck0(wxCommandEvent &event)
         logMessagePanel->AppendText(
         getCurrentTime()+
         switchVec[currentSwitchIndex].objName +
-        " is set to 0.\n");
+        _(" is set to 0.\n"));
       }
       else
       {
         logMessagePanel->AppendText(
         getCurrentTime()+
         switchVec[currentSwitchIndex].objName +
-        " is not set to 0.\n");
+        _(" is not set to 0.\n"));
       }
     }
   }
@@ -830,14 +835,14 @@ void MyFrame::OnCheck1(wxCommandEvent &event)
         logMessagePanel->AppendText(
         getCurrentTime()+
         switchVec[currentSwitchIndex].objName +
-        " is set to 1.\n");
+        _(" is set to 1.\n"));
       }
       else
       {
         logMessagePanel->AppendText(
         getCurrentTime()+
         switchVec[currentSwitchIndex].objName +
-        " is not set to 1.\n");     
+        _(" is not set to 1.\n"));     
       }
     }  
   }
@@ -862,7 +867,7 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
         monitorwarning.ShowModal();
       logMessagePanel->AppendText(
       getCurrentTime()+
-      "No monitor is available to be set.\n");
+      _("No monitor is available to be set.\n"));
     }
     else
     {
@@ -876,9 +881,9 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
       {
         logMessagePanel->AppendText(
           getCurrentTime()+
-          "Monitor "+
+          _("Monitor ")+
           monitorSet->GetStringSelection() + 
-          " is set.\n");
+          _(" is set.\n"));
         monitorSet->Delete(currentSetIndex);
         setVec[currentSetIndex].objVal = !setVec[currentSetIndex].objVal;
         zapVec.push_back(setVec[currentSetIndex]);
@@ -897,9 +902,9 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
       {
         logMessagePanel->AppendText(
           getCurrentTime()+
-          "Monitor "+
+          _("Monitor ")+
           monitorSet->GetStringSelection() + 
-          " is not set successfully.\n");
+          _(" is not set successfully.\n"));
           if(mmz->moncount()==10)
           {
             wxMessageDialog monitorwarning(this, 
@@ -931,7 +936,7 @@ void MyFrame::OnButtonZAP(wxCommandEvent& event)
         monitorwarning.ShowModal();
       logMessagePanel->AppendText(
       getCurrentTime()+
-      "No monitor is available to be zapped.\n");
+      _("No monitor is available to be zapped.\n"));
     }
     else
     {
@@ -942,9 +947,9 @@ void MyFrame::OnButtonZAP(wxCommandEvent& event)
       {
         logMessagePanel->AppendText(
           getCurrentTime()+
-          "Monitor "+
+          _("Monitor ")+
           monitorZap->GetStringSelection() + 
-          " is zapped.\n");
+          _(" is zapped.\n"));
         monitorZap->Delete(currentZapIndex);
         zapVec[currentZapIndex].objVal = !zapVec[currentZapIndex].objVal;
         setVec.push_back(zapVec[currentZapIndex]);
@@ -963,11 +968,10 @@ void MyFrame::OnButtonZAP(wxCommandEvent& event)
       {
         logMessagePanel->AppendText(
           getCurrentTime()+
-          "Monitor "+
+          _("Monitor ")+
           monitorZap->GetStringSelection() + 
-          " is not zapped successfully.\n");
+          _(" is not zapped successfully.\n"));
       }
-      
     }
   }
 }
@@ -1008,7 +1012,7 @@ void MyFrame::loadFile(wxString s)
       {// check if the definition file is valid
         logMessagePanel->AppendText(
           getCurrentTime()+
-          "Logic Definition File Error.\n");
+          _("Logic Definition File Error.\n"));
         
         std::string text = buffer.str(); // text will now contain "Bla\n"
         wxMessageDialog errorwarning(this, 
@@ -1025,11 +1029,10 @@ void MyFrame::loadFile(wxString s)
       }  
       else
       {
-          std::cout << "3. file loaded, " << filePath.ToStdString() << "\n";
         logMessagePanel->AppendText(
           getCurrentTime()+
-          "File loaded from "+
-          s + " successfully.\n");
+          _("File loaded from ")+
+          s + _(" successfully.\n"));
           FileLoaded = 1;
         std::vector<MyChoiceObj> signalList;
 
@@ -1173,9 +1176,8 @@ void MyFrame::loadFile(wxString s)
       filewarning.ShowModal();
     logMessagePanel->AppendText(
       getCurrentTime()+
-      "File does not exist.\n");
+      _("File does not exist.\n"));
   }
-  
 }
 
 int MyFrame::updateCurrentChoice(std::string choiceName, std::vector<MyChoiceObj>* vec)
@@ -1200,11 +1202,21 @@ void MyFrame::runnetwork(int ncycles)
 
   while ((n > 0) && ok) {
     dmz->executedevices (ok);
-    if (ok) {
+    if (ok) 
+    {
       n--;
       mmz->recordsignals ();
-    } else
-      cout << "Error: network is oscillating" << endl;
+    } 
+    else
+    {
+      wxMessageDialog filewarning(this, 
+        _("Network is oscillating" ), 
+        _("Warning"), wxICON_INFORMATION | wxOK);
+        filewarning.ShowModal();
+      logMessagePanel->AppendText(
+        getCurrentTime()+
+        _("Warning: network is oscillating.\n"));
+    }
   }
   if (ok) cyclescompleted = cyclescompleted + ncycles;
   else cyclescompleted = 0;

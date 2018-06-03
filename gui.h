@@ -54,6 +54,20 @@ class MyChoiceObj
   devicekind kind;
 };
 
+static const wxLanguage langID[] =
+{
+    wxLANGUAGE_ENGLISH,
+    wxLANGUAGE_THAI,
+    wxLANGUAGE_CHINESE_SIMPLIFIED
+};
+
+const wxString languages[] =
+{
+    _T("English"),
+    _T("Thai"),
+    _T("Simplified Chinese")
+};
+
 class MyGLCanvas;
 
 class MyFrame: public wxFrame
@@ -68,8 +82,9 @@ class MyFrame: public wxFrame
   monitor *monitor_mod = NULL, 
   network *network_mod = NULL,
 	long style = wxDEFAULT_FRAME_STYLE); // constructor
+  void loadFile(wxString s); 
   wxString filePath;                    // store location of path
-  void loadFile(wxString s);
+  wxLocale locale;
 
  private:
   MyGLCanvas *canvas;   // OpenGL drawing area widget to draw traces

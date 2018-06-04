@@ -11,7 +11,7 @@ bool parser::readin (void)
 	smz->getsymbol(cursym, curid, curnum);
 	// Some file may contain nothing!
 	if(cursym == eofsym){ // prevent segmentation error!
-		error(61);
+		error(deffile_empty);
 		return false;
 	}
 
@@ -23,7 +23,7 @@ bool parser::readin (void)
 			devicelist();
 		}
 		else{
-			error(51);
+			error(dev_key);
 			smz->skipcolon();
 			devicelist();
 		}
@@ -33,7 +33,7 @@ bool parser::readin (void)
 			connectionlist();
 		}
 		else{
-			error(52);
+			error(con_key);
 			smz->skipcolon();
 			connectionlist();
 		}
@@ -43,7 +43,7 @@ bool parser::readin (void)
 			monitorlist();
 		}
 		else{
-			error(53);
+			error(mon_key);
 			smz->skipcolon();
 			monitorlist();
 		}
@@ -57,7 +57,7 @@ bool parser::readin (void)
 	}
 	smz->getsymbol(cursym, curid, curnum);
 	if(cursym != eofsym){
-		error(41);
+		error(after_last_semicol);
 	}
 	if(errorcount == 0){
 		// cout << "0 error dectected" << endl;
@@ -96,15 +96,15 @@ void parser::devicelist()
 		if(cursym == semicol) // good
 			break;
 		else if(cursym == consym){
-			error(1);
+			error(semicol_missing);
 		}
 		else if(cursym == eofsym){
-			error(43);
+			error(deffile_incomplete);
 			return;
 		}
 		else{
 			smz->getsymbol(cursym, curid, curnum);
-			error(42);
+			error(comma_missing);
 		}
 	}
 
@@ -113,7 +113,7 @@ void parser::device() // scan up to ',' or ';'
 {
 	smz->getsymbol(cursym, curid, curnum); // expect SWITCH, CLOCK etc.
 	if(cursym != namesym){
-		error(2);
+		error(device_def);
 		return;
 	}
 	// here cursym == namesym, so curid tells the NAME
@@ -143,7 +143,7 @@ void parser::device() // scan up to ',' or ';'
 	if(!wrongkind)
 		smz->getsymbol(cursym, curid, curnum);
 	else
-		error(2); //a device definition is expected
+		error(device_def); //a device definition is expected
 }
 void parser::switchdev()
 {
@@ -162,29 +162,29 @@ void parser::switchdev()
 					variant = curnum;
 				}
 				else{
-					error(3);
+					error(intial_state);
 				}
 				smz->getsymbol(cursym, curid, curnum);
 				if(cursym != rightbrk){
-					error(4);
+					error(rightbracket);
 				}
 			}
 			else {
-				error(5);
+				error(num_expected);
 			}
 		}
 		else{
-			error(6);
+			error(leftbracket);
 		}
 	}
 	else{
-		error(7);
+		error(equal_expected);
 	}
 	// Up to this stage the switch must have been defiened correctly
 	// So make a call to makedevice
 	dmz->makedevice(dkind, did, variant, ok);
 	if(!ok){
-		error(31);
+		error(make_device);
 	}
 }
 void parser::dtypedev()
@@ -198,13 +198,13 @@ void parser::dtypedev()
 		did = name1();
 	}
 	else{
-		error(7);
+		error(equal_expected);
 	}
 	// Up to this stage the dtype must have been defined correctly
 	// So make a call to makedevice
 	dmz->makedevice(dkind, did, variant, ok);
 	if(!ok){
-		error(31);
+		error(make_device);
 	}
 }
 void parser::xordev()
@@ -218,11 +218,11 @@ void parser::xordev()
 		did = name1();
 	}
 	else{
-		error(7);
+		error(equal_expected);
 	}
 	dmz->makedevice(dkind, did, variant, ok);
 	if(!ok){
-		error(31);
+		error(make_device);
 	}
 }
 void parser::clockdev()
@@ -266,11 +266,11 @@ void parser::notdev()
 		did = name1();
 	}
 	else{
-		error(7);
+		error(equal_expected);
 	}
 	dmz->makedevice(dkind, did, variant, ok);
 	if(!ok){
-		error(31);
+		error(make_device);
 	}
 }
 void parser::dev_name_num(devicekind dkind)
@@ -287,30 +287,30 @@ void parser::dev_name_num(devicekind dkind)
 			if(cursym == numsym){
 
 				if(dkind != aclock && dkind != rccircuit && (curnum > 16 || curnum <=0)){
-					error(12);
+					error(input_num);
 				}
 
 				variant = curnum;
 
 				smz->getsymbol(cursym, curid, curnum);
 				if(cursym != rightbrk){
-					error(4);
+					error(rightbracket);
 				}
 			}
 			else {
-				error(5);
+				error(num_expected);
 			}
 		}
 		else{
-			error(6);
+			error(leftbracket);
 		}
 	}
 	else{
-		error(7);
+		error(equal_expected);
 	}
 	dmz->makedevice(dkind, did, variant, ok);
 	if(!ok){
-		error(31);
+		error(make_device);
 	}
 }
 name parser::name1()
@@ -323,12 +323,12 @@ name parser::name1()
 		devlink finddev = netz->finddevice(curid); // return NULL if not defined yet
 		if(finddev)
 		{
-			semantic(1);
+			semantic(dev_name_existed);
 		}
 		// 2. device names cannot be the same as reserved keyword
 		if(is_name_reserved(curid))
 		{
-			semantic(2);
+			semantic(dev_name_reserved);
 		}
 		/* ------------------------------------- */
 
@@ -336,10 +336,10 @@ name parser::name1()
 		return deviceid;
 	}
 	else if (cursym == devsym || cursym == consym || cursym == monsym){
-		semantic(2);
+		semantic(dev_name_reserved);
 	}
 	else {
-		error(8);
+		error(name_violate);
 	}
 	return -1; // it won't reach this just make warning disappear [error(8) throw error]
 }
@@ -371,14 +371,14 @@ void parser::connectionlist()
 		if (cursym == semicol)
 			break;
 		else if(cursym == monsym)
-			error(1);
+			error(semicol_missing);
 		else if(cursym == eofsym){
-			error(43);
+			error(deffile_incomplete);
 			return;
 		}
 		else{
 			smz->getsymbol(cursym, curid, curnum);
-			error(42);
+			error(comma_missing);
 		}
 	}
 
@@ -387,7 +387,7 @@ void parser::connectionlist()
 	bool ok;
 	netz->checknetwork(ok);
 	if(!ok)
-		semantic(3);
+		semantic(make_conn);
 	/* ------------------------------------- */
 }
 void parser::connection()
@@ -403,10 +403,10 @@ void parser::connection()
 
 		smz->getsymbol(cursym, curid, curnum); // expect '='
 		if(cursym != equals)
-			error(18);
+			error(arrow_sym);
 		smz->getsymbol(cursym, curid, curnum); // expect '>'
 		if(cursym != greaterthan)
-			error(18);
+			error(arrow_sym);
 
 		signalin(inputdev, inputport);
 
@@ -421,7 +421,7 @@ void parser::connection()
 	if(!ok){
 		/* --------- Semantic error #4 --------- */
 		// 4. Portnumber does not exist e.g. gate1.I20
-		semantic(4);
+		semantic(port_num_invalid);
 		/* ------------------------------------- */
 	}
 }
@@ -437,7 +437,7 @@ void parser::signalout(name& dev, name& port)
 		// Invalid device (not defined)
 		if(!dlink)
 		{
-			semantic(5);
+			semantic(dev_not_defined);
 		}
 		/* ------------------------------------- */
 		devicekind dkind = dlink->kind;
@@ -448,14 +448,14 @@ void parser::signalout(name& dev, name& port)
 				dtypeout(port);
 			}
 			else
-				error(14);
+				error(dtype_out);
 		}
 		else {
 			port = blankname;
 		}
 	}
 	else { // if the first symbol when signame() is called is NOT name => error
-		error(20);
+		error(name_missing);
 	}
 }
 void parser::signalin(name& dev, name& port)
@@ -470,7 +470,7 @@ void parser::signalin(name& dev, name& port)
 		// Invalid device (not defined)
 		if(!dlink)
 		{
-			semantic(5);
+			semantic(dev_not_defined);
 		}
 		/* ------------------------------------- */
 		devicekind dkind = dlink->kind;
@@ -481,7 +481,7 @@ void parser::signalin(name& dev, name& port)
 				dtypein(port);
 			}
 			else
-				error(15);
+				error(dtype_in);
 		}
 		else if(dkind == xorgate){
 			smz->getsymbol(cursym, curid, curnum);
@@ -489,7 +489,7 @@ void parser::signalin(name& dev, name& port)
 				gatein(port);
 			}
 			else
-				error(16);
+				error(xor_in);
 		}
 		else if(dkind == andgate || dkind == nandgate || dkind == orgate || dkind == norgate || dkind == notgate){
 			smz->getsymbol(cursym, curid, curnum);
@@ -497,10 +497,10 @@ void parser::signalin(name& dev, name& port)
 				gatein(port);
 			}
 			else
-				error(17);
+				error(gate_in);
 		}
 		else { // CLOCK or SWITCH or RC
-			error(19);
+			error(noinput_expected);
 		}
 
 		/* --------- Semantic error #6 --------- */
@@ -509,13 +509,13 @@ void parser::signalin(name& dev, name& port)
 		outplink conn = ilink->connect;
 		if(conn != NULL)
 		{
-			semantic(6); // throw an error
+			semantic(port_connected); // throw an error
 		}
 		/* ------------------------------------- */
 
 	}
 	else { // if the first symbol when signame() is called is NOT name => error
-		error(20);
+		error(name_missing);
 	}
 }
 void parser::dtypeout(name& port)
@@ -527,7 +527,7 @@ void parser::dtypeout(name& port)
 		port = curid;
 	}
 	else {
-		error(14);
+		error(dtype_out);
 	}
 }
 void parser::dtypein(name& port)
@@ -541,7 +541,7 @@ void parser::dtypein(name& port)
 		port = curid;
 	}
 	else {
-		error(15);
+		error(dtype_in);
 	}
 }
 void parser::gatein(name& port)
@@ -564,7 +564,7 @@ void parser::gatein(name& port)
 	}
 	// if it is not I1, ..., I16
 	// it either fails to follow gatein = ( "I" , number ) or number is too high
-	error(17);
+	error(gate_in);
 }
 
 /* 3. Monitors */
@@ -576,7 +576,7 @@ void parser::monitorlist()
 		monitor1();
 	}
 	if (cursym != semicol)
-		error(1);
+		error(semicol_missing);
 }
 void parser::monitor1()
 {
@@ -596,12 +596,12 @@ void parser::monitor1()
 
 	mmz->makemonitor(devid, outputport, ok);
 	if(!ok){
-		error(33);
+		error(make_monitor);
 	}
 }
 
 /* 4. Error Handling */
-void parser::error(int errn)
+void parser::error(errornumber errn)
 {
 	errorcount++;
 	if(errn <= 50){
@@ -610,80 +610,107 @@ void parser::error(int errn)
 	}
 	switch(errn)
 	{
-		case 0: cout << "undefined error" << endl; break;
-		case 1: cout << "a semicolon is expected before this expression" << endl; break;
-		case 2: cout << "a device definition is wrong" << endl; break;
-		case 3: cout << "Initial state is either 0 or 1" << endl;
-				throw devicedeferror; break;
-		case 4: cout << "expect a ) symbol " << endl;
-				throw devicedeferror; break;
-		case 5: cout << "expect a number symbol" << endl;
-				throw devicedeferror; break;
-		case 6: cout << "expect a ( symbol " << endl;
-				throw devicedeferror; break;
-		case 7: cout << "expect an '=' symbol" << endl;
-				throw devicedeferror; break;
-		case 8: cout << "name error. hint: name must start with a letter or '_'" << endl;
-				throw nameerror; break;
-		case 12: cout << "the maximum number of inputs is 16 and minimum is 1" << endl;
-				throw devicedeferror; break;
-		case 14: cout << "Q or QBAR is expected for dtype output" << endl;
-				throw signalerror; break;
-		case 15: cout << "DATA, CLK, SET, CLEAR is expected for dtype input" << endl;
-				throw signalerror; break;
-		case 16: cout << "XOR input I1 or I2" << endl;
-				throw signalerror; break;
-		case 17: cout << "gate input I1 to I16" << endl;
-				throw signalerror; break;
-		case 18: cout << "expect => after signalout (or apart from dtype no port should be defined.)" << endl;
-				throw signalerror; break;
-		case 19: cout << "invalid input device" << endl;
-				throw signalerror; break;
-		case 20: cout << "name of a device is expected" << endl;
-				throw signalerror; break;
+		case undefined:
+			cout << "undefined error" << endl; break;
+		case semicol_missing:
+			cout << "a semicolon is expected before this expression" << endl; break;
+		case device_def:
+			cout << "a device definition is wrong" << endl; break;
+		case intial_state:
+			cout << "Initial state is either 0 or 1" << endl;
+			throw devicedeferror; break;
+		case rightbracket:
+			cout << "expect a ) symbol " << endl;
+			throw devicedeferror; break;
+		case num_expected:
+			cout << "expect a number symbol" << endl;
+			throw devicedeferror; break;
+		case leftbracket:
+			cout << "expect a ( symbol " << endl;
+			throw devicedeferror; break;
+		case equal_expected:
+			cout << "expect an '=' symbol" << endl;
+			throw devicedeferror; break;
+		case name_violate:
+			cout << "name error. hint: name must start with a letter or '_'" << endl;
+			throw nameerror; break;
+		case input_num:
+			cout << "the maximum number of inputs is 16 and minimum is 1" << endl;
+			throw devicedeferror; break;
+		case dtype_out:
+			cout << "Q or QBAR is expected for dtype output" << endl;
+			throw signalerror; break;
+		case dtype_in:
+			cout << "DATA, CLK, SET, CLEAR is expected for dtype input" << endl;
+			throw signalerror; break;
+		case xor_in:
+			cout << "XOR input I1 or I2" << endl;
+			throw signalerror; break;
+		case gate_in:
+			cout << "gate input I1 to I16" << endl;
+			throw signalerror; break;
+		case arrow_sym:
+			cout << "expect => after signalout (or apart from dtype no port should be defined.)" << endl;
+			throw signalerror; break;
+		case noinput_expected:
+			cout << "CLOCK/SWITCH/RC do not have an input" << endl;
+			throw signalerror; break;
+		case name_missing:
+			cout << "name of a device is expected" << endl;
+			throw signalerror; break;
 
-		case 31: cout << "Makedevice error" << endl; break;
-		case 32: cout << "connection error. hint: 'output => input'" << endl; break;
-		case 33: cout << "monitor error. hint: check the signal" << endl; break;
+		case make_device:
+			cout << "Makedevice error" << endl; break;
+		case make_monitor:
+			cout << "monitor error. hint: check the signal" << endl; break;
 
-		case 41: cout << "Nothing is expected after the last ;" << endl; break;
-		case 42: cout << "a comma is expected before this expression" << endl; break;
-		case 43: cout << "the definition file is not complete" << endl; break;
+		case after_last_semicol:
+			cout << "Nothing is expected after the last ;" << endl; break;
+		case comma_missing:
+			cout << "a comma is expected before this expression" << endl; break;
+		case deffile_incomplete:
+			cout << "the definition file is not complete" << endl; break;
 
-		// Special cases use number above 50
-		case 51: smz->print_line_error(8);
-				cout << "***ERROR 51: 'DEVICES:'' keyword expected" << endl; break;
-		case 52: smz->print_line_error(8);
-				cout << "***ERROR 52: 'CONNECTIONS:'' keyword expected" << endl; break;
-		case 53: smz->print_line_error(8);
-				cout << "***ERROR 53: 'MONITORS:'' keyword expected" << endl; break;
-		case 61: cout << "the file is empty. nothing to parse" << endl; break;
+		// Special cases use number above 50 (enumeration)
+		case dev_key: smz->print_line_error(8);
+			cout << "***ERROR 51: 'DEVICES:'' keyword expected" << endl; break;
+		case con_key: smz->print_line_error(8);
+			cout << "***ERROR 52: 'CONNECTIONS:'' keyword expected" << endl; break;
+		case mon_key: smz->print_line_error(8);
+			cout << "***ERROR 53: 'MONITORS:'' keyword expected" << endl; break;
+		case deffile_empty:
+			cout << "the file is empty. nothing to parse" << endl; break;
 	}
 }
-void parser::semantic(int errn)
+void parser::semantic(semanticnumber errn)
 {
 	errorcount++;
-	if(errn == 3)
+	if(errn == make_conn) // make connection case -> no need to print any line
 		smz->skip_dueto_error(cursym, curid, curnum, false);
 	else
 		smz->skip_dueto_error(cursym, curid, curnum);
 
 	// Semantic error will be shown above 100
-	cout << "***ERROR 10" << errn << ": " ;
+	cout << "***ERROR " << errn << ": " ;
 	switch (errn)
 	{
-		case 1: cout << "device name invalid - two devices cannot have the same name" << endl;
-				throw semanticerror; break;
-		case 2: cout << "device name invalid - cannot use reserved keyword" << endl;
-				throw semanticerror; break;
-		case 3: cout << "CONNTECTIONS: every input should be connected to a (valid) output" << endl;
-				break;
-		case 4: cout << "Portnumber does not exist" << endl;
-				break;
-		case 5: cout << "Invalid device (not defined)" << endl;
-				throw semanticerror; break;
-		case 6: cout << "This input port is already connected" << endl;
-				throw semanticerror; break;
-
+		case dev_name_existed:
+			cout << "device name invalid - two devices cannot have the same name" << endl;
+			throw semanticerror; break;
+		case dev_name_reserved:
+			cout << "device name invalid - cannot use reserved keyword" << endl;
+			throw semanticerror; break;
+		case make_conn:
+			cout << "CONNECTIONS: every input should be connected to a (valid) output" << endl;
+			break;
+		case port_num_invalid:
+			cout << "Portnumber does not exist" << endl;
+			break;
+		case dev_not_defined:
+			cout << "Invalid device (not defined)" << endl;
+			throw semanticerror; break;
+		case port_connected:
+			cout << "This input port is already connected" << endl;
+			throw semanticerror; break;
 	}
 }

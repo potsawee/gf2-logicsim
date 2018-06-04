@@ -29,6 +29,7 @@ typedef enum
     equal_expected      = 7, // = missing
     name_violate        = 8, // name violates the grammar
     input_num           = 12, // gate expected 1 to 16 to be number of input
+    notgate_in          = 13, // not gate input should be not.I
     dtype_out           = 14, // dtype output wrong
     dtype_in            = 15, // dtype input wrong
     xor_in              = 16, // xor input either I1 or I2
@@ -100,7 +101,7 @@ private:
     void signalin(name& dev, name& port);
     void dtypeout(name& port);
     void dtypein(name& port);
-    void gatein(name& port);
+    void gatein(name& port, devicekind dkind);
 
     /* 3. Monitors */
     void monitorlist();

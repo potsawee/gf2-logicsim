@@ -486,7 +486,7 @@ void parser::signalin(name& dev, name& port)
 		else if(dkind == xorgate){
 			smz->getsymbol(cursym, curid, curnum);
 			if(cursym == fullstop){
-				gatein(port);
+				gatein(port, dkind);
 			}
 			else
 				error(xor_in);
@@ -494,7 +494,7 @@ void parser::signalin(name& dev, name& port)
 		else if(dkind == andgate || dkind == nandgate || dkind == orgate || dkind == norgate || dkind == notgate){
 			smz->getsymbol(cursym, curid, curnum);
 			if(cursym == fullstop){
-				gatein(port);
+				gatein(port, dkind);
 			}
 			else
 				error(gate_in);
@@ -544,27 +544,41 @@ void parser::dtypein(name& port)
 		error(dtype_in);
 	}
 }
-void parser::gatein(name& port)
+void parser::gatein(name& port, devicekind dkind)
 {
 	/* Improve->check is the port is valid */
 	// gatein = ( "I" , number )
 	smz->getsymbol(cursym, curid, curnum);
-	if(nmz->lookup("I") == curid){
-		// this is for not gate
-		port = curid;
-		return;
-	}
-	for(int i=1; i<=16; i++){
-		string s = "I" + to_string(i);
-		name checkid = nmz->lookup(s);
-		if(checkid == curid){
+	if(dkind == notgate){ // Not gate input e.g. notgate.I
+		if(nmz->lookup("I") == curid){
+			// this is for not gate
 			port = curid;
 			return;
 		}
+		error(notgate_in);
 	}
-	// if it is not I1, ..., I16
-	// it either fails to follow gatein = ( "I" , number ) or number is too high
-	error(gate_in);
+	else if(dkind == xorgate){ // XOR gate always have input I1, I2
+		for(int i=1; i<=2; i++){
+			string s = "I" + to_string(i);
+			name checkid = nmz->lookup(s);
+			if(checkid == curid){
+				port = curid;
+				return;
+			}
+		}
+		error(xor_in);
+	}
+	else{ // the rest of the gates can have up to 16 inputs
+		for(int i=1; i<=16; i++){
+			string s = "I" + to_string(i);
+			name checkid = nmz->lookup(s);
+			if(checkid == curid){
+				port = curid;
+				return;
+			}
+		}
+		error(gate_in);
+	}
 }
 
 /* 3. Monitors */
@@ -637,6 +651,9 @@ void parser::error(errornumber errn)
 		case input_num:
 			cout << "the maximum number of inputs is 16 and minimum is 1" << endl;
 			throw devicedeferror; break;
+		case notgate_in:
+			cout << "not gate can only have one input so call it not.I (no number after I)" << endl;
+			throw signalerror; break;
 		case dtype_out:
 			cout << "Q or QBAR is expected for dtype output" << endl;
 			throw signalerror; break;

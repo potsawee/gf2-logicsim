@@ -134,19 +134,29 @@ void devices::makegate (devicekind dkind, name did, int ninputs, bool& ok)
   devlink d;
   int n;
   namestring iname;
-  ok = (ninputs <= maxinputs);
+  ok = (ninputs <= maxinputs && ninputs > 0);
   if (ok) {
     netz->adddevice (dkind, did, d);
     netz->addoutput (d, blankname);
-    for (n = 1; n <= ninputs; n++) {
-      iname = "I";
-      if (n < 10) {
-	iname += ((char) n) + '0';
-      } else {
-	iname += ((char) (n / 10)) + '0';
-	iname += ((char) (n % 10)) + '0';
-      }
-      netz->addinput (d, nmz->lookup (iname));
+    if(dkind == notgate){
+        // NOT gate always has just one input
+        // we call this I e.g. notgate.I
+        // to distinguish from its output
+        // which is just notgate without dot
+        iname = "I";
+        netz->addinput (d, nmz->lookup (iname));
+    }
+    else{
+        for (n = 1; n <= ninputs; n++) {
+          iname = "I";
+          if (n < 10) {
+    	iname += ((char) n) + '0';
+          } else {
+    	iname += ((char) (n / 10)) + '0';
+    	iname += ((char) (n % 10)) + '0';
+          }
+          netz->addinput (d, nmz->lookup (iname));
+        }
     }
   }
 }

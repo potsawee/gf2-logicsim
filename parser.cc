@@ -491,7 +491,7 @@ void parser::signalin(name& dev, name& port)
 			else
 				error(16);
 		}
-		else if(dkind == andgate || dkind == nandgate || dkind == orgate || dkind == norgate){
+		else if(dkind == andgate || dkind == nandgate || dkind == orgate || dkind == norgate || dkind == notgate){
 			smz->getsymbol(cursym, curid, curnum);
 			if(cursym == fullstop){
 				gatein(port);
@@ -499,7 +499,7 @@ void parser::signalin(name& dev, name& port)
 			else
 				error(17);
 		}
-		else { // CLOCK or SWITCH
+		else { // CLOCK or SWITCH or RC
 			error(19);
 		}
 
@@ -549,6 +549,11 @@ void parser::gatein(name& port)
 	/* Improve->check is the port is valid */
 	// gatein = ( "I" , number )
 	smz->getsymbol(cursym, curid, curnum);
+	if(nmz->lookup("I") == curid){
+		// this is for not gate
+		port = curid;
+		return;
+	}
 	for(int i=1; i<=16; i++){
 		string s = "I" + to_string(i);
 		name checkid = nmz->lookup(s);

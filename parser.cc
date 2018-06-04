@@ -93,8 +93,10 @@ void parser::devicelist()
 		else if(cursym == consym){
 			error(1);
 		}
-		else if(cursym == eofsym)
+		else if(cursym == eofsym){
 			error(43);
+			return;
+		}
 		else{
 			smz->getsymbol(cursym, curid, curnum);
 			error(42);
@@ -365,8 +367,10 @@ void parser::connectionlist()
 			break;
 		else if(cursym == monsym)
 			error(1);
-		else if(cursym == eofsym)
+		else if(cursym == eofsym){
 			error(43);
+			return;
+		}
 		else{
 			smz->getsymbol(cursym, curid, curnum);
 			error(42);

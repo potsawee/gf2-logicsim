@@ -9,6 +9,11 @@ bool parser::readin (void)
 	// return true if definition file parsed OK
 
 	smz->getsymbol(cursym, curid, curnum);
+	// Some file may contain nothing!
+	if(cursym == eofsym){ // prevent segmentation error!
+		error(61);
+		return false;
+	}
 
 	/* Syntax error detection */
 	/* Semantic error detection */
@@ -639,6 +644,7 @@ void parser::error(int errn)
 		case 41: cout << "Nothing is expected after the last ;" << endl; break;
 		case 42: cout << "a comma is expected before this expression" << endl; break;
 		case 43: cout << "the definition file is not complete" << endl; break;
+
 		// Special cases use number above 50
 		case 51: smz->print_line_error(8);
 				cout << "***ERROR 51: 'DEVICES:'' keyword expected" << endl; break;
@@ -646,7 +652,7 @@ void parser::error(int errn)
 				cout << "***ERROR 52: 'CONNECTIONS:'' keyword expected" << endl; break;
 		case 53: smz->print_line_error(8);
 				cout << "***ERROR 53: 'MONITORS:'' keyword expected" << endl; break;
-
+		case 61: cout << "the file is empty. nothing to parse" << endl; break;
 	}
 }
 void parser::semantic(int errn)

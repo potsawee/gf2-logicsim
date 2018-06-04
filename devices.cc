@@ -432,6 +432,7 @@ void devices::initdevices (void)
     //TODO: Add RC (DONE)
     else if (d->kind == rccircuit){
       d->olist->sig = high;
+      d->counter = 0;
     }
   }
 }
@@ -452,6 +453,9 @@ void devices::executedevices (bool& ok)
   if (debugging)
     cout << "Start of execution cycle" << endl;
   updateclocks ();
+  
+  updaterccircuit();
+	
   machinecycle = 0;
   do {
     machinecycle++;
@@ -550,4 +554,5 @@ devices::devices (names* names_mod, network* net_mod)
   clrpin  = nmz->lookup("CLEAR");
   qpin    = nmz->lookup("Q");
   qbarpin = nmz->lookup("QBAR");
+
 }

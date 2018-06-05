@@ -54,20 +54,6 @@ class MyChoiceObj
   devicekind kind;
 };
 
-static const wxLanguage langID[] =
-{
-    wxLANGUAGE_ENGLISH,
-    wxLANGUAGE_THAI,
-    wxLANGUAGE_CHINESE_SIMPLIFIED
-};
-
-const wxString languages[] =
-{
-    _T("English"),
-    _T("Thai"),
-    _T("Simplified Chinese")
-};
-
 class MyGLCanvas;
 
 class MyFrame: public wxFrame

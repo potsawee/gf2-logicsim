@@ -371,21 +371,16 @@ MyFrame::MyFrame(wxWindow *parent,
   netz = network_mod;
 
   // detect the system locale and use the corresponding language
-  locale.Init()
-    wxLocale::AddCatalogLookupPathPrefix(wxT("."));
-    locale.AddCatalog(wxT("gui"));
-
-  wxLANGUAGE currentLanguage = wxLocale::GetLanguage();
-  if((currentLanguage != wxLANGUAGE_CHINESE_SIMPLIFIED)||(currentLanguage != wxLANGUAGE_THAI))
-  {
-    wxMessageDialog warning(
-      this, 
-      _("The language chosen is not supported. Default language, English, is used instead."), 
-      _("Warning"), 
-      wxICON_INFORMATION | wxOK);
-    warning.ShowModal();
-  }
-
+  locale.Init();
+  int currentLanguage = wxLocale::GetSystemLanguage();
+	if((currentLanguage==wxLANGUAGE_THAI)||
+	(currentLanguage==wxLANGUAGE_CHINESE_SIMPLIFIED)||
+	(currentLanguage==wxLANGUAGE_CHINESE))
+	{
+		wxLocale::AddCatalogLookupPathPrefix(wxT("."));
+		locale.AddCatalog(wxT("gui"));
+	}
+	
   if (nmz == NULL || dmz == NULL || mmz == NULL|| netz == NULL) {
     cout << "Cannot operate GUI without names, devices, monitor, or network classes" << endl;
     exit(1);

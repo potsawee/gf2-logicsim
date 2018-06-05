@@ -66,7 +66,7 @@ bool MyApp::OnInit()
 	  }
 	  std::cout << "Usage:    " << argv[0] << "                to invoke GUI." << endl;
 	  std::cout << "Usage:    " << argv[0] << " [filename],    to invoke GUI with [filename loaded]" << endl;
-	  std::cout << "Usage:    " << argv[0] << " [filename] -u, to invoke command user interface." << endl;
+	  std::cout << "Usage:    " << argv[0] << " [filename] -c, to invoke command user interface." << endl;
   }
   return(false); // enter the GUI event loop
 #else

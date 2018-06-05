@@ -1029,20 +1029,12 @@ void MyFrame::loadFile(wxString s)
     // todo: maybe not necessary to pass them as arguments?
       smz = new scanner(nmz, filePath);
       pmz = new parser(netz, dmz, mmz, smz, nmz);
-      std::streambuf * old = std::cout.rdbuf(buffer.rdbuf());
       if(!(pmz->readin()))
       {// check if the definition file is valid
         logMessagePanel->AppendText(
           getCurrentTime()+
           _("Logic Definition File Error.\n"));
         
-        std::string text = buffer.str(); // text will now contain "Bla\n"
-        wxMessageDialog errorwarning(this, 
-          _(text), 
-          _("Definition File Error"), wxICON_INFORMATION | wxOK);
-
-        errorwarning.ShowModal();
-          
           // /* --- Open gedit to edit to file --- */
           // string str = "gedit " + filePath.ToStdString();
           // const char *command = str.c_str();

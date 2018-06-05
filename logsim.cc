@@ -33,13 +33,35 @@ bool MyApp::OnInit()
     wxDefaultPosition,  
     wxSize(800, 600), 
     nmz, dmz, mmz, netz);
-  frame->Show(true);
-  if(argc==2)
+    if((argc==1)||(argc==2))
+    {
+      frame->Show(true);
+	  if(argc==2)
+	  {
+		frame->filePath = wxString(argv[1]);
+		frame->loadFile(wxString(argv[1]));
+	  }
+	  return(true); 
+	}
+  else if ((argc==3)&&(argv[2]=="-u"))
   {
-    frame->filePath = wxString(argv[1]);
-    frame->loadFile(wxString(argv[1]));
+	  std::cout << "Command line user interface is invoked.\n";
+	  smz = new scanner(nmz, wxString(argv[1]).mb_str());
+	  pmz = new parser(netz, dmz, mmz, smz, nmz);
+	  if (pmz->readin ()) { // check the logic file parsed correctly
+		// Construct the text-based interface
+		userint umz(nmz, dmz, mmz);
+		umz.userinterface();	
+	}  
   }
-  return(true); // enter the GUI event loop
+  else
+  {
+	  std::cout << "Too many arguments\n";
+	  std::cout << "Usage:    " << argv[0] << "                to invoke GUI." << endl;
+	  std::cout << "Usage:    " << argv[0] << " [filename],    to invoke GUI with [filename loaded]" << endl;
+	  std::cout << "Usage:    " << argv[0] << " [filename] -u, to invoke command user interface." << endl;
+  }
+  return(false); // enter the GUI event loop
 #else
   if (argc != 2) { // check we have one command line argument
     wcout << "Usage:      " << argv[0] << " [filename]" << endl;

@@ -689,12 +689,12 @@ void parser::error(errornumber errn)
 			cout << "the definition file is not complete" << endl; break;
 
 		// Special cases use number above 50 (enumeration)
-		case dev_key: smz->print_line_error(8);
+		case dev_key: smz->print_line_error(-1);
 			cout << "***ERROR 51: 'DEVICES:'' keyword expected" << endl; break;
-		case con_key: smz->print_line_error(8);
-			cout << "***ERROR 52: 'CONNECTIONS:'' keyword expected" << endl; break;
-		case mon_key: smz->print_line_error(8);
-			cout << "***ERROR 53: 'MONITORS:'' keyword expected" << endl; break;
+		case con_key: smz->print_line_error(-1);
+			cout << "***ERROR 52: 'CONNECTIONS:'' keyword expected after ; (i.e. after end of devices)" << endl; break;
+		case mon_key: smz->print_line_error(-1);
+			cout << "***ERROR 53: 'MONITORS:'' keyword expected after ; (i.e. after end of connections)" << endl; break;
 		case deffile_empty:
 			cout << "the file is empty. nothing to parse" << endl; break;
 	}

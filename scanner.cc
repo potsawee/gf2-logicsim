@@ -270,7 +270,8 @@ void scanner::print_line_error(int n)
 
 	cout << "In line " << (linenum+1) << ": " << lines[linenum] << endl;
 	int x = int((linenum+1) / 10); // to account for line1 and line10, line100 etc.
-	cout << string(9 + x , ' ') << string(n, ' ') << "^" << endl;
+	if(n>=0)
+		cout << string(9 + x , ' ') << string(n, ' ') << "^" << endl;
 }
 
 // Functions for unit testing

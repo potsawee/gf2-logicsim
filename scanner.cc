@@ -233,7 +233,11 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 		}
 		inf.seekg(curposition);
 		//cout << "counter = " << counter << endl;
-		int position = lines[linenum].size() - counter;
+		int position;
+		if(linenum >= lines.size())
+			position = 0;
+		else
+			position = lines[linenum].size() - counter;
 		/* --------------------------------------------------------- */
 		print_line_error(position);
 

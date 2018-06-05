@@ -70,7 +70,7 @@ class MyFrame: public wxFrame
 	long style = wxDEFAULT_FRAME_STYLE); // constructor
   void loadFile(wxString s); 
   wxString filePath;                    // store location of path
-  wxLocale locale;
+  wxLocale locale;                      // the locale object used for language environment controlling
 
  private:
   MyGLCanvas *canvas;   // OpenGL drawing area widget to draw traces
@@ -81,8 +81,6 @@ class MyFrame: public wxFrame
   network *netz;        // pointer to network class
   scanner *smz;         // pointer to scanner class
   parser *pmz;          // pointer to parser class
-
-  //~ wxScrolledWindow* scrolledWindow;     // pointer to the scrolled window, used for displaying signals
 
   wxTextCtrl *logMessagePanel;          // pointer to the text box for displaying logging message
   wxTextCtrl *filePathBox;              // pointer to the text box for entering logic definition file path
@@ -108,7 +106,6 @@ class MyFrame: public wxFrame
   void OnAbout(wxCommandEvent& event);      // event handler for about menu item
   void OnOpen(wxCommandEvent &event);       // event handler for open menu item
   void OnHelp(wxCommandEvent &event);       // event handler for help menu item
-  // void OnSave(wxCommandEvent &event);
   void OnButtonRUN(wxCommandEvent& event);      // event handler for push button
   void OnButtonQUIT(wxCommandEvent& event);     // event handler for reset button
   void OnButtonCONTINUE(wxCommandEvent& event); // event handler for continue button
@@ -189,6 +186,6 @@ class MyGLCanvas: public wxGLCanvas
   DECLARE_EVENT_TABLE()
 };
 
-std::string getCurrentTime();
-// void sortObjVec();
+std::string getCurrentTime();       // function to return current time as a string
+
 #endif /* gui_h */

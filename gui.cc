@@ -371,123 +371,86 @@ MyFrame::MyFrame(wxWindow *parent,
   netz = network_mod;
 
   // detect the system locale and use the corresponding language
+  // only English, Thai and Chinese are fully supported by our software
   locale.Init();
-  int currentLanguage = wxLocale::GetSystemLanguage();
-	if((currentLanguage==wxLANGUAGE_THAI)||
-	(currentLanguage==wxLANGUAGE_CHINESE_SIMPLIFIED)||
-	(currentLanguage==wxLANGUAGE_CHINESE))
-	{
-		wxLocale::AddCatalogLookupPathPrefix(wxT("."));
-		locale.AddCatalog(wxT("gui"));
-	}
+  wxLocale::AddCatalogLookupPathPrefix(wxT("."));
+  locale.AddCatalog(wxT("gui"));
 	
   if (nmz == NULL || dmz == NULL || mmz == NULL|| netz == NULL) {
     cout << "Cannot operate GUI without names, devices, monitor, or network classes" << endl;
     exit(1);
   }
-  // Menu bar
+
+  // Menu bar ///////////////////////////////////////////////////////////////////////////////////////
   wxMenu *fileMenu = new wxMenu;
-  // About is under guitest menu on mac
-  // exit is under guitest menu by default
   fileMenu->Append(wxID_OPEN, _("&Open"));
   fileMenu->Append(wxID_HELP, _("&Help"));
   fileMenu->Append(wxID_ABOUT, _("&About"));
   fileMenu->Append(wxID_EXIT, _("&Quit"));
-
-  // The following behave normally
-  // refer to wxStandardID
-  // fileMenu->Append(wxID_NEW, "&New");
-  // fileMenu->Append(wxID_SAVE, "&Save");
-
-  // wxMenu *editMenu = new wxMenu;
-  // editMenu->Append(wxID_UNDO, "&Undo");
-  // editMenu->Append(wxID_REDO, "&Redo");
-  
   wxMenuBar *menuBar = new wxMenuBar;
   menuBar->Append(fileMenu, _("&File"));
-  // menuBar->Append(editMenu, "&Edit");
   SetMenuBar(menuBar);
 
-  // main window
-  wxBoxSizer *overallSizer = new wxBoxSizer(wxVERTICAL);
-  wxBoxSizer *filePathSizer = new wxBoxSizer(wxHORIZONTAL);
+  // main window ////////////////////////////////////////////////////////////////////////////////////
+  wxBoxSizer *overallSizer = new wxBoxSizer(wxVERTICAL);      // the overall layout of items will be vertical
+  wxBoxSizer *filePathSizer = new wxBoxSizer(wxHORIZONTAL);   // sizer containing items related to file selection
+  wxBoxSizer *bottomRightSizer = new wxBoxSizer(wxVERTICAL);  // sizer containing items related to configuration and operation
+  wxBoxSizer *bottomSizer = new wxBoxSizer(wxHORIZONTAL);     // sizer containing items related to everything below the filepath box
+  
   filePathSizer->Add(
-    new wxButton(this, MY_BUTTON_LOAD, _("Load")), 
+    new wxButton(this, MY_BUTTON_LOAD, _("Load")), // load button
     0, 
     wxALL, 
     10);
-
   filePathSizer->Add(
-    new wxButton(this, MY_BUTTON_BROWSE, _("Browse")), 
+    new wxButton(this, MY_BUTTON_BROWSE, _("Browse")), // browse button
     0, 
     wxALL, 
     10);
+	filePathBox = new wxTextCtrl( // text box for entering and displaying filepath
+    this, 
+    MY_TEXTCTRL_FILEPATH, 
+    "", 
+    wxDefaultPosition, 
+    wxSize(10000, -1), 
+    wxTE_PROCESS_ENTER);
+  filePathSizer->Add(filePathBox, 0, wxEXPAND | wxALL, 10);
+  // end of filePathSizer
 
-	filePathBox = new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(10000, -1), wxTE_PROCESS_ENTER);
-  filePathSizer->Add(
-    filePathBox, 
-    0, 
-    wxEXPAND | wxALL, 
-    10);
-    
-  int* x,y;
-  wxSize s;
-  wxBoxSizer *bottomSizer = new wxBoxSizer(wxHORIZONTAL);
-
-  wxBoxSizer *displaySizer = new wxBoxSizer(wxVERTICAL);
-
-	//~ scrolledWindow = new wxScrolledWindow(this, -1, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxHSCROLL|wxVSCROLL);
-  //~ displaySizer->Add(scrolledWindow, 1, wxEXPAND|wxALL, 10);
-  //~ wxBoxSizer *swinSizer = new wxBoxSizer(wxVERTICAL);
-	//~ scrolledWindow->SetAutoLayout(true);
-  //~ scrolledWindow->SetMinSize(wxSize(2000, 500));
-	//~ scrolledWindow->SetScrollbars(30, 30, 120, 60);
-  canvas = new MyGLCanvas(
+  wxBoxSizer *displaySizer = new wxBoxSizer(wxVERTICAL);  // sizer containing items related to the canvas and the log message box
+  canvas = new MyGLCanvas(    // canvas will be used to draw the signal
     this, 
     wxID_ANY, 
     monitor_mod, 
     names_mod, 
     wxDefaultPosition, 
     wxDefaultSize);
-  // displaySizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
-    //~ swinSizer->Add(canvas, 1, wxRIGHT|wxBOTTOM|wxEXPAND, 20);
-	//~ scrolledWindow->SetSizer(swinSizer);
-  // scrolledWindow->GetVirtualSize(&x, &y);
-  // std::cout << x << "   "<< y << "\n";
-
   displaySizer->Add(canvas, 1, wxEXPAND|wxALL, 10);
   displaySizer->Add(
-    new wxStaticText(this, wxID_ANY, _("Log Activity")), 
+    new wxStaticText(this, wxID_ANY, _("Log Activity")),  // text message describing the log message box
     0, 
     wxTOP|wxLEFT|wxRIGHT, 
     10);
-
-  logMessagePanel = new wxTextCtrl(this, 
+  
+  logMessagePanel = new wxTextCtrl(this,  // logMessagePanel will be used for displaying log messages
       MY_TEXTCTRL_LOG, 
       "", 
       wxDefaultPosition, 
       wxSize(2000, 100), 
       wxTE_MULTILINE|wxTE_READONLY|wxALL);
-
-  wxBoxSizer *textSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer *textSizer = new wxBoxSizer(wxHORIZONTAL);   // this sizer forces the log message box to expand horizontal only
   textSizer->Add(logMessagePanel, 1, wxEXPAND);
-
   displaySizer->Add(
     textSizer,
     0,
     wxEXPAND|wxALL,
     10);
+  // end of the displaySizer
 
-  bottomSizer->Add(displaySizer, 1, wxEXPAND);
   
-  //bottom-right config-op panel
-  wxBoxSizer *bottomRightSizer = new wxBoxSizer(wxVERTICAL);
-
-  // configuration sizer
-  wxStaticBoxSizer *configSizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Configuration"));
-  // switch sizers
-  wxStaticBoxSizer *switchSizer = new wxStaticBoxSizer(wxHORIZONTAL, configSizer->GetStaticBox(), _("Switches"));
-  switchChoice = new wxChoice(
+  wxStaticBoxSizer *configSizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Configuration")); // sizer containing configuration items
+  wxStaticBoxSizer *switchSizer = new wxStaticBoxSizer(wxHORIZONTAL, configSizer->GetStaticBox(), _("Switches")); // sizer used to group switches together
+  switchChoice = new wxChoice(  // this choice list contains all switches available
     switchSizer->GetStaticBox(), 
     MY_CHOICE_LIST_SWITCHES, 
     wxDefaultPosition,
@@ -498,18 +461,18 @@ MyFrame::MyFrame(wxWindow *parent,
     wxDefaultValidator,
     "Switches");
   switchSizer->Add(switchChoice, 0, wxALL, 5);
-  wxStaticBoxSizer *switchStateSizer = new wxStaticBoxSizer(wxHORIZONTAL, switchSizer->GetStaticBox(), _("Switch State"));
-  switchState0 = new wxCheckBox(switchStateSizer->GetStaticBox(), MY_CHECKBOX_0, "0");
-  switchState1 = new wxCheckBox(switchStateSizer->GetStaticBox(), MY_CHECKBOX_1, "1");
+
+  wxStaticBoxSizer *switchStateSizer = new wxStaticBoxSizer(wxHORIZONTAL, switchSizer->GetStaticBox(), _("Switch State")); // sizer sued to group switch status check boxes
+  switchState0 = new wxCheckBox(switchStateSizer->GetStaticBox(), MY_CHECKBOX_0, "0");  // check box 0
+  switchState1 = new wxCheckBox(switchStateSizer->GetStaticBox(), MY_CHECKBOX_1, "1");  // check box 1
   switchStateSizer->Add(switchState0, 0, wxALL, 5);
   switchStateSizer->Add(switchState1, 0, wxALL, 5);
   switchSizer->Add(switchStateSizer, 0, wxALIGN_TOP);
 
-  // monitor sizers
-  wxStaticBoxSizer *monitorCtrlSizer = new wxStaticBoxSizer(wxVERTICAL, configSizer->GetStaticBox(), _("Monitors"));
-  wxBoxSizer *monitorSetSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxBoxSizer *monitorZapSizer = new wxBoxSizer(wxHORIZONTAL);
-  monitorSet = new wxChoice(
+  wxStaticBoxSizer *monitorCtrlSizer = new wxStaticBoxSizer(wxVERTICAL, configSizer->GetStaticBox(), _("Monitors")); // sizer containing items related to monitor settings
+  wxBoxSizer *monitorSetSizer = new wxBoxSizer(wxHORIZONTAL); // sizer grouping items related to setting monitors
+  wxBoxSizer *monitorZapSizer = new wxBoxSizer(wxHORIZONTAL); // sizer grouping items related to zapping monitors
+  monitorSet = new wxChoice(  // choice list showing all monitors to set
     monitorCtrlSizer->GetStaticBox(), 
     MY_CHOICE_MONITOR_SET,
     wxDefaultPosition,
@@ -520,8 +483,8 @@ MyFrame::MyFrame(wxWindow *parent,
     wxDefaultValidator,
     "Set Monitors");
   monitorSetSizer->Add(monitorSet, 0, wxALL, 5);
-  monitorSetSizer->Add(new wxButton(monitorCtrlSizer->GetStaticBox(), MY_BUTTON_SET, _("Set")), 0, wxALL, 10);
-  monitorZap = new wxChoice(
+  monitorSetSizer->Add(new wxButton(monitorCtrlSizer->GetStaticBox(), MY_BUTTON_SET, _("Set")), 0, wxALL, 10);  // set button
+  monitorZap = new wxChoice(  // choice list showing all monitors to zap
     monitorCtrlSizer->GetStaticBox(), 
     MY_CHOICE_MONITOR_ZAP,
     wxDefaultPosition,
@@ -532,16 +495,15 @@ MyFrame::MyFrame(wxWindow *parent,
     wxDefaultValidator,
     "Zap Monitors");
   monitorZapSizer->Add(monitorZap, 0, wxALL, 5);
-  monitorZapSizer->Add(new wxButton(monitorCtrlSizer->GetStaticBox(), MY_BUTTON_ZAP, _("Zap")), 0, wxALL, 10);
+  monitorZapSizer->Add(new wxButton(monitorCtrlSizer->GetStaticBox(), MY_BUTTON_ZAP, _("Zap")), 0, wxALL, 10);  // zap button
   monitorCtrlSizer->Add(monitorSetSizer, 0, wxALIGN_LEFT);
   monitorCtrlSizer->Add(monitorZapSizer, 0, wxALIGN_LEFT);
 
   configSizer->Add(switchSizer, 0, wxALIGN_TOP|wxALIGN_LEFT);
   configSizer->Add(monitorCtrlSizer, 0, wxALIGN_TOP|wxALIGN_LEFT);
-  // end of configuration sizer
+  // end of configSizer
 
-  // opration sizer
-  wxStaticBoxSizer *opSizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Operations"));
+  wxStaticBoxSizer *opSizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Operations"));  // sizer containing items related to the operation of the software
   wxBoxSizer *buttonSizer1 = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer *buttonSizer2 = new wxBoxSizer(wxHORIZONTAL);
   opSizer->Add(new wxStaticText(opSizer->GetStaticBox(), wxID_ANY, _("No. of Clock Cycles")), 0, wxTOP|wxLEFT|wxRIGHT, 10);
@@ -554,22 +516,21 @@ MyFrame::MyFrame(wxWindow *parent,
   buttonSizer2->Add(new wxButton(opSizer->GetStaticBox(), MY_BUTTON_QUIT, _("Quit")), 0, wxALL, 10);
   opSizer->Add(buttonSizer1, 0 , wxALL, 10);
   opSizer->Add(buttonSizer2, 0 , wxALL, 10);
-  // end of operation sizer
+  // end of opSizer
 
   bottomRightSizer->Add(configSizer, 0, wxALL, 10);
   bottomRightSizer->Add(opSizer, 0, wxALL, 10);
+  bottomSizer->Add(displaySizer, 1, wxEXPAND);
   bottomSizer->Add(bottomRightSizer, 0, wxALIGN_TOP);
   overallSizer->Add(filePathSizer, 0, wxALIGN_LEFT);
   overallSizer->Add(bottomSizer, 1, wxALIGN_LEFT);
 
-  // the top level window should not shrink below this size
-  SetSizeHints(1000, 1000);
-  //~ SetMaxSize(wxSize(800, 700));
+  SetSizeHints(1000, 1000);   // set the minimum size of the main window to be 1000*1000
   SetSizer(overallSizer);
 }
 
- void MyFrame::OnOpen(wxCommandEvent &event)
-   // Event handler for the about menu item
+// Event handler for the 'Open' menu item
+void MyFrame::OnOpen(wxCommandEvent &event)
  {
     wxFileDialog openFileDialog(
       NULL, 
@@ -584,8 +545,8 @@ MyFrame::MyFrame(wxWindow *parent,
   filePathBox->SetValue(filePath);
  }
 
+// Event handler for the 'About' menu item
 void MyFrame::OnAbout(wxCommandEvent &event)
-  // Event handler for the about menu item
 {
   wxMessageDialog about(
     this, 
@@ -595,8 +556,8 @@ void MyFrame::OnAbout(wxCommandEvent &event)
   about.ShowModal();
 }
 
+// Event handler for the 'Help' menu item
 void MyFrame::OnHelp(wxCommandEvent &event)
-  // Event handler for the about menu item
 {
   wxMessageDialog about(
     this, 
@@ -606,35 +567,29 @@ void MyFrame::OnHelp(wxCommandEvent &event)
   about.ShowModal();
 }
 
+// Event handler for the 'Run' button
 void MyFrame::OnButtonRUN(wxCommandEvent &event)
-  // Event handler for the push button
 {
   if(FileLoaded)
   {
-    IsStarted = 1;
+    IsStarted = 1; 
     int n, ncycles;
-    //~ canvas->SetSize(wxSize(500, 600));
     cyclescompleted = 0;
+    // reinitialise device and monitor classes
     dmz->initdevices ();
     mmz->resetmonitor ();
     ncycles = spin->GetValue();
+    // reset the canvas to default status
    	canvas->SetDefault(mmz, nmz);
-	canvas->Refresh();
-    // todo: change 20 to signal size, scale according to the number of monitors accordingly
-    //~ if((ncycles+cyclescompleted)*20+250>500)
-    //~ {
-    //~ int x, y;
-    //~ scrolledWindow->GetViewStart(&x, &y);
-      //~ canvas->SetSize((ncycles+cyclescompleted)*20+250, 600);
-      //~ scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+15, 20);
-      //~ scrolledWindow->Scroll(x, y);
-    //~ }
+	  canvas->Refresh();
+    // run the network
     runnetwork(ncycles);
-    canvas->Render("Run button pressed", cyclescompleted);
+    // log the event
     logMessagePanel->AppendText(getCurrentTime()+_("Start running.\n"));
   }
   else
   {
+    // dialogue box asking for a defination file before running
     wxMessageDialog opwarning(this, 
       _("Please load a file before running."), 
       _("Warning"), wxOK|wxICON_INFORMATION);    
@@ -642,8 +597,8 @@ void MyFrame::OnButtonRUN(wxCommandEvent &event)
   }
 }
 
+// Event handler for the 'Quit' button
 void MyFrame::OnButtonQUIT(wxCommandEvent &event)
-  // Event handler for the push button
 {
   wxMessageDialog monitorwarning(this, 
     _("Are you sure you want to quit the programme?"), 
@@ -654,18 +609,16 @@ void MyFrame::OnButtonQUIT(wxCommandEvent &event)
   }
 }
 
+// Event handler for the 'Stop' button
 void MyFrame::OnButtonSTOP(wxCommandEvent &event)
 {
   mmz->resetmonitor();
   canvas->SetDefault(mmz, nmz);
-  //~ canvas->SetSize(wxSize(1200, 600));
-  //~ scrolledWindow->Scroll(0, 0);
-  //~ scrolledWindow->SetScrollbars(20, 20, 60, 30);
   IsStarted = 0;
   canvas->Refresh();
-  // FileLoaded = 0;
 }
 
+// Event handler for the 'Continue' button
 void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
 {
   if(FileLoaded)
@@ -676,24 +629,14 @@ void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
       if(cyclescompleted>0)
       {
         if(ncycles+cyclescompleted > maxcycles)
-        {
+        { // limit the total number of cycles run within 50, according to maxcycles defined in the monitor class provided
           ncycles = maxcycles-cyclescompleted;
           wxMessageDialog runwarning(this, 
           _("Maximum number of cycles per run (50) is reached."), 
           _("Warning"), wxOK|wxICON_INFORMATION);    
           runwarning.ShowModal();  			
         }
-        // todo: change 20 to signal size, scale according to the number of monitors accordingly
-        //~ if((ncycles+cyclescompleted)*20+250>500)
-        //~ {
-        //~ int x, y;
-        //~ scrolledWindow->GetViewStart(&x, &y);
-          //~ canvas->SetSize((ncycles+cyclescompleted)*20+300, 600);
-          //~ scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+15, 30);
-          //~ scrolledWindow->Scroll(x, y);
-        //~ }
         runnetwork(ncycles);
-        canvas->Render("Continue button pressed", cyclescompleted);
         logMessagePanel->AppendText(getCurrentTime()+_("Continue running.\n"));
       }
       else
@@ -718,9 +661,8 @@ void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
   }
 }
 
-
+// Event handler for the spin item to set the number of cycles to run
 void MyFrame::OnSpin(wxSpinEvent &event)
-  // Event handler for the spin control
 {
   if(spin->GetValue()>maxcycles)
   {
@@ -730,36 +672,34 @@ void MyFrame::OnSpin(wxSpinEvent &event)
       _("Warning"), wxOK|wxICON_INFORMATION);    
     spinwarning.ShowModal(); 
   }
-  
   wxString text;
-
-  text.Printf("New spinctrl value %d", event.GetPosition());
   canvas->Render(text);
 }
 
+// Event handler for the 'Load' button
 void MyFrame::OnButtonLOAD(wxCommandEvent &event)
 {
   loadFile(filePath);
 }
 
+// Event handler when Enter is hit after entering text to the filepath text box
 void MyFrame::OnPathEnter(wxCommandEvent &event)
-  // Event handler for the text entry field
 {
   loadFile(filePath);
 }
 
+// Event handler when the filepath changes
 void MyFrame::OnPathChange(wxCommandEvent &event)
-  // Event handler for the text entry field
 {
   filePath = event.GetString();
 }
 
-// display switch state accordingly
+// Event handler when a switch is selected from the switch choice list
 void MyFrame::OnChoiceSwitch(wxCommandEvent &event)
 {
-  // todo: find a better way of doing so
+  // get the index of the switch selected
   currentSwitchIndex = updateCurrentChoice((event.GetString()).ToStdString(), &switchVec);
-
+  // set check boxes accordingly
   if(switchVec[currentSwitchIndex].objVal)
   {
     switchState1->SetValue(1);
@@ -772,10 +712,11 @@ void MyFrame::OnChoiceSwitch(wxCommandEvent &event)
   }
 }
 
+// Event handler for when check box 0 is set
 void MyFrame::OnCheck0(wxCommandEvent &event)
 {
   if(switchChoice->IsEmpty())
-  {
+  { // generate warning message if there is no switch to set
     wxMessageDialog switchwarning(this, 
       _("No switch is available.\nPlease load a file first."), 
       _("Warning"), wxICON_INFORMATION | wxOK);
@@ -783,15 +724,11 @@ void MyFrame::OnCheck0(wxCommandEvent &event)
   }
   else
   {
-    if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
-    // todo: two unchecked boxes should not be allowed
-    {
+    if(switchState1->GetValue()==switchState0->GetValue())
+    { 
+      // set the state of the switch in the device list
       bool ok;
-      dmz->setswitch(
-        switchVec[currentSwitchIndex].dev,
-        low,
-        ok
-      );
+      dmz->setswitch(switchVec[currentSwitchIndex].dev, low, ok);
       if(ok)
       {
         switchState1->SetValue(!(switchState1->GetValue()));
@@ -812,6 +749,7 @@ void MyFrame::OnCheck0(wxCommandEvent &event)
   }
 }
 
+// Event handler when check box 0 is set
 void MyFrame::OnCheck1(wxCommandEvent &event)
 {
   if(switchChoice->IsEmpty())
@@ -823,15 +761,11 @@ void MyFrame::OnCheck1(wxCommandEvent &event)
   }
   else
   {
-    if(switchState1->GetValue()==switchState0->GetValue())//&&(switchState0->GetValue()))
-    // todo: two unchecked boxes should not be allowed
+    if(switchState1->GetValue()==switchState0->GetValue())
     {
+      // set the state of the switch in the device list
       bool ok;
-      dmz->setswitch(
-        switchVec[currentSwitchIndex].dev,
-        high,
-        ok
-      );
+      dmz->setswitch(switchVec[currentSwitchIndex].dev, high, ok);
       if(ok)
       {
         switchState0->SetValue(!(switchState0->GetValue()));
@@ -852,10 +786,11 @@ void MyFrame::OnCheck1(wxCommandEvent &event)
   }
 }
 
+// Event handler for the 'Set' button
 void MyFrame::OnButtonSET(wxCommandEvent& event)
 {
   if(IsStarted)
-  {
+  { // it is forbidden in the software to change monitor settings after running
     wxMessageDialog monitorwarning(this, 
     _("Please do not alter monitor settings while running.\nPlease press stop button first."), 
     _("Warning"), wxICON_INFORMATION | wxOK);
@@ -864,7 +799,7 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
   else
   {
     if(monitorSet->IsEmpty())
-    {
+    { // generate warning message when there is no signal that can be monitored
       wxMessageDialog monitorwarning(this, 
         _("No monitor is available to be set.\nPlease load a file first."), 
         _("Warning"), wxICON_INFORMATION | wxOK);
@@ -878,11 +813,8 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
       currentSetIndex = updateCurrentChoice((monitorSet->GetStringSelection()).ToStdString(), &setVec);
       bool ok = true;
       mmz->makemonitor(setVec[currentSetIndex].dev, setVec[currentSetIndex].output, ok);
-      // std::cout << setVec[currentSetIndex].objName << "    "
-      // << setVec[currentSetIndex].dev << "    "
-      // << setVec[currentSetIndex].output << "\n";
       if(ok)
-      {
+      { // set monitor at the signal chosen. Update the set and zap choice list at the same time
         logMessagePanel->AppendText(
           getCurrentTime()+
           _("Monitor ")+
@@ -909,8 +841,8 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
           _("Monitor ")+
           monitorSet->GetStringSelection() + 
           _(" is not set successfully.\n"));
-          if(mmz->moncount()==10)
-          {
+          if(mmz->moncount()==maxmonitors)
+          { // maximum 10 monitors can be set, according to maxmonitors defined in the monitor class provided
             wxMessageDialog monitorwarning(this, 
               _("Maximun number of monitors reached.\nPlease zap monitor point(s) before setting."), 
               _("Warning"), wxICON_INFORMATION | wxOK);
@@ -921,19 +853,20 @@ void MyFrame::OnButtonSET(wxCommandEvent& event)
   }
 }
 
+// Event handler for the 'Zap' button
 void MyFrame::OnButtonZAP(wxCommandEvent& event)
 {
   if(IsStarted)
-  {
+  { // it is forbidden in the software to change monitor settings after running
     wxMessageDialog monitorwarning(this, 
     _("Please do not alter monitor settings while running.\nPlease press stop button first."), 
     _("Warning"), wxICON_INFORMATION | wxOK);
     monitorwarning.ShowModal();
   }
   else
-  {
+  { 
     if(monitorZap->IsEmpty())
-    {
+    { // generate warning message when there is no monitor that can be removed
       wxMessageDialog monitorwarning(this, 
         _("No monitor is available to be zapped.\nPlease load a file first."), 
         _("Warning"), wxICON_INFORMATION | wxOK);
@@ -943,7 +876,7 @@ void MyFrame::OnButtonZAP(wxCommandEvent& event)
       _("No monitor is available to be zapped.\n"));
     }
     else
-    {
+    { // remove monitor selected. Update the set and zap choice list at the same time
       currentZapIndex = updateCurrentChoice((monitorZap->GetStringSelection()).ToStdString(), &zapVec);
       bool ok = true;
       mmz->remmonitor(zapVec[currentZapIndex].dev, zapVec[currentZapIndex].output, ok);
@@ -980,13 +913,16 @@ void MyFrame::OnButtonZAP(wxCommandEvent& event)
   }
 }
 
-
+// Function to load the logic definition file to the software. Scanning and Parsing are done here.
 void MyFrame::loadFile(wxString s)
 {
+  // re-initialise names, network, device, monitor objects
   nmz = new names();
   netz = new network(nmz);
   dmz = new devices(nmz, netz);
   mmz = new monitor(nmz, netz);
+
+  // clean up the programme for running
   canvas->SetDefault(mmz, nmz);
   switchChoice->Clear();
   switchState0->SetValue(0);
@@ -1001,27 +937,21 @@ void MyFrame::loadFile(wxString s)
   logMessagePanel->Clear();
   filePathBox->Clear();
   filePathBox->AppendText(s);
+
   ifstream f((filePath.ToStdString()).c_str());
   if(f.good())
-  {
+  { // check if the file path is valid
     string extString = (filePath.ToStdString()).substr((filePath.ToStdString()).length() - 4, (filePath.ToStdString()).length());
     if(extString == ".gf2")
-    {
-    // nmz, netz, dmz, mmz reinitialised here to allow load/reset
-    // todo: maybe not necessary to pass them as arguments?
+    { // check if the file has a .gf2 extension
+      // scanner object and parser object are initialised
       smz = new scanner(nmz, filePath);
       pmz = new parser(netz, dmz, mmz, smz, nmz);
       if(!(pmz->readin()))
-      {// check if the definition file is valid
+      { // check if the definition file is valid
         logMessagePanel->AppendText(
           getCurrentTime()+
           _("Logic Definition File Error.\n"));
-        
-          // /* --- Open gedit to edit to file --- */
-          // string str = "gedit " + filePath.ToStdString();
-          // const char *command = str.c_str();
-          // system(command);
-          // /* ---------------------------------- */
       }  
       else
       {
@@ -1030,8 +960,9 @@ void MyFrame::loadFile(wxString s)
           _("File loaded from ")+
           s + _(" successfully.\n"));
           FileLoaded = 1;
-        std::vector<MyChoiceObj> signalList;
 
+        // copy a list of signals from the device class and add them to different choice list accordingly
+        std::vector<MyChoiceObj> signalList;
         devlink currentDevice = netz->devicelist();
         name currentID;
         int maxClockCycle;
@@ -1040,12 +971,12 @@ void MyFrame::loadFile(wxString s)
           currentID = currentDevice->id;
           namestring devName = nmz->getname(currentID);
           if(currentDevice->kind == aswitch)
-          {
+          { // add switches to the switch choice list
             MyChoiceObj tempObj;
             tempObj.dev = currentID;
             tempObj.objName = devName;
             if(currentDevice->swstate==low)
-            {
+            { // display the switch state accordingly
               tempObj.objVal = 0;
             }
             else if(currentDevice->swstate==high)
@@ -1057,10 +988,10 @@ void MyFrame::loadFile(wxString s)
             signalList.push_back(tempObj);
           }
           else
-          {
+          { // store all signals other than from switches
             outplink currentOutput = currentDevice->olist;
             if(currentOutput->id==-1)
-            {
+            { // signal from single-output devices
               MyChoiceObj tempObj;
               tempObj.dev = currentID;
               tempObj.output = -1;
@@ -1072,7 +1003,7 @@ void MyFrame::loadFile(wxString s)
             else
             {
               while(currentOutput != NULL)
-              {
+              { // signals from multi-output devices
                 MyChoiceObj tempObj;
                 tempObj.dev = currentID;
                 tempObj.output = currentOutput->id;
@@ -1087,15 +1018,13 @@ void MyFrame::loadFile(wxString s)
           currentDevice = currentDevice->next;
         }
 
+        // add the list of switch to the choice list, set check boxes for the first switch
         std::sort(switchVec.begin(), switchVec.end());
         for(std::vector<MyChoiceObj>::iterator it = switchVec.begin() ; it != switchVec.end(); ++it)
         {
           switchChoice->Append(it->objName);
         }
-        // current switch choice by default is 
         currentSwitchIndex = 0;
-        // set the value for the first switch
-        // todo: find a better way to initialise
         if(switchVec.begin()->objVal)
         {
           switchState1->SetValue(1);
@@ -1107,6 +1036,8 @@ void MyFrame::loadFile(wxString s)
           switchState0->SetValue(1);
         }
         switchChoice->SetSelection(0);
+
+        // add monitors to the monitor choice list
         int monitorCount = mmz->moncount();
         name dev, output;
         for(int i = 0; i < monitorCount; ++i)
@@ -1142,6 +1073,7 @@ void MyFrame::loadFile(wxString s)
         }
         currentZapIndex = 0;
         
+        // add remaining unmonitored signals to the set choice list
         for(int n = 0; n < signalList.size(); ++n)
         {
           setVec.push_back(signalList[n]);
@@ -1152,6 +1084,8 @@ void MyFrame::loadFile(wxString s)
           monitorSet->Append(it->objName);
         }
         currentSetIndex = 0;
+        
+        // make two lists display the first items by default
         monitorSet->SetSelection(0);
         monitorZap->SetSelection(0);
       }
@@ -1176,6 +1110,7 @@ void MyFrame::loadFile(wxString s)
   }
 }
 
+// Function that returns the index of the items selected in the choice list
 int MyFrame::updateCurrentChoice(std::string choiceName, std::vector<MyChoiceObj>* vec)
 {
   int i = 0;
@@ -1190,8 +1125,8 @@ int MyFrame::updateCurrentChoice(std::string choiceName, std::vector<MyChoiceObj
   return 0;
 }
 
+// Function to run the network, derived from corresponding function in userint.cc
 void MyFrame::runnetwork(int ncycles)
-  // Function to run the network, derived from corresponding function in userint.cc
 {
   bool ok = true;
   int n = ncycles;
@@ -1218,8 +1153,7 @@ void MyFrame::runnetwork(int ncycles)
   else cyclescompleted = 0;
 }
 
-
-
+ // Function returning a string containing the current time, which is used for logging
 std::string getCurrentTime()
 {
   time_t rawtime;
@@ -1234,12 +1168,14 @@ std::string getCurrentTime()
   return str;
 }
 
+ // Overloaded constructor for MyChoiceObj objects
 MyChoiceObj::MyChoiceObj(std::string name, bool val)
 {
   objName = name;
   objVal = val;
 }
 
+// Default constructor for MyChoiceObj objects
 MyChoiceObj::MyChoiceObj()
 {
   objName = "";

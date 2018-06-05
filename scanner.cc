@@ -16,7 +16,6 @@ scanner::scanner(names* nmz, const char* defname) // nmz is a pointer to names c
 		cout<< "Error: Failed to open file" << endl;
 		exit(1);
 	}
-	// cout << "File opened successfully" << endl;
 
 	/* append lines for report lines containing errors */
 	string str;
@@ -39,10 +38,6 @@ scanner::~scanner()
 }
 void scanner::getsymbol(symbol& s, name& id, int& num)
 {
-	// s = badsym;	//initialisation
-	// id = blankname;
-	// num = -1;
-
 	skipspaces(); // curch is not a white-space
 
     if(eofile){
@@ -185,10 +180,6 @@ void scanner::skipcomments()
 			while (!eofile && curch != '\n'){
 				eofile = !(inf.get(curch));
 				if (curch == '\n') {
-
-					//cout <<"It's the end of a line"<<endl;
-					// cout << "linenum2++" << endl;
-					// linenum ++; @potsawee DOUBLE counting!
 					break;
 				}
 			}
@@ -232,7 +223,6 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 			counter++;
 		}
 		inf.seekg(curposition);
-		//cout << "counter = " << counter << endl;
 		int position;
 		if(linenum >= lines.size())
 			position = 0;
@@ -252,7 +242,6 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 		eofile = !(inf.get(curch));
 		return;
 	}
-	//eofile = !(inf.get(curch));
 	if(curch != '\n'){
 		while(!(eofile || s == comma || s == semicol || curch == '\n')){
 			getsymbol(s, id, num);

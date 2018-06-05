@@ -37,8 +37,8 @@ MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, na
   mmz = monitor_mod;
   nmz = names_mod;
   SetDefault(mmz, nmz);
-  period = 20;
-  height = 20;
+  period = 30;
+  height = 30;
 }
 
 void MyGLCanvas::Render(wxString example_text, int cycles)
@@ -66,7 +66,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
   { // draw the first monitor signal, get trace from monitor class
     for(int j = 0; j < mmz->moncount(); ++j)
     {
-      int yLow = 500 - 50*j;
+      int yLow = 50+60*j;
       int yHigh = yLow + height;
 
       // doted 0 and 1 lines
@@ -75,12 +75,12 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 	    glColor3f(0.7,0.7,0.7);   
       glBegin(GL_LINE_STRIP);			
       glVertex2f(100, yLow);
-      glVertex2f(cyclesdisplayed*20+50, yLow);
+      glVertex2f(cyclesdisplayed*period+50, yLow);
       glEnd();
 
       glBegin(GL_LINE_STRIP);			
       glVertex2f(100, yHigh);
-      glVertex2f(cyclesdisplayed*20+100, yHigh);
+      glVertex2f(cyclesdisplayed*period+100, yHigh);
       glEnd();
       glDisable(GL_LINE_STIPPLE);
       
@@ -95,8 +95,8 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
             glBegin(GL_QUADS);
                 glVertex2f(period*i+100.0, yHigh);
                 glVertex2f(period*i+100.0, yLow);
-                glVertex2f(period*i+120.0, yLow);
-                glVertex2f(period*i+120.0, yHigh);
+                glVertex2f(period*i+130.0, yLow);
+                glVertex2f(period*i+130.0, yHigh);
             glEnd();            
           }
         }
@@ -113,7 +113,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
           if (s==low) y = yLow;
           if (s==high) y = yHigh;
           glVertex2f(period*i+100.0, y); 
-          glVertex2f(period*i+120.0, y);
+          glVertex2f(period*i+130.0, y);
         }
       }
       glEnd();
@@ -124,8 +124,8 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
       {
 				glBegin(GL_LINE_STRIP);
 				glColor3f(0.7, 0.7, 0.7); // set line colour to grey
-				glVertex2f(20*i+100.0, yLow); 
-				glVertex2f(20*i+100.0, yLow-5);
+				glVertex2f(period*i+100.0, yLow); 
+				glVertex2f(period*i+100.0, yLow-5);
 				glEnd();
 			}
 
@@ -143,28 +143,28 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 			}
     }
     
-    // white background for displaying signal labels
-    glColor3f(1.0, 1.0, 1.0);
-    glBegin(GL_QUADS);
-        glVertex2f(100+0.0, 550.0);
-        glVertex2f(100+0.0, 50.0);
-        glVertex2f(100+99.0, 50.0);
-        glVertex2f(100+99.0, 550.0);
-    glEnd();
+    //~ // white background for displaying signal labels
+    //~ glColor3f(1.0, 1.0, 1.0);
+    //~ glBegin(GL_QUADS);
+        //~ glVertex2f(100+0.0, 550.0);
+        //~ glVertex2f(100+0.0, 50.0);
+        //~ glVertex2f(100+99.0, 50.0);
+        //~ glVertex2f(100+99.0, 550.0);
+    //~ glEnd();
       
     glEnable(GL_LINE_STIPPLE); 
     glLineStipple(2,0xAAAA);    
 	glColor3f(0.0, 0.0, 0.0);
     glBegin(GL_LINE_STRIP);
-        glVertex2f(100+100.0, 550.0);
-        glVertex2f(100+100.0, 550-50*(mmz->moncount()));
+        glVertex2f(100.0, 10);
+        glVertex2f(100.0, 50+60*(mmz->moncount()));
     glEnd(); 
     glDisable(GL_LINE_STIPPLE);
     
     // signal labels
 	for (int j = 0; j < mmz->moncount(); j++) 
     {
-      int yLow = 500 - 50*j;
+      int yLow = 50 + 60*j;
       int yHigh = yLow + height;
       name dev, outp;
 			mmz->getmonname(j, dev, outp); 		// dev is now the id of the device
@@ -174,7 +174,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
         sigName = sigName + "." + nmz->getname(outp);
       }
 			glColor3f(0.0, 0.0, 0.0); 			// set text colour to black
-			glRasterPos2f(100+20, yLow+10); 	// position is in (columns, rows) from bottom left corner
+			glRasterPos2f(100-70, yLow+10); 	// position is in (columns, rows) from bottom left corner
 			for (i = 0; i < sigName.length(); i++) 
       {
 				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, sigName[i]);
@@ -182,15 +182,15 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 		glEnable(GL_LINE_STIPPLE); 
 		glLineStipple(2,0xAAAA);  
 		glBegin(GL_LINE_STRIP);
-			glVertex2f(100+40, yLow);
-			glVertex2f(100+100.0, yLow);
+			glVertex2f(30.0, yLow);
+			glVertex2f(100.0, yLow);
 		glEnd(); 
 		glDisable(GL_LINE_STIPPLE);
 		
-		glRasterPos2f(100+90, yHigh+4);
+		glRasterPos2f(90, yHigh+4);
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, '1');
 		
-		glRasterPos2f(100+90, yLow+4);
+		glRasterPos2f(90, yLow+4);
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, '0');
 		
     }
@@ -198,8 +198,8 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
     // mark the cycle limit
     glBegin(GL_LINE_STRIP);	
     glColor3f(0.7,0.7,0.7);		
-    glVertex2f(maxcycles*20+100, 50);
-    glVertex2f(maxcycles*20+100, 550);
+    glVertex2f(maxcycles*period+100, 20);
+    glVertex2f(maxcycles*period+100, 700);
     glEnd();
   } 
   else 
@@ -217,9 +217,9 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
   }
 
   // Example of how to use GLUT to draw text on the canvas
-  // glColor3f(0.0, 0.0, 1.0);
-  // glRasterPos2f(20*xx, 300);
-  // for (i = 0; i < example_text.Len(); i++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, example_text[i]);
+  //~ glColor3f(0.0, 0.0, 1.0);
+  //~ glRasterPos2f(20, 10);
+  //~ for (i = 0; i < example_text.Len(); i++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, example_text[i]);
 
   // We've been drawing to the back buffer, flush the graphics pipeline and swap the back buffer to the front
   glFlush();
@@ -289,25 +289,55 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
   }
   if (event.ButtonUp()) text.Printf("Mouse button %d released at %d %d", event.GetButton(), event.m_x, h-event.m_y);
   if (event.Dragging()) {
-    pan_x += event.m_x - last_x;
-    pan_y -= event.m_y - last_y;
-    last_x = event.m_x;
-    last_y = event.m_y;
+	if((event.m_x - last_x + pan_x <= 20)&&(event.m_x - last_x + pan_x >= -cyclesdisplayed*30.0*zoom*1.1+500))
+	{
+		pan_x += event.m_x - last_x;
+	}
+	if((pan_y-event.m_y+last_y <= 30)&&(pan_y-event.m_y+last_y >= -(mmz->moncount()*60-100)))
+	{
+	pan_y -= event.m_y - last_y;
+	}
+	last_x = event.m_x;
+	last_y = event.m_y;
     init = false;
     text.Printf("Mouse dragged to %d %d, pan now %d %d", event.m_x, h-event.m_y, pan_x, pan_y);
   }
   if (event.Leaving()) text.Printf("Mouse left window at %d %d", event.m_x, h-event.m_y);
   if (event.GetWheelRotation() < 0) {
-    zoom = zoom * (1.0 - (double)event.GetWheelRotation()/(20*event.GetWheelDelta()));
+	 float zoomRatio = zoom * (1.0 - (double)event.GetWheelRotation()/(20*event.GetWheelDelta()));
+	if(zoomRatio < 1.0)
+    {
+		zoom = 1.0;
+	}
+	else if (zoomRatio > 1.8)
+	{
+		zoom = 1.8;
+	}
+	else
+	{
+		zoom = zoomRatio;
+	}
     init = false;
     text.Printf("Negative mouse wheel rotation, zoom now %f", zoom);
   }
   if (event.GetWheelRotation() > 0) {
-    zoom = zoom / (1.0 + (double)event.GetWheelRotation()/(20*event.GetWheelDelta()));
+    float zoomRatio = zoom / (1.0 + (double)event.GetWheelRotation()/(20*event.GetWheelDelta()));
+    if(zoomRatio < 1.0)
+    {
+		zoom = 1.0;
+	}
+	else if(zoomRatio > 1.8)
+	{
+		zoom = 1.8;
+	}
+	else
+	{
+		zoom = zoomRatio;
+	}
+    //~ zoom = zoom / (1.0 + (double)event.GetWheelRotation()/(20*event.GetWheelDelta()));
     init = false;
     text.Printf("Positive mouse wheel rotation, zoom now %f", zoom);
   }
-
   if (event.GetWheelRotation() || event.ButtonDown() || event.ButtonUp() || event.Dragging() || event.Leaving()) Render(text);
 
 }
@@ -567,19 +597,10 @@ MyFrame::MyFrame(wxWindow *parent,
       _("GF2 files (*.gf2)|*.gf2"), 
       wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 	if(openFileDialog.ShowModal() == wxID_CANCEL)
-		return;			// user changed idea..
-    // proceed loading the file chosen by the user
+		return;	
   filePath = openFileDialog.GetPath();
   filePathBox->SetValue(filePath);
  }
- /* --------------------- */
-
-// void MyFrame::OnSave(wxCommandEvent &event)
-// // Event Handler for 'Save'
-// {
-// 	//@potsawee I still have no idea what to implement here haha
-// }
-
 
 void MyFrame::OnAbout(wxCommandEvent &event)
   // Event handler for the about menu item
@@ -615,6 +636,8 @@ void MyFrame::OnButtonRUN(wxCommandEvent &event)
     dmz->initdevices ();
     mmz->resetmonitor ();
     ncycles = spin->GetValue();
+   	canvas->SetDefault(mmz, nmz);
+	canvas->Refresh();
     // todo: change 20 to signal size, scale according to the number of monitors accordingly
     //~ if((ncycles+cyclescompleted)*20+250>500)
     //~ {
@@ -657,6 +680,7 @@ void MyFrame::OnButtonSTOP(wxCommandEvent &event)
   //~ scrolledWindow->Scroll(0, 0);
   //~ scrolledWindow->SetScrollbars(20, 20, 60, 30);
   IsStarted = 0;
+  canvas->Refresh();
   // FileLoaded = 0;
 }
 

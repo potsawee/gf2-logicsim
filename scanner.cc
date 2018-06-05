@@ -226,7 +226,7 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 		char mychar;
 		streampos curposition = inf.tellg();
 		inf.get(mychar);
-		while(mychar!='\n'){
+		while(mychar!='\n' && curch != '\n'){
 			if(!inf.get(mychar)) //if eofile
 				break;
 			counter++;

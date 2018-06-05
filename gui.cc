@@ -1,6 +1,6 @@
 #include "gui.h"
 
-// added macintosh compatibility
+// this part is for macintosh compatibility
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #include <GLUT/glut.h>
@@ -60,16 +60,15 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
   }
   glClear(GL_COLOR_BUFFER_BIT);
 
-  // std::cout << xx << "    " << yy << std::endl;
-
   if ((cyclesdisplayed >= 0) && (mmz->moncount() > 0)) 
-  { // draw the first monitor signal, get trace from monitor class
+  { 
+    // draw monitor signals //////////////////////////////////////////////////////////////////////////
     for(int j = 0; j < mmz->moncount(); ++j)
     {
       int yLow = 50+60*j;
       int yHigh = yLow + height;
 
-      // doted 0 and 1 lines
+      // draw doted 0 and 1 lines ////////////////////////////////////////////////////////////////////
       glEnable(GL_LINE_STIPPLE); 
       glLineStipple(2,0xAAAA); // dashed lines, factor 2
 	    glColor3f(0.7,0.7,0.7);   
@@ -84,7 +83,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
       glEnd();
       glDisable(GL_LINE_STIPPLE);
       
-      // fill areas below high signals
+      // fill areas below high signals //////////////////////////////////////////////////////////////
       for(i = 0; i < cyclesdisplayed; ++i)
       {
         if(mmz->getsignaltrace(j, i, s))
@@ -102,7 +101,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
         }
       }
         
-      // draw signal
+      // draw signal ////////////////////////////////////////////////////////////////////////////////
       glColor3f(colourBox[j][0], colourBox[j][1], colourBox[j][2]);
       glLineWidth(2);
       glBegin(GL_LINE_STRIP);
@@ -119,7 +118,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
       glEnd();
       glLineWidth(1);
         
-      // set cycle mark
+      // set cycle mark /////////////////////////////////////////////////////////////////////////////
       for (i=0; i<cyclesdisplayed; i++) 
       {
 				glBegin(GL_LINE_STRIP);
@@ -143,31 +142,23 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 			}
     }
     
-    //~ // white background for displaying signal labels
-    //~ glColor3f(1.0, 1.0, 1.0);
-    //~ glBegin(GL_QUADS);
-        //~ glVertex2f(100+0.0, 550.0);
-        //~ glVertex2f(100+0.0, 50.0);
-        //~ glVertex2f(100+99.0, 50.0);
-        //~ glVertex2f(100+99.0, 550.0);
-    //~ glEnd();
-      
+    // mark the starting point ///////////////////////////////////////////////////////////////////////
     glEnable(GL_LINE_STIPPLE); 
     glLineStipple(2,0xAAAA);    
-	glColor3f(0.0, 0.0, 0.0);
+	  glColor3f(0.0, 0.0, 0.0);
     glBegin(GL_LINE_STRIP);
         glVertex2f(100.0, 10);
         glVertex2f(100.0, 50+60*(mmz->moncount()));
     glEnd(); 
     glDisable(GL_LINE_STIPPLE);
     
-    // signal labels
+    // signal labels /////////////////////////////////////////////////////////////////////////////////
 	for (int j = 0; j < mmz->moncount(); j++) 
     {
       int yLow = 50 + 60*j;
       int yHigh = yLow + height;
       name dev, outp;
-			mmz->getmonname(j, dev, outp); 		// dev is now the id of the device
+			mmz->getmonname(j, dev, outp);
 			namestring sigName = nmz->getname(dev);
       if (outp != -1)
       {
@@ -179,6 +170,8 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
       {
 				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, sigName[i]);
 			}
+    
+    // additional marking and labels //////////////////////////////////////////////////////////////////
 		glEnable(GL_LINE_STIPPLE); 
 		glLineStipple(2,0xAAAA);  
 		glBegin(GL_LINE_STRIP);
@@ -195,42 +188,23 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 		
     }
 
-    // mark the cycle limit
+    // mark the cycle limit ///////////////////////////////////////////////////////////////////////////
     glBegin(GL_LINE_STRIP);	
     glColor3f(0.7,0.7,0.7);		
     glVertex2f(maxcycles*period+100, 20);
     glVertex2f(maxcycles*period+100, 700);
     glEnd();
   } 
-  else 
-  { // draw an artificial trace
-
-    // glColor3f(0.0, 1.0, 0.0);
-    // glBegin(GL_LINE_STRIP);
-    // for (i=0; i<15; i++) {
-    //   if (i%3) y = 10.0;
-    //   else y = 30.0;
-    //   glVertex2f(20*i+10.0, y); 
-    //   glVertex2f(20*i+30.0, y);
-    // }
-    // glEnd();
-  }
-
-  // Example of how to use GLUT to draw text on the canvas
-  //~ glColor3f(0.0, 0.0, 1.0);
-  //~ glRasterPos2f(20, 10);
-  //~ for (i = 0; i < example_text.Len(); i++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, example_text[i]);
-
+  
   // We've been drawing to the back buffer, flush the graphics pipeline and swap the back buffer to the front
   glFlush();
   SwapBuffers();
 }
 
+// Function to initialise the GL context
 void MyGLCanvas::InitGL()
-  // Function to initialise the GL context
 {
   int w, h;
-
   GetClientSize(&w, &h);
   SetCurrent(*context);
   glDrawBuffer(GL_BACK);
@@ -245,6 +219,7 @@ void MyGLCanvas::InitGL()
   glScaled(zoom, zoom, zoom);
 }
 
+// Function to set the canvas to the default status
 void MyGLCanvas::SetDefault(monitor *monitor_mod, names *names_mod)
 {
   init = false;
@@ -256,8 +231,8 @@ void MyGLCanvas::SetDefault(monitor *monitor_mod, names *names_mod)
   nmz = names_mod;
 }
 
+// Event handler for when the canvas is exposed
 void MyGLCanvas::OnPaint(wxPaintEvent& event)
-  // Event handler for when the canvas is exposed
 {
   int w, h;
   wxString text;
@@ -268,110 +243,113 @@ void MyGLCanvas::OnPaint(wxPaintEvent& event)
   Render(text);
 }
 
+// Event handler for when the canvas is resized
 void MyGLCanvas::OnSize(wxSizeEvent& event)
-  // Event handler for when the canvas is resized
 {
   init = false; // this will force the viewport and projection matrices to be reconfigured on the next paint
 }
 
+// Event handler for mouse events inside the GL canvas
 void MyGLCanvas::OnMouse(wxMouseEvent& event)
-  // Event handler for mouse events inside the GL canvas
 {
   wxString text;
   int w, h;;
   static int last_x, last_y;
 
   GetClientSize(&w, &h);
-  if (event.ButtonDown()) {
+  if (event.ButtonDown()) 
+  {
     last_x = event.m_x;
     last_y = event.m_y;
-    text.Printf("Mouse button %d pressed at %d %d", event.GetButton(), event.m_x, h-event.m_y);
   }
-  if (event.ButtonUp()) text.Printf("Mouse button %d released at %d %d", event.GetButton(), event.m_x, h-event.m_y);
-  if (event.Dragging()) {
-	if((event.m_x - last_x + pan_x <= 20)&&(event.m_x - last_x + pan_x >= -cyclesdisplayed*30.0*zoom*1.1+500))
-	{
-		pan_x += event.m_x - last_x;
-	}
-	if((pan_y-event.m_y+last_y <= 30)&&(pan_y-event.m_y+last_y >= -(mmz->moncount()*60-100)))
-	{
-	pan_y -= event.m_y - last_y;
-	}
-	last_x = event.m_x;
-	last_y = event.m_y;
-    init = false;
-    text.Printf("Mouse dragged to %d %d, pan now %d %d", event.m_x, h-event.m_y, pan_x, pan_y);
-  }
-  if (event.Leaving()) text.Printf("Mouse left window at %d %d", event.m_x, h-event.m_y);
-  if (event.GetWheelRotation() < 0) {
-	 float zoomRatio = zoom * (1.0 - (double)event.GetWheelRotation()/(20*event.GetWheelDelta()));
-	if(zoomRatio < 1.0)
+
+  // event handler for dragging action on the canvas /////////////////////////////////////////////
+  if (event.Dragging()) 
+  {// the dragging action is constrained so that the signal is always visible
+	  if((event.m_x - last_x + pan_x <= 20)&&(event.m_x - last_x + pan_x >= -cyclesdisplayed*30.0*zoom*1.1+500))
     {
-		zoom = 1.0;
-	}
-	else if (zoomRatio > 1.8)
-	{
-		zoom = 1.8;
-	}
-	else
-	{
-		zoom = zoomRatio;
-	}
+      pan_x += event.m_x - last_x;
+    }
+	  if((pan_y-event.m_y+last_y <= 30)&&(pan_y-event.m_y+last_y >= -(mmz->moncount()*60-100)))
+    {
+      pan_y -= event.m_y - last_y;
+    }
+    last_x = event.m_x;
+    last_y = event.m_y;
     init = false;
-    text.Printf("Negative mouse wheel rotation, zoom now %f", zoom);
   }
-  if (event.GetWheelRotation() > 0) {
+  if (event.Leaving()) 
+  
+  // event handler for wheel rotation action on the canvas ////////////////////////////////////////
+  if (event.GetWheelRotation() < 0) 
+  {// the zooming factor is limited between 1.0 and 1.8
+	  float zoomRatio = zoom * (1.0 - (double)event.GetWheelRotation()/(20*event.GetWheelDelta()));
+    if(zoomRatio < 1.0)
+      {
+      zoom = 1.0;
+    }
+    else if (zoomRatio > 1.8)
+    {
+      zoom = 1.8;
+    }
+    else
+    {
+      zoom = zoomRatio;
+    }
+    init = false;
+  }
+  if (event.GetWheelRotation() > 0) 
+  {// the zooming factor is limited between 1.0 and 1.8
     float zoomRatio = zoom / (1.0 + (double)event.GetWheelRotation()/(20*event.GetWheelDelta()));
     if(zoomRatio < 1.0)
     {
-		zoom = 1.0;
-	}
-	else if(zoomRatio > 1.8)
-	{
-		zoom = 1.8;
-	}
-	else
-	{
-		zoom = zoomRatio;
-	}
+		  zoom = 1.0;
+	  }
+    else if(zoomRatio > 1.8)
+    {
+      zoom = 1.8;
+    }
+    else
+    {
+      zoom = zoomRatio;
+    }
     //~ zoom = zoom / (1.0 + (double)event.GetWheelRotation()/(20*event.GetWheelDelta()));
     init = false;
-    text.Printf("Positive mouse wheel rotation, zoom now %f", zoom);
   }
-  if (event.GetWheelRotation() || event.ButtonDown() || event.ButtonUp() || event.Dragging() || event.Leaving()) Render(text);
-
 }
 
 // MyFrame ///////////////////////////////////////////////////////////////////////////////////////
 
-
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
+  // binding events to File menu option
   EVT_MENU(wxID_EXIT, MyFrame::OnButtonQUIT)
   EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
   EVT_MENU(wxID_HELP, MyFrame::OnHelp)
+  EVT_MENU(wxID_OPEN, MyFrame::OnOpen)
+
+  // binding events to buttons
   EVT_BUTTON(MY_BUTTON_RUN, MyFrame::OnButtonRUN)
   EVT_BUTTON(MY_BUTTON_QUIT, MyFrame::OnButtonQUIT)
   EVT_BUTTON(MY_BUTTON_STOP, MyFrame::OnButtonSTOP)
-  // EVT_MENU(wxID_SAVE, MyFrame::OnSave)
-  EVT_MENU(wxID_OPEN, MyFrame::OnOpen)
   EVT_BUTTON(MY_BUTTON_CONTINUE, MyFrame::OnButtonCONTINUE)
   EVT_BUTTON(MY_BUTTON_LOAD, MyFrame::OnButtonLOAD)
   EVT_BUTTON(MY_BUTTON_BROWSE, MyFrame::OnOpen)
+  EVT_BUTTON(MY_BUTTON_SET, MyFrame::OnButtonSET)
+  EVT_BUTTON(MY_BUTTON_ZAP, MyFrame::OnButtonZAP)
   EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
   
-  // load files
+  // binding events to text box input
   EVT_TEXT(MY_TEXTCTRL_FILEPATH, MyFrame::OnPathChange)
   EVT_TEXT_ENTER(MY_TEXTCTRL_FILEPATH, MyFrame::OnPathEnter)
 
+  // binding events to choice list selection and checkboxes
   EVT_CHOICE(MY_CHOICE_LIST_SWITCHES, MyFrame::OnChoiceSwitch)
   EVT_CHECKBOX(MY_CHECKBOX_0, MyFrame::OnCheck0)
   EVT_CHECKBOX(MY_CHECKBOX_1, MyFrame::OnCheck1)
-
-  EVT_BUTTON(MY_BUTTON_SET, MyFrame::OnButtonSET)
-  EVT_BUTTON(MY_BUTTON_ZAP, MyFrame::OnButtonZAP)
-
 END_EVENT_TABLE()
   
+// Constructor - initialises pointers to names, devices and monitor classes, lays out widgets
+// using sizers
 MyFrame::MyFrame(wxWindow *parent, 
   const wxString& title, 
   const wxPoint& pos, 
@@ -382,8 +360,6 @@ MyFrame::MyFrame(wxWindow *parent,
   network *network_mod,
   long style):
   wxFrame(parent, wxID_ANY, title, pos, size, style)
-  // Constructor - initialises pointers to names, devices and monitor classes, lays out widgets
-  // using sizers
 {
   SetIcon(wxIcon(wx_icon));
   IsStarted = 0;
@@ -394,10 +370,21 @@ MyFrame::MyFrame(wxWindow *parent,
   mmz = monitor_mod;
   netz = network_mod;
 
-  // put wxLANGUAGE_CHINESE_SIMPLIFIED as an argument in Init() to set manually
-  locale.Init();
-  wxLocale::AddCatalogLookupPathPrefix(wxT("."));
-  locale.AddCatalog(wxT("gui"));
+  // detect the system locale and use the corresponding language
+  if(locale.Init())
+  {
+    wxLocale::AddCatalogLookupPathPrefix(wxT("."));
+    locale.AddCatalog(wxT("gui"));
+  }
+  else
+  {
+    wxMessageDialog warning(
+      this, 
+      _("The language chosen is not supported. Default language, English, is used instead."), 
+      _("Warning"), 
+      wxICON_INFORMATION | wxOK);
+    warning.ShowModal();
+  }
 
   if (nmz == NULL || dmz == NULL || mmz == NULL|| netz == NULL) {
     cout << "Cannot operate GUI without names, devices, monitor, or network classes" << endl;

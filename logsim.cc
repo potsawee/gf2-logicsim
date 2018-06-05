@@ -43,7 +43,7 @@ bool MyApp::OnInit()
 	  }
 	  return(true); 
 	}
-  else if ((argc==3)&&(argv[2]=="-u"))
+  else if ((argc==3)&&(argv[2]=="-c"))
   {
 	  std::cout << "Command line user interface is invoked.\n";
 	  smz = new scanner(nmz, wxString(argv[1]).mb_str());
@@ -56,7 +56,14 @@ bool MyApp::OnInit()
   }
   else
   {
-	  std::cout << "Too many arguments\n";
+	  if(argc==3)
+	  {
+		  std::cout << "Wrong arguments.\n";
+	  }
+	  else
+	  {
+		std::cout << "Too many arguments\n";
+	  }
 	  std::cout << "Usage:    " << argv[0] << "                to invoke GUI." << endl;
 	  std::cout << "Usage:    " << argv[0] << " [filename],    to invoke GUI with [filename loaded]" << endl;
 	  std::cout << "Usage:    " << argv[0] << " [filename] -u, to invoke command user interface." << endl;

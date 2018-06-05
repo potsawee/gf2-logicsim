@@ -96,7 +96,7 @@ class MyFrame: public wxFrame
   scanner *smz;         // pointer to scanner class
   parser *pmz;          // pointer to parser class
 
-  wxScrolledWindow* scrolledWindow;     // pointer to the scrolled window, used for displaying signals
+  //~ wxScrolledWindow* scrolledWindow;     // pointer to the scrolled window, used for displaying signals
 
   wxTextCtrl *logMessagePanel;          // pointer to the text box for displaying logging message
   wxTextCtrl *filePathBox;              // pointer to the text box for entering logic definition file path

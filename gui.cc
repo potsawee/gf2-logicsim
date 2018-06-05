@@ -60,9 +60,6 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
   }
   glClear(GL_COLOR_BUFFER_BIT);
 
-  int xx, yy;
-  xx = GetParent()->GetScrollPos(wxHORIZONTAL);
-  yy = GetParent()->GetScrollPos(wxVERTICAL);
   // std::cout << xx << "    " << yy << std::endl;
 
   if ((cyclesdisplayed >= 0) && (mmz->moncount() > 0)) 
@@ -149,18 +146,18 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
     // white background for displaying signal labels
     glColor3f(1.0, 1.0, 1.0);
     glBegin(GL_QUADS);
-        glVertex2f(20*xx+0.0, 550.0);
-        glVertex2f(20*xx+0.0, 50.0);
-        glVertex2f(20*xx+99.0, 50.0);
-        glVertex2f(20*xx+99.0, 550.0);
+        glVertex2f(100+0.0, 550.0);
+        glVertex2f(100+0.0, 50.0);
+        glVertex2f(100+99.0, 50.0);
+        glVertex2f(100+99.0, 550.0);
     glEnd();
       
     glEnable(GL_LINE_STIPPLE); 
     glLineStipple(2,0xAAAA);    
 	glColor3f(0.0, 0.0, 0.0);
     glBegin(GL_LINE_STRIP);
-        glVertex2f(20*xx+100.0, 550.0);
-        glVertex2f(20*xx+100.0, 550-50*(mmz->moncount()));
+        glVertex2f(100+100.0, 550.0);
+        glVertex2f(100+100.0, 550-50*(mmz->moncount()));
     glEnd(); 
     glDisable(GL_LINE_STIPPLE);
     
@@ -177,7 +174,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
         sigName = sigName + "." + nmz->getname(outp);
       }
 			glColor3f(0.0, 0.0, 0.0); 			// set text colour to black
-			glRasterPos2f(20*xx+20, yLow+10); 	// position is in (columns, rows) from bottom left corner
+			glRasterPos2f(100+20, yLow+10); 	// position is in (columns, rows) from bottom left corner
 			for (i = 0; i < sigName.length(); i++) 
       {
 				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, sigName[i]);
@@ -185,15 +182,15 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 		glEnable(GL_LINE_STIPPLE); 
 		glLineStipple(2,0xAAAA);  
 		glBegin(GL_LINE_STRIP);
-			glVertex2f(20*xx+40, yLow);
-			glVertex2f(20*xx+100.0, yLow);
+			glVertex2f(100+40, yLow);
+			glVertex2f(100+100.0, yLow);
 		glEnd(); 
 		glDisable(GL_LINE_STIPPLE);
 		
-		glRasterPos2f(20*xx+90, yHigh+4);
+		glRasterPos2f(100+90, yHigh+4);
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, '1');
 		
-		glRasterPos2f(20*xx+90, yLow+4);
+		glRasterPos2f(100+90, yLow+4);
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, '0');
 		
     }
@@ -414,7 +411,7 @@ MyFrame::MyFrame(wxWindow *parent,
     wxALL, 
     10);
 
-	filePathBox = new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(1000, -1), wxTE_PROCESS_ENTER);
+	filePathBox = new wxTextCtrl(this, MY_TEXTCTRL_FILEPATH, "", wxDefaultPosition, wxSize(10000, -1), wxTE_PROCESS_ENTER);
   filePathSizer->Add(
     filePathBox, 
     0, 
@@ -427,25 +424,26 @@ MyFrame::MyFrame(wxWindow *parent,
 
   wxBoxSizer *displaySizer = new wxBoxSizer(wxVERTICAL);
 
-	scrolledWindow = new wxScrolledWindow(this, -1, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxHSCROLL|wxVSCROLL);
-  displaySizer->Add(scrolledWindow, 1, wxEXPAND|wxALL, 10);
-  wxBoxSizer *swinSizer = new wxBoxSizer(wxVERTICAL);
-	scrolledWindow->SetAutoLayout(true);
-  scrolledWindow->SetMinSize(wxSize(500, 400));
-	scrolledWindow->SetScrollbars(20, 20, 25, 30);
+	//~ scrolledWindow = new wxScrolledWindow(this, -1, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxHSCROLL|wxVSCROLL);
+  //~ displaySizer->Add(scrolledWindow, 1, wxEXPAND|wxALL, 10);
+  //~ wxBoxSizer *swinSizer = new wxBoxSizer(wxVERTICAL);
+	//~ scrolledWindow->SetAutoLayout(true);
+  //~ scrolledWindow->SetMinSize(wxSize(2000, 500));
+	//~ scrolledWindow->SetScrollbars(30, 30, 120, 60);
   canvas = new MyGLCanvas(
-    scrolledWindow, 
+    this, 
     wxID_ANY, 
     monitor_mod, 
     names_mod, 
     wxDefaultPosition, 
-    wxSize(500, 600));
+    wxDefaultSize);
   // displaySizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
-  swinSizer->Add(canvas, 1, wxRIGHT|wxBOTTOM|wxEXPAND, 20);
-	scrolledWindow->SetSizer(swinSizer);
+    //~ swinSizer->Add(canvas, 1, wxRIGHT|wxBOTTOM|wxEXPAND, 20);
+	//~ scrolledWindow->SetSizer(swinSizer);
   // scrolledWindow->GetVirtualSize(&x, &y);
   // std::cout << x << "   "<< y << "\n";
 
+  displaySizer->Add(canvas, 1, wxEXPAND|wxALL, 10);
   displaySizer->Add(
     new wxStaticText(this, wxID_ANY, _("Log Activity")), 
     0, 
@@ -456,8 +454,8 @@ MyFrame::MyFrame(wxWindow *parent,
       MY_TEXTCTRL_LOG, 
       "", 
       wxDefaultPosition, 
-      wxSize(500, 100), 
-      wxTE_MULTILINE|wxTE_READONLY);
+      wxSize(2000, 100), 
+      wxTE_MULTILINE|wxTE_READONLY|wxALL);
 
   wxBoxSizer *textSizer = new wxBoxSizer(wxHORIZONTAL);
   textSizer->Add(logMessagePanel, 1, wxEXPAND);
@@ -550,11 +548,11 @@ MyFrame::MyFrame(wxWindow *parent,
   bottomRightSizer->Add(opSizer, 0, wxALL, 10);
   bottomSizer->Add(bottomRightSizer, 0, wxALIGN_TOP);
   overallSizer->Add(filePathSizer, 0, wxALIGN_LEFT);
-  overallSizer->Add(bottomSizer, 0, wxALIGN_LEFT);
+  overallSizer->Add(bottomSizer, 1, wxALIGN_LEFT);
 
   // the top level window should not shrink below this size
-  SetSizeHints(800, 700);
-  SetMaxSize(wxSize(800, 700));
+  SetSizeHints(1000, 1000);
+  //~ SetMaxSize(wxSize(800, 700));
   SetSizer(overallSizer);
 }
 
@@ -612,20 +610,20 @@ void MyFrame::OnButtonRUN(wxCommandEvent &event)
   {
     IsStarted = 1;
     int n, ncycles;
-    canvas->SetSize(wxSize(500, 600));
+    //~ canvas->SetSize(wxSize(500, 600));
     cyclescompleted = 0;
     dmz->initdevices ();
     mmz->resetmonitor ();
     ncycles = spin->GetValue();
     // todo: change 20 to signal size, scale according to the number of monitors accordingly
-    if((ncycles+cyclescompleted)*20+250>500)
-    {
-    int x, y;
-    scrolledWindow->GetViewStart(&x, &y);
-      canvas->SetSize((ncycles+cyclescompleted)*20+250, 600);
-      scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+15, 20);
-      scrolledWindow->Scroll(x, y);
-    }
+    //~ if((ncycles+cyclescompleted)*20+250>500)
+    //~ {
+    //~ int x, y;
+    //~ scrolledWindow->GetViewStart(&x, &y);
+      //~ canvas->SetSize((ncycles+cyclescompleted)*20+250, 600);
+      //~ scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+15, 20);
+      //~ scrolledWindow->Scroll(x, y);
+    //~ }
     runnetwork(ncycles);
     canvas->Render("Run button pressed", cyclescompleted);
     logMessagePanel->AppendText(getCurrentTime()+_("Start running.\n"));
@@ -655,9 +653,9 @@ void MyFrame::OnButtonSTOP(wxCommandEvent &event)
 {
   mmz->resetmonitor();
   canvas->SetDefault(mmz, nmz);
-  canvas->SetSize(wxSize(500, 600));
-  scrolledWindow->Scroll(0, 0);
-  scrolledWindow->SetScrollbars(20, 20, 25, 30);
+  //~ canvas->SetSize(wxSize(1200, 600));
+  //~ scrolledWindow->Scroll(0, 0);
+  //~ scrolledWindow->SetScrollbars(20, 20, 60, 30);
   IsStarted = 0;
   // FileLoaded = 0;
 }
@@ -680,14 +678,14 @@ void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
           runwarning.ShowModal();  			
         }
         // todo: change 20 to signal size, scale according to the number of monitors accordingly
-        if((ncycles+cyclescompleted)*20+250>500)
-        {
-        int x, y;
-        scrolledWindow->GetViewStart(&x, &y);
-          canvas->SetSize((ncycles+cyclescompleted)*20+300, 600);
-          scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+15, 30);
-          scrolledWindow->Scroll(x, y);
-        }
+        //~ if((ncycles+cyclescompleted)*20+250>500)
+        //~ {
+        //~ int x, y;
+        //~ scrolledWindow->GetViewStart(&x, &y);
+          //~ canvas->SetSize((ncycles+cyclescompleted)*20+300, 600);
+          //~ scrolledWindow->SetScrollbars(20, 20, (ncycles+cyclescompleted)+15, 30);
+          //~ scrolledWindow->Scroll(x, y);
+        //~ }
         runnetwork(ncycles);
         canvas->Render("Continue button pressed", cyclescompleted);
         logMessagePanel->AppendText(getCurrentTime()+_("Continue running.\n"));

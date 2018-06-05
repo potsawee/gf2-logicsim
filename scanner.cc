@@ -226,13 +226,18 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 		char mychar;
 		streampos curposition = inf.tellg();
 		inf.get(mychar);
-		while(mychar!='\n'){
-			inf.get(mychar);
+		while(mychar!='\n' && curch != '\n'){
+			if(!inf.get(mychar)) //if eofile
+				break;
 			counter++;
 		}
 		inf.seekg(curposition);
 		//cout << "counter = " << counter << endl;
-		int position = lines[linenum].size() - counter;
+		int position;
+		if(linenum >= lines.size())
+			position = 0;
+		else
+			position = lines[linenum].size() - counter;
 		/* --------------------------------------------------------- */
 		print_line_error(position);
 
@@ -247,7 +252,7 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 		eofile = !(inf.get(curch));
 		return;
 	}
-	eofile = !(inf.get(curch));
+	//eofile = !(inf.get(curch));
 	if(curch != '\n'){
 		while(!(eofile || s == comma || s == semicol || curch == '\n')){
 			getsymbol(s, id, num);
@@ -255,11 +260,18 @@ void scanner::skip_dueto_error(symbol& s, name& id, int& num, bool print)
 	}
 
 }
+
 void scanner::print_line_error(int n)
 {
+	if(eofile){
+		cout << "In line " << lines.size()+1 << ": " << endl;
+		return;
+	}
+
 	cout << "In line " << (linenum+1) << ": " << lines[linenum] << endl;
 	int x = int((linenum+1) / 10); // to account for line1 and line10, line100 etc.
-	cout << string(9 + x , ' ') << string(n, ' ') << "^" << endl;
+	if(n>=0)
+		cout << string(9 + x , ' ') << string(n, ' ') << "^" << endl;
 }
 
 // Functions for unit testing

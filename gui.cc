@@ -371,12 +371,12 @@ MyFrame::MyFrame(wxWindow *parent,
   netz = network_mod;
 
   // detect the system locale and use the corresponding language
-  if(locale.Init())
-  {
+  locale.Init()
     wxLocale::AddCatalogLookupPathPrefix(wxT("."));
     locale.AddCatalog(wxT("gui"));
-  }
-  else
+
+  wxLANGUAGE currentLanguage = wxLocale::GetLanguage();
+  if((currentLanguage != wxLANGUAGE_CHINESE_SIMPLIFIED)||(currentLanguage != wxLANGUAGE_THAI))
   {
     wxMessageDialog warning(
       this, 

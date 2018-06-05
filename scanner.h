@@ -50,22 +50,14 @@ class scanner {
 private:
     ifstream inf; //input definition file
     char curch; //current input character
-    // string currentline;	//current line
 	char prevch; //previous input character
     bool eofile; //true when end of file is reached
-    // bool eoline; //true when end of line is reached
-    // symbol cursym; //current symbol
-    // int symlength; //current symbol length
     int linenum; //line number
 
-    // void getch(char& curch); //reads next character, updates curch
-    // void incrChar(); //gets next character
     void skipspaces(); //skips spaces
     void skipcomments(); //skips comments
-    // string getline(); //gets current line
     void getnumber(int& num); //reads number
     void getname(name& id, bool& is_keyword); 	//reads name
-    // void displayerror(string errormessage); //displays error messages
 
 	names* _nmz; // pointer to names class
 	vector<string>	lines;

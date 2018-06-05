@@ -87,7 +87,6 @@ parser::parser (network* network_mod, devices* devices_mod,
 /* 1. Devices */
 void parser::devicelist()
 {
-	// cout << "DEVICELIST" << endl;
 	device();
 	while(1){
 		while(cursym == comma){
@@ -362,7 +361,6 @@ bool parser::is_name_reserved(name id)
 /* 2. Connections */
 void parser::connectionlist()
 {
-	// cout << "CONNECTIONLIST" << endl;
 	connection();
 	while(1){
 		while(cursym == comma){ // while loop breaks when cursym == semicol
@@ -392,7 +390,7 @@ void parser::connectionlist()
 }
 void parser::connection()
 {
-	/* change monday 28 may 2018
+	/* -------------------------
 	connection: signalout => signalin
 	e.g. d1.Q => xor1.I1
 	------------------------- */
@@ -584,7 +582,6 @@ void parser::gatein(name& port, devicekind dkind)
 /* 3. Monitors */
 void parser::monitorlist()
 {
-	// cout << "MONITORLIST" << endl;
 	monitor1();
 	while(cursym == comma){ // while loop breaks when cursym == semicol
 		monitor1();

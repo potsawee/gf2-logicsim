@@ -284,9 +284,15 @@ void parser::dev_name_num(devicekind dkind)
 		if(cursym == leftbrk){
 			smz->getsymbol(cursym, curid, curnum);
 			if(cursym == numsym){
-
-				if(dkind != aclock && dkind != rccircuit && (curnum > 16 || curnum <=0)){
-					error(input_num);
+				// since it is not a switch if it comes here
+				// so '0' is definitely not allowed!
+				if((dkind != aclock && dkind != rccircuit && curnum > 16) || curnum <=0){
+					if(dkind == aclock)
+						error(clock_num);
+					else if(dkind == rccircuit)
+						error(rc_num);
+					else
+						error(input_num);
 				}
 
 				variant = curnum;
@@ -645,6 +651,12 @@ void parser::error(errornumber errn)
 		case name_violate:
 			cout << "name error. hint: name must start with a letter or '_'" << endl;
 			throw nameerror; break;
+		case clock_num:
+			cout << "clock frequency must be +ve integer" << endl;
+			throw devicedeferror; break;
+		case rc_num:
+			cout << "rc time constant must be +ve integer" << endl;
+			throw devicedeferror; break;
 		case input_num:
 			cout << "the maximum number of inputs is 16 and minimum is 1" << endl;
 			throw devicedeferror; break;

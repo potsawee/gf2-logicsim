@@ -28,6 +28,8 @@ typedef enum
     leftbracket         = 6, // ( missing
     equal_expected      = 7, // = missing
     name_violate        = 8, // name violates the grammar
+    clock_num           = 10, // clock frequency must be +ve int
+    rc_num              = 11, // rc time-const must be +ve int
     input_num           = 12, // gate expected 1 to 16 to be number of input
     notgate_in          = 13, // not gate input should be not.I
     dtype_out           = 14, // dtype output wrong

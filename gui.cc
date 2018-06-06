@@ -336,7 +336,8 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
   event.ButtonDown()||
   event.ButtonUp()||
   event.Leaving()||
-  event.Dragging());
+  event.Dragging())
+	Render(text);
 }
 
 // MyFrame ///////////////////////////////////////////////////////////////////////////////////////
@@ -602,7 +603,7 @@ void MyFrame::OnButtonRUN(wxCommandEvent &event)
     ncycles = spin->GetValue();
     // reset the canvas to default status
    	canvas->SetDefault(mmz, nmz);
-	  //~ canvas->Refresh();
+	  canvas->Refresh();
     // run the network
     runnetwork(ncycles);
     // display the signal

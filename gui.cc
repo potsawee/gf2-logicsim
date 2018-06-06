@@ -240,13 +240,13 @@ void MyGLCanvas::SetDefault(monitor *monitor_mod, names *names_mod)
 // Event handler for when the canvas is exposed
 void MyGLCanvas::OnPaint(wxPaintEvent& event)
 {
-  //~ int w, h;
-  //~ wxString text;
+  int w, h;
+  wxString text;
 
-  //~ wxPaintDC dc(this); // required for correct refreshing under MS windows
-  //~ GetClientSize(&w, &h);
-  //~ text.Printf("Canvas redrawn by OnPaint event handler, canvas size is %d by %d", w, h);
-  //~ Render(text);
+  wxPaintDC dc(this); // required for correct refreshing under MS windows
+  GetClientSize(&w, &h);
+  text.Printf("Canvas redrawn by OnPaint event handler, canvas size is %d by %d", w, h);
+  Render(text);
 }
 
 // Event handler for when the canvas is resized

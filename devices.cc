@@ -108,7 +108,6 @@ void devices::makeclock (name id, int frequency)
   d->counter = 0;
 }
 
-//TODO: makerccircuit (DONE)
 
 /* ----------- Maintenance ----------- */
 void devices::makerccircuit (name id, int timeconst)
@@ -161,7 +160,6 @@ void devices::makegate (devicekind dkind, name did, int ninputs, bool& ok)
   }
 }
 
-//TODO: makenotgate new function or add to above?? (DONE)
 
 /***********************************************************************
  *
@@ -222,8 +220,6 @@ void devices::makedevice (devicekind dkind, name did, int variant, bool& ok)
 	break;
   }
 }
-
-//TODO: add not and RC to makedevice (DONE)
 
 /***********************************************************************
  *
@@ -311,8 +307,6 @@ void devices::execxorgate(devlink d)
   signalupdate (newoutp, d->olist->sig);
 }
 
-//TODO: exec_notgate OR add this to execgate? (DONE)
-
 
 /***********************************************************************
  *
@@ -363,7 +357,6 @@ void devices::execclock(devlink d)
   }
 }
 
-//TODO: exec_rccircuits (DONE)
 void devices::execrccircuit (devlink d)
 {
     if (d->olist->sig == falling){
@@ -397,7 +390,6 @@ void devices::updateclocks (void)
 }
 
 
-//TODO: update_rccircuits (DONE)
 void devices::updaterccircuit (void)
 {
 	devlink d;
@@ -429,7 +421,6 @@ void devices::initdevices (void)
       if (rand()%2) d->memory = low;
       else d->memory = high;
     }
-    //TODO: Add RC (DONE)
     else if (d->kind == rccircuit){
       d->olist->sig = high;
       d->counter = 0;
@@ -453,9 +444,9 @@ void devices::executedevices (bool& ok)
   if (debugging)
     cout << "Start of execution cycle" << endl;
   updateclocks ();
-  
+
   updaterccircuit();
-	
+
   machinecycle = 0;
   do {
     machinecycle++;
@@ -474,7 +465,6 @@ void devices::executedevices (bool& ok)
         case notgate:  execgate (d, low, high);  break;
         case dtype:    execdtype (d);            break;
         case rccircuit:execrccircuit (d);		 break;
-        //TODO: Add RC and not gate (DONE)
       }
       if (debugging)
 	showdevice (d);

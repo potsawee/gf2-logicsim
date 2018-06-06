@@ -195,13 +195,6 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
     glVertex2f(maxcycles*period+100, 700);
     glEnd();
   } 
-  
-  glColor3f(0.0, 0.0, 1.0);
-  glRasterPos2f(20, 10);
-  for (int i = 0; i < example_text.Len(); i++) 
-	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, example_text[i]);
-	
-  
   // We've been drawing to the back buffer, flush the graphics pipeline and swap the back buffer to the front
   glFlush();
   SwapBuffers();

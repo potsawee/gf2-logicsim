@@ -196,6 +196,12 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
     glEnd();
   } 
   
+  glColor3f(0.0, 0.0, 1.0);
+  glRasterPos2f(20, 10);
+  for (int i = 0; i < example_text.Len(); i++) 
+	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, example_text[i]);
+	
+  
   // We've been drawing to the back buffer, flush the graphics pipeline and swap the back buffer to the front
   glFlush();
   SwapBuffers();
@@ -234,13 +240,13 @@ void MyGLCanvas::SetDefault(monitor *monitor_mod, names *names_mod)
 // Event handler for when the canvas is exposed
 void MyGLCanvas::OnPaint(wxPaintEvent& event)
 {
-  int w, h;
-  wxString text;
+  //~ int w, h;
+  //~ wxString text;
 
-  wxPaintDC dc(this); // required for correct refreshing under MS windows
-  GetClientSize(&w, &h);
-  text.Printf("Canvas redrawn by OnPaint event handler, canvas size is %d by %d", w, h);
-  Render(text);
+  //~ wxPaintDC dc(this); // required for correct refreshing under MS windows
+  //~ GetClientSize(&w, &h);
+  //~ text.Printf("Canvas redrawn by OnPaint event handler, canvas size is %d by %d", w, h);
+  //~ Render(text);
 }
 
 // Event handler for when the canvas is resized
@@ -253,7 +259,7 @@ void MyGLCanvas::OnSize(wxSizeEvent& event)
 void MyGLCanvas::OnMouse(wxMouseEvent& event)
 {
   wxString text;
-  int w, h;;
+  int w, h;
   static int last_x, last_y;
 
   GetClientSize(&w, &h);
@@ -261,8 +267,13 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
   {
     last_x = event.m_x;
     last_y = event.m_y;
+    text.Printf("Mouse button %d pressed at %d %d", event.GetButton(), event.m_x, h-event.m_y);
   }
-
+  if (event.ButtonUp())
+  {
+	  text.Printf("Mouse button %d pressed at %d %d", event.GetButton(), event.m_x, h-event.m_y);
+  }
+  
   // event handler for dragging action on the canvas /////////////////////////////////////////////
   if (event.Dragging()) 
   {// the dragging action is constrained so that the signal is always visible
@@ -277,8 +288,12 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
     last_x = event.m_x;
     last_y = event.m_y;
     init = false;
+    text.Printf("Mouse dragged to %d %d, pan now %d %d", event.m_x, h-event.m_y, pan_x, pan_y);
   }
-  if (event.Leaving()) 
+  if (event.Leaving())
+  {
+	  text.Printf("Mouse left window at %d %d", event.m_x, h-event.m_y);
+  }
   
   // event handler for wheel rotation action on the canvas ////////////////////////////////////////
   if (event.GetWheelRotation() < 0) 
@@ -297,6 +312,7 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
       zoom = zoomRatio;
     }
     init = false;
+    text.Printf("Negative mouse wheel rotation, zoom now %f", zoom);
   }
   if (event.GetWheelRotation() > 0) 
   {// the zooming factor is limited between 1.0 and 1.8
@@ -313,9 +329,14 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
     {
       zoom = zoomRatio;
     }
-    //~ zoom = zoom / (1.0 + (double)event.GetWheelRotation()/(20*event.GetWheelDelta()));
     init = false;
+    text.Printf("Positive mouse wheel rotation, zoom now %f", zoom);
   }
+  if(event.GetWheelRotation()||
+  event.ButtonDown()||
+  event.ButtonUp()||
+  event.Leaving()||
+  event.Dragging());
 }
 
 // MyFrame ///////////////////////////////////////////////////////////////////////////////////////
@@ -581,9 +602,11 @@ void MyFrame::OnButtonRUN(wxCommandEvent &event)
     ncycles = spin->GetValue();
     // reset the canvas to default status
    	canvas->SetDefault(mmz, nmz);
-	  canvas->Refresh();
+	  //~ canvas->Refresh();
     // run the network
     runnetwork(ncycles);
+    // display the signal
+    canvas->Render("Run button pressed", cyclescompleted);
     // log the event
     logMessagePanel->AppendText(getCurrentTime()+_("Start running.\n"));
   }
@@ -637,6 +660,8 @@ void MyFrame::OnButtonCONTINUE(wxCommandEvent &event)
           runwarning.ShowModal();  			
         }
         runnetwork(ncycles);
+        // display the signal
+		canvas->Render("Continue button pressed", cyclescompleted);
         logMessagePanel->AppendText(getCurrentTime()+_("Continue running.\n"));
       }
       else
@@ -673,6 +698,7 @@ void MyFrame::OnSpin(wxSpinEvent &event)
     spinwarning.ShowModal(); 
   }
   wxString text;
+  text.Printf("New spinctrl value %d", event.GetPosition());
   canvas->Render(text);
 }
 
